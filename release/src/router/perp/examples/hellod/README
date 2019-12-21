@@ -1,0 +1,29 @@
+# hellod/README
+# a simple perpetrate service for testing
+# wcm, 2010.01.16 - 2011.02.02
+# ===
+
+hellod is a simple perpetrate service that may be useful for testing
+a perp installation.
+
+It uses tcpserver (from ucspi-tcp) listening on port 1789, the "hello"
+port.  Whenever a connection is made, it execs the /bin/sh shell to
+echo a greeting and the client's ip address back to the client.
+
+Clients can connect to the hellod server with tcpcat:
+
+  $ tcpcat 127.0.0.1 1789
+  hello 127.0.0.1
+
+or (with a properly configured /etc/services):
+
+  $ tcpcat 127.0.0.1 hello
+  hello 127.0.0.1
+
+Netcat is another utility:
+
+  $ nc 127.0.0.1 hello
+  hello 127.0.0.1
+
+
+### EOF

@@ -1,0 +1,115 @@
+.\" perpstat.8
+.\" wcm, 2009.11.25 - 2011.02.01
+.\" ===
+.TH perpstat 8 "January 2013" "perp-2.07" "persistent process supervision"
+.SH NAME
+perpstat \- display current status of
+.BR perpd (8)
+services
+.SH SYNOPSIS
+.B perpstat [\-hV] [\-b
+.I basedir
+.B ]
+.I sv
+.BI [ sv
+.B ...]
+.SH DESCRIPTION
+.B perpstat
+is used to report the current service status of each
+.I sv
+argument monitored by an active
+.BR perpd (8)
+supervisor.
+.PP
+Each argument
+.I sv
+should be a service definition directory running under the supervision of
+.BR perpd (8).
+.B perpstat
+will look for
+.I sv
+in the
+.I basedir
+directory specified with the
+.B \-b
+option,
+or as set in the
+.B PERP_BASE
+environmental variable,
+or in the current directory if neither of the previous is given.
+.PP
+For each argument
+.I sv
+found in the base directory,
+.B perpstat
+queries the
+.BR perpd (8)
+supervisor for its runtime status.
+It then prints information regarding the
+.BR perpd (8)
+supervisor itself,
+the main service,
+and its log service (if any),
+one line for each process.
+.SH OPTIONS
+.TP
+.B \-b basedir
+Base directory.
+Sets the base directory containing the service definitions named by the
+.I sv
+arguments.
+If not set,
+.B perpstat
+will use the value set in the variable PERP_BASE,
+or the current directory if neither of these are defined.
+On a normal system,
+the base directory will be
+.IR /etc/perp .
+.TP
+.B \-h
+Help.
+Print a brief usage message to stderr and exit.
+.TP
+.B \-V
+Version.
+Print the version number to stderr and exit.
+.SH EXIT STATUS
+.B perpstat
+exits with the following values:
+.TP
+0
+Success.
+The
+.B perpstat
+command successfully processed and reported on each 
+.I sv
+argument given.
+Note that this status is returned even if certain problems were found and reported
+for individual
+.I sv
+arguments.
+.TP
+100
+Usage error.
+For unknown options or missing arguments.
+Returns 100 and prints a brief diagnostic message to stderr on exit.
+.TP
+111
+System error.
+For system, permission, configuration, and/or resource failures.
+Returns 111 and prints a brief diagnostic message to stderr on exit.
+.SH AUTHOR
+Wayne Marshall, http://b0llix.net/perp/
+.SH SEE ALSO
+.nh
+.BR perp_intro (8),
+.BR perpboot (8),
+.BR perpctl (8),
+.BR perpd (8),
+.BR perpetrate (5),
+.BR perphup (8),
+.BR perpls (8),
+.BR perpok (8),
+.BR sissylog (8),
+.BR tinylog (8)
+.\" EOF perpstat.8

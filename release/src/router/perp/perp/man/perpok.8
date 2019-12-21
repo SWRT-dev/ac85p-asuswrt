@@ -1,0 +1,247 @@
+.\" perpok.8
+.\" wcm, 2009.11.10 - 2013.01.09
+.\" ===
+.TH perpok 8 "January 2013" "perp-2.07" "persistent process supervision"
+.SH NAME
+perpok \- check a
+.BR perpd (8)
+service
+.SH SYNOPSIS
+.B perpok [\-hV] [\-b
+.I basedir
+.B ] [\-u
+.I secs
+.B ] [\-v]
+.I sv
+.SH DESCRIPTION
+.B perpok
+is used to check that the service
+.I sv
+is actively running under supervision of 
+.BR perpd (8).
+.PP
+The argument
+.I sv
+should be a service definition directory supervised by
+.BR perpd (8).
+.B perpok
+will look for
+.I sv
+in the directory given with the
+.B \-b
+option,
+or as set in the
+.B PERP_BASE
+environmental variable,
+or in the current directory if neither of the previous is given.
+.PP
+.B perpok
+returns 0 to indicate success if the definition directory
+.I sv
+exists and is under the active supervision of
+.BR perpd (8).
+.PP
+The
+.B \-u
+option may be given to specify a minimum uptime in
+.IR secs .
+In this case,
+.B perpok
+will further check that the main service itself is running,
+is not resetting,
+does not want down,
+and that its uptime has been at least
+.I secs
+seconds.
+If all these conditions are met,
+.B perpok
+returns 0 to indicate success.
+.PP
+If the conditions for success are not met,
+.B perpok
+exits non-zero.
+.PP
+.B perpok
+is intended primarily as a utility for boolean testing in scripting environments.
+See the
+.BR perpstat (8)
+and
+.BR perpls (8)
+utilities for more detailed status reporting.
+.SH OPTIONS
+.TP
+.B \-b basedir
+Base directory.
+Sets the base directory containing the service definition
+.IR sv .
+If not set,
+.B perpok
+will use the value set in the variable PERP_BASE,
+or the current directory if neither of these are defined.
+On a normal system,
+the base directory will be
+.IR /etc/perp .
+.TP
+.B \-h
+Help.
+Print a brief usage message to stderr and exit.
+.TP
+.B \-u secs
+Uptime.
+Normally
+.B perpok
+checks only that the
+.I sv
+directory is active (exists and is sticky),
+and that
+.BR perpd (8)
+is actively supervising it.
+This option extends the checks performed by
+.B perpok
+to test that the main service itself is running,
+is not resetting,
+does not want down,
+and that its uptime has been at least
+.I secs
+seconds.
+Normally it is sensible to set
+.I secs
+to some small value, such as 2 or 3,
+which is
+just long enough to check that the service is not cycling on restarts.
+.TP
+.B \-V
+Version.
+Print the version number to stderr and exit.
+.TP
+.B \-v
+Verbose.
+Normally
+.B perpok
+exits silently,
+as it is designed primarily for runscripts that might use it to perform simple dependency checks
+prior to starting their own services.
+This option causes
+.B perpok
+to print a message reporting either success or failure to stderr on exit.
+.SH EXAMPLES
+.B perpok
+may be used as a basic dependency checking utility within service runscripts:
+.PP
+.RS
+.nf
+#!/bin/sh
+if test ${1} = "start" ; then
+  if ! perpok -u3 foo ; then
+    echo "dependency foo not running"
+    exit 1
+  fi
+  # otherwise foo ok, continue to start service:
+  exec /usr/bin/bar ...
+fi
+.fi
+.RE
+.PP
+This example shows a runscript for a ``bar'' service that uses
+.B perpok
+to require a dependency on another service named ``foo''.
+If foo has not been running for at least 3 seconds,
+the runscript exits immediately.
+The
+.BR perpd (8)
+supervisor running this service will then continue to try restarting it at one second intervals,
+until the
+.B perpok
+dependency check succeeds.
+.PP
+Note that, when using
+.B perpok
+in a normal collection of services running under
+.BR perpd (8),
+PERP_BASE will always be properly predefined in the runscript environment.
+.PP
+.SH EXIT STATUS
+.B perpok
+exits with the following values:
+.TP
+0
+Success.
+The service
+.I sv
+is active and a
+.BR perpd (8)
+supervisor has been found running for it.
+Additionally,
+if the
+.B \-u
+option has been given,
+the main service itself has been found running,
+not resetting,
+not wanting down,
+and with an uptime of at least
+.I secs
+seconds.
+.TP
+1
+Failure.
+The service directory
+.I sv
+was found not to be active,
+or a
+.BR perpd (8)
+supervisor was not found running for it,
+or the additional constraints imposed for uptime checking
+with the
+.B \-u
+option were not met.
+.TP
+100
+Usage error.
+For unknown options, missing arguments, or if
+.I sv
+does not name a directory.
+Prints a brief diagnostic message to stderr on exit.
+.TP
+111
+System error.
+Unexpected failures during system calls, privilege and/or resource problems,
+or configuration errors in the
+.BR perpd (8)
+system.
+Prints a brief diagnostic message to stderr on exit.
+.SH CAVEATS
+For use as a dependency tool,
+.B perpok
+by itself is of course limited.
+As illustrated in the example section above,
+.B perpok
+may find a dependency running okay at startup,
+but there is no guarantee that it will continue to run for as long
+as the dependent service requires it.
+.PP
+A collection of services running under
+.BR perpd (8)
+tends to be reliable,
+so that the use of
+.B perpok
+for basic dependency checking at startup is normally adequate.
+Interrelated services may also use
+.B perpok
+in combination with runscript
+.B reset
+targets to implement a system of stricter dependency controls. 
+.SH AUTHOR
+Wayne Marshall, http://b0llix.net/perp/
+.SH SEE ALSO
+.nh
+.BR perp_intro (8),
+.BR perpboot (8),
+.BR perpctl (8),
+.BR perpd (8),
+.BR perpetrate (5),
+.BR perphup (8),
+.BR perpls (8),
+.BR perpstat (8),
+.BR sissylog (8),
+.BR tinylog (8)
+.\" EOF perpok.8

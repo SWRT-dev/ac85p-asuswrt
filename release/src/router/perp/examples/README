@@ -1,0 +1,44 @@
+# examples/README
+# perp: persistent process supervision
+# sample perp services
+# wcm, 2009.12.28 - 2011.02.02
+# ===
+
+This directory contains the following sample perp services:
+
+  apgd       automatic password generator
+  dnscache   djbdns caching nameserver
+  hellod     port 1789 (hello) service for testing
+  mathopd    lightweight httpd server
+  sshd       secure shell daemon
+
+To install a service:
+
+  $ su
+  # cp -R apgd /etc/perp
+  # chmod +x /etc/perp/apgd/rc.*
+
+To activate a service:
+
+  $ su
+  # chmod +t /etc/perp/apgd && perphup
+
+or (since perp-2.00):
+
+  $ su
+  # perpctl A apgd
+
+
+Notes:
+
+All services use the same generic rc.log runscript for logging
+with tinylog using the tinylog_run wrapper.  A sample
+tinylog.conf file is shown here, and may be edited/installed
+in /etc/tinylog.conf.
+
+The tinylog_run script is setup to run under an unprivileged
+user account named `tinylog'.  The administrator will need
+to add the appropriate user/group accounts to the system to
+enable this feature.
+
+### EOF

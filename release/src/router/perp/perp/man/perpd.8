@@ -1,0 +1,652 @@
+.\" perpd.8
+.\" wcm, 2008.02.26 - 2013.01.09
+.\" ===
+.TH perpd 8 "January 2013"  "perp-2.07"  "persistent process supervision"
+.SH NAME
+perpd \- persistent process scanner/supervisor/controller
+.SH SYNOPSIS
+.B perpd [\-hV] [\-a
+.I secs
+.B ] [\-g
+.I gid
+.B ] [
+.I basedir
+.B ]
+.SH DESCRIPTION
+.B perpd
+scans a directory to start and monitor a collection of services.
+It is the principal daemon of an active perp installation.
+.PP
+.B perpd
+operates on a base directory containing a set of
+.BR perpetrate (5)
+service definitions.
+The base directory may be given by the
+.I basedir
+argument on the command line.
+If no
+.I basedir
+argument is given,
+.B perpd
+will look for a value associated with the environmental variable PERP_BASE.
+If neither of these is defined,
+.B perpd
+will operate on a compiled-in default directory,
+normally
+.IR /etc/perp .
+.PP
+Service definitions are installed,
+configured and activated as subdirectories of the base directory.
+As
+.B perpd
+sequentially scans the base directory,
+it looks for subdirectory names not beginning with `.'.
+If
+.B perpd
+then finds the `sticky' bit set on the subdirectory,
+it considers the service definition ``active'' and
+attempts to start the service.
+.PP
+First
+.B perpd
+inspects the service subdirectory.
+If the optional file named
+.I rc.log
+is present and executable,
+.B perpd
+spawns a child process to run it,
+setting up a pipe to link its stdin to the stdout
+of the main service.
+To start the logging process,
+.B perpd
+invokes
+.I rc.log
+as follows:
+.PP
+.RS
+.B ./rc.log start
+.I svname
+.RE
+.PP
+The first argument is the literal string ``start'',
+with the
+.I svname
+argument set to the basename of the subdirectory.
+.PP
+After starting the optional logger,
+.B perpd
+proceeds to spawn a child process to run the required file named
+.IR rc.main .
+If a logging process has been defined as described above,
+.B perpd
+will also connect the stdout of the main service to the stdin of the logger.
+.PP
+To start the main service,
+.B perpd
+invokes
+.I rc.main
+as follows:
+.PP
+.RS
+.B ./rc.main start
+.I svname
+.RE
+.PP
+The conventions and arguments for starting
+.I rc.main
+are the same as those described for
+.I rc.log
+above.
+.PP
+.B perpd
+runs each
+child process for
+.I rc.main
+and
+.I rc.log
+in a new session and separate process group.
+The current working directory of the child process is
+set to the service subdirectory.
+The environment for each process is defined with the variable
+.B PERP_BASE
+set to the absolute path of the
+.B perpd
+base directory as described above.
+.PP
+The files
+.I rc.main
+and
+.I rc.log
+are known as ``runscripts''.
+The result of running ``start'' on a runscript
+should normally be a persistent process,
+some long\-running program designed to start at system boot
+and continue running until system shutdown.
+Runscript conventions and examples may be found in the
+.BR perpetrate (5)
+manual.
+.PP
+.B perpd
+monitors its ``start'' processes to make sure they continue running.
+If any active service process terminates,
+.B perpd
+is triggered to reset and restart the service.
+.PP
+To reset a process that has terminated from a ``start'',
+.B perpd
+will invoke the associated runscript again in either one of two forms,
+depending on whether the process exited normally,
+or was killed by a signal:
+.PP
+.RS
+.B ./rc.main reset
+.I svname
+.B exit
+.I exitcode
+.RE
+or
+.RS
+.B ./rc.main reset
+.I svname
+.B signal
+.I signum signame
+.RE
+.PP
+The first argument in both cases is the literal string ``reset''.
+If the service exited normally,
+this is followed by the literal string ``exit'' and a string representation
+of the numeric exit code returned by the process.
+If the service was terminated by a signal,
+the ``reset'' is followed by the literal string ``signal'',
+a string representation of the numeric signal number that killed the process,
+and the symbolic name for the signal, such as SIGTERM.
+.PP
+A runscript process running ``reset'' will normally run to completion
+and return/exit promptly.
+After the resetting process terminates,
+.B perpd
+will then attempt to restart the service,
+again invoking its runscript with the same ``start'' and
+.I svname
+arguments as described above.
+.PP
+To avoid chronic service failures from looping too quickly,
+.B perpd
+will delay at least one second beyond the previous start time
+before trying to restart a service.
+.PP
+.B perpd
+may be triggered to immediately rescan the base directory with a
+SIGHUP signal or the
+.BR perphup (8)
+command.
+.B perpd
+may also be configured at startup to automatically rescan the
+base directory at fixed intervals given by the
+.B \-a
+option.
+For any new active service definitions found while scanning,
+.B perpd
+will attempt to start the service as described above.
+For any existing services whose subdirectory has been removed
+or is no longer sticky,
+.B perpd
+will bring down the service
+(terminating both the main and log processes,
+and then running ``reset'' on each),
+and remove the service from further active monitoring.
+.PP
+While
+.B perpd
+monitors its services,
+it also listens on a control interface for administrative commands
+and status requests from perp client applications such as
+.BR perpctl (8),
+.BR perpls (8),
+and
+.BR perpstat (8).
+.PP
+.B perpd
+will exit failure immediately after startup under certain conditions:
+being unable to find or change into the base directory;
+finding another instance of
+.B perpd
+running on the same base directory;
+or failure during initialization of its control files.
+Otherwise,
+.B perpd
+is designed to start at system boot and continue running until system shutdown.
+.PP
+Normally a system is configured to start
+.B perpd
+as part of its
+.BR init (8)
+sequence during system startup.
+The
+perp
+distribution
+includes a
+.BR perpboot (8)
+utility,
+specifically designed to provide a reliable method for starting
+.B perpd
+under many different
+.BR init (8)
+environments.
+.\" *** STARTUP MODIFICATION
+.SS STARTUP MODIFICATION
+.PP
+The service startup procedures
+described above may be modified by installing certain specific ``flag'' files
+into the service directory:
+.I flag.down
+and
+.IR flag.once .
+.PP
+If a file named
+.I flag.down
+is present,
+.B perpd
+will not attempt to start the
+.I rc.main
+control executable immediately at startup.
+In such cases,
+the
+.BR perpctl (8)
+utility may be used to tell
+.B perpetrate
+to start the service at a later time.
+.PP
+If a file named
+.I flag.once
+is present,
+.B perpd
+will attempt to start the
+.I rc.main
+control executable immediately at startup, as usual,
+and then reset it if it terminates.
+But when the reset completes,
+.B perpd
+will not restart the main service.
+Again,
+the
+.BR perpctl (8)
+utility may be used to tell
+.B perpd
+to restart the service if necessary,
+or to ``unflag'' its
+.I once
+setting.
+.PP
+If both files
+.I flag.down
+and
+.I flag.once
+are present when
+.B perpd
+is starting the service for the first time,
+the behavior described for
+.I flag.down
+takes precedence.
+.PP
+The existence of either of the flag files
+.I flag.down
+and
+.I flag.once
+only affects the behavior of the service at activation.
+If they are installed in the service directory after 
+.B perpd
+has already started and is running the service,
+they will have no effect until the service is deactivated and then reactivated.
+.PP
+The presence of either of these flag files also has no effect
+on the optional logging service.
+If a file named
+.I rc.log
+is present and executable at startup,
+.B perpd
+will attempt to start and monitor a logger for the service,
+irrespective of the presence of any of the flag files described above.
+.PP
+These flag files are usually of zero length and may be installed with the
+.BR touch (1)
+command.
+.\" *** OPTIONS ***
+.SH OPTIONS
+.TP
+.B \-a secs
+Autoscan.
+Normally
+.B perpd
+runs in a quiet
+.BR poll (2)
+state until some external signal or event causes it to rescan the base directory.
+The
+.B \-a
+option may be used to set an interval
+that causes
+.B perpd
+to automatically rescan the base directory every
+.I secs
+seconds.
+For example,
+a
+.I secs
+argument of 5 will cause
+.B perpd
+to automatically rescan the base directory at least once every 5 seconds,
+imitating the behavior of daemontools
+.BR svscan (8).
+An argument of 0 disables autoscanning.
+.TP
+.B \-g gid
+Socket gid.
+Normally the control socket is created with the same ownership
+as the
+.B perpd
+process and with an explicit access mode 0700.
+The
+.B -g
+option sets the group ownership on the control socket according to the
+.IR gid
+argument and changes the access mode on the socket to 0770.
+The
+.I gid
+argument may be given as either a numeric group id
+or as a group name.
+Note that the designated group will also require
+access to the
+.I .control
+directory (or related symlink) in which the control socket is installed.
+.TP
+.B \-h
+Help.
+Display a brief help message on stderr and exit.
+.TP
+.B \-V
+Version.
+Display the version string on stderr and exit.
+.\" *** EXAMPLES ***
+.SH EXAMPLES
+.B perpd
+is designed to permit easy service activation/deactivation using the
+.BR chmod (1)
+utility.
+.PP
+To activate a service within the
+.B perpd
+base directory,
+set the sticky bit of the subdirectory containing the
+service definition:
+.PP
+.RS
+chmod +t myservice && perphup
+.RE
+.PP
+.B perpd
+will notice the service definition is now active
+and will initiate the startup procedures for it.
+Alternatively, the
+.B A
+command to
+.BR perpctl (8)
+may be used instead to perform the equivalent activation:
+.PP
+.RS
+perpctl A myservice
+.RE
+.PP
+To deactivate a service, unset the sticky bit:
+.PP
+.RS
+chmod -t myservice && perphup
+.RE
+.PP
+.B perpd
+will notice the service has now been deactivated and will
+initiate a shutdown sequence on it.
+The
+.B X
+command to
+.BR perpctl (8)
+may also be used to perform the equivalent deactivation:
+.PP
+.RS
+perpctl X myservice
+.RE
+.PP
+Note that there is generally no need to use the
+.BR perpctl (8)
+.B D
+command to bring down a service before deactivating it.
+Simply unsetting the sticky bit will bring the service down properly.
+.PP
+On some platforms/terminals,
+colorized
+.BR ls (1)
+listings may be configured to display the `sticky' entries within a directory
+so they are readily visible.
+Othewise,
+request
+.BR ls (1)
+to display a long listing format that presents directory permissions in the first column:
+.PP
+.RS
+.nf
+.B # ls -l
+drwxr-xr-x  goodbye
+drwxr-xr-t  hello
+.fi
+.RE
+.PP
+In this truncated and contrived example,
+the service directory
+.I hello
+is active (has sticky bit set; see the `t' in its permission string),
+and the service directory
+.I goodbye
+is not active (sticky bit not set.)
+.PP
+The
+.BR stat (1),
+.BR perpstat (8),
+and
+.BR perpls (8)
+utilities may also be used to display the active services within a directory.
+.\" *** FILES ***
+.SH FILES
+.I /etc/perp
+.RS
+The default base operating directory monitored by 
+.BR perpd ,
+containing the set of service definition directories as described in
+.BR perpetrate (5).
+.RE
+.PP
+.I /PERP_BASE/.control
+.RS
+.B perpd
+maintains associated runtime files and IPC interfaces within a subdirectory named
+.IR .control .
+Normally this will be configured as a symbolic link
+to a directory within the
+.I /var
+hierarchy before starting
+.BR perpd .
+For example, the symlink:
+.PP
+.RS
+.I .control
+->
+.I /var/run/perp
+.RE
+.PP
+will cause
+.B perpd
+to maintain its runtime files under
+.IR /var/run/perp .
+If
+.B perpd
+finds that
+.I .control
+is a dangling symlink on startup,
+it will attempt to make the directory that
+.I .control
+points to.
+.RE
+.PP
+.I /PERP_BASE/.control/perpd.pid
+.RS
+The lock file used by
+.B perpd
+to constrain execution to a single instance on a base directory.
+This file also contains the pid of the active
+.B perpd
+process.
+.RE
+.PP
+.I /PERP_BASE/.control/perpd.sock
+.RS
+The domain socket used by
+.B perpd
+to perform inter-process communications with perp client utilities
+such as
+.BR perpctl (8)
+and
+.BR perpls (8).
+.RE
+.SH ENVIRONMENT
+PERP_BASE
+.RS
+The base scanning directory for the
+.B perpd
+process.
+If no
+.I basedir
+argument is given on the command-line at startup,
+.B perpd
+checks for a value defined with PERP_BASE.
+If this variable is not defined or empty,
+.B perpd
+uses a compiled-in default,
+usually
+.IR /etc/perp .
+Irrespective of how
+.I basedir
+is determined at startup,
+.B perpd
+will use its value to define PERP_BASE within the environment of each
+service runscript it starts.
+If defined,
+PERP_BASE should be given as an absolute pathname.
+.RE
+.PP
+PERP_SVPID
+.RS
+The process ID of the active or terminated service.
+.B perpd
+supplies the process ID of the service process in the value of the PERP_SVPID variable
+within the environment of both the ``start'' and ``reset'' invocations of the runscript.
+In the case of the ``start'' target,
+the value given in PERP_SVPID is the process ID of the script itself,
+and which normally becomes the pid of the active service,
+as when the script calls the
+.B exec
+command to run the service program.
+In the case of the ``reset'' target,
+the value given in PERP_SVPID is the process ID of the service
+that has just terminated.
+.RE
+.PP
+PERP_SVSECS
+.RS
+The uptime in seconds of the terminated service.
+.B perpd
+supplies the total wallclock runtime of the process that has just terminated
+in the value of the PERP_SVSECS variable.
+This variable is defined only within the environment of the ``reset''
+invocation of the runscript.
+.RE
+.SH ERROR LOGGING
+.B perpd
+emits diagnostics to stderr.
+To capture and log such messages,
+.B perpd
+will usually be started with an associated logger;
+see
+.BR perpboot (8)
+for a utility designed to start
+.B perpd
+with an associated logger.
+In such an installation,
+the stderr of
+.B perpd
+will be redirected to stdout,
+and, in turn, its stdout will be piped to the stdin of the logger.
+.PP
+Each activated service starts with its stdout and stderr file descriptors
+inherited from
+.BR perpd .
+If these are not subsequently redirected elsewhere,
+any diagnostics emitted by a service will also appear in the
+.B perpd
+logger.
+.\" *** SIGNALS ***
+.SH SIGNALS
+SIGHUP
+.RS
+Triggers
+.B perpd
+to immediately rescan the base directory.
+.RE
+.PP
+SIGTERM
+.RS
+Triggers
+.B perpd
+to begin a shutdown sequence on
+each service process it is currently monitoring.
+After all service
+processes have terminated from their ``start'' and final ``reset'',
+.B perpd
+itself exits 0.
+.RE
+.\" *** LIMITS ***
+.SH LIMITS
+Each
+.B perpd
+instance can monitor a compile-time maximum number
+of active services,
+normally 200.
+The runtime environment of the
+.B perpd
+process should be configured to permit sufficient child processes
+(up to 2 per service),
+and open file descriptors
+(up to 3 per service, plus 7 requisite,
+plus a number for concurrent client connections, usually 20)
+to handle the actual number of services to be installed and activated.
+See
+.BR getrlimit (2),
+.BR runlimit (8)
+and the references to RLIMIT_NPROC and RLIMIT_NOFILE
+for more information.
+.\" *** AUTHOR ***
+.SH AUTHOR
+Wayne Marshall, http://b0llix.net/perp/
+.\" *** SEE ALSO ***
+.SH SEE ALSO
+.nh
+.BR chmod (1),
+.BR perp_intro (8),
+.BR perp-setup (8),
+.BR perpboot (8),
+.BR perpctl (8),
+.BR perpetrate (5),
+.BR perphup (8),
+.BR perpls (8),
+.BR perpok (8),
+.BR perpstat (8),
+.BR sissylog (8),
+.BR tinylog (8)
+.\" EOF (perpd.8)

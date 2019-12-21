@@ -1,0 +1,8 @@
+# PERPTOP.txt
+# notes/ideas regarding "top"-like utility for perp
+# table of perp processes
+# wcm, 2008.10.11 - 2008.10.11
+# ===
+
+
+### EOF

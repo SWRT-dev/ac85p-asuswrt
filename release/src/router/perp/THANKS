@@ -1,0 +1,38 @@
+# THANKS
+# perp project acknowledgements and gratitude
+# wcm, 2012.01.04 - 2013.01.11
+# ===
+
+Many contributors and users have given explicit help and support with
+the project.  Thank you very much!
+
+(in no particular order)
+
+Daniel J. Bernstein
+ - original supervision and logging concepts in daemontools
+
+Felix von Leitner
+ - single process supervisor implementation in minit
+
+Nikola Vladov
+ - insight, inspiration, testing, mountain hiking, and ninit
+
+Dave Peticolas
+ - bug fixes(!!!) and enhancements 
+
+Elie De Brauwer
+ - bug fixes and feedback
+
+Laurent Bercot
+ - maintainer of supervision mailing list
+
+Michael Conrad
+ - bug reports and feature enhancements
+
+Eivind Uggedal
+ - doc fixes
+
+Jorge Almeida
+ - build reports and feature requests
+ 
+### EOF

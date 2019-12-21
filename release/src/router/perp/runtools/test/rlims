@@ -1,0 +1,5 @@
+# rlims: runlimit(8) definition file
+RLIMIT_NOFILE = 8
+#RLIMIT_BOGUS = 999
+RLIMIT_NPROC = 44
+### EOF

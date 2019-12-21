@@ -1,0 +1,89 @@
+.\" rundetach.8
+.\" wcm, 2009.12.11 - 2011.03.18
+.\" ===
+.TH rundetach 8 "January 2013" "runtools-2.07" "runtools"
+.SH NAME
+rundetach \- run a program in the background
+.SH SYNOPSIS
+.B rundetach [\-hV]
+.I program
+.B [
+.I args ...
+.B ]
+.SH DESCRIPTION
+.B rundetach
+forks a child process into the background,
+detached from a controlling terminal,
+in its own session and process group.
+It then runs
+.I program
+with any additional arguments given in
+.IR args .
+.PP
+If
+.I program
+does not contain a ``/'' slash character,
+.B rundetach
+will perform a shell-like search for the executable using the
+.B PATH
+variable in the current environment.
+.SH OPTIONS
+.TP
+.B \-h
+Help.
+Print a brief usage message to stderr and exit.
+.TP
+.B \-V
+Version.
+Print the version number to stderr and exit.
+.SH EXIT STATUS
+.B rundetach
+exits with one of the following values:
+.TP
+0
+.I program
+was invoked and completed successfully.
+In this case,
+the exit code is returned by the
+.IR program ,
+rather than by
+.B rundetach
+itself.
+.TP
+100
+.B rundetach
+failed because of a usage error,
+such as an invalid command\-line option or argument.
+In this case,
+.B rundetach
+prints a brief error message and usage help to stderr on exit.
+.TP
+111
+.B rundetach
+failed due to some system or resource error.
+In this case,
+.B rundetach
+prints a brief diagnostic message to stderr on exit.
+.TP
+1\-127
+.I program
+was invoked and failed with its own non-zero exit status.
+.SH AUTHOR
+Wayne Marshall, http://b0llix.net/perp/
+.SH SEE ALSO
+.nh
+.BR runtools_intro (8),
+.BR runargs (8),
+.BR runargv0 (8),
+.BR runchoom (8),
+.BR rundeux (8),
+.BR runenv (8),
+.BR runfile (8),
+.BR runlimit (8),
+.BR runlock (8),
+.BR runpause (8),
+.BR runsession (8),
+.BR runtool (8),
+.BR runtrap (8),
+.BR runuid (8)
+.\" EOF

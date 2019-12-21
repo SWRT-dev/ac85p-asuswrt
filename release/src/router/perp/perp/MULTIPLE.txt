@@ -1,0 +1,110 @@
+# MULTIPLE.txt
+# suggestions if running multiple instances of perpd
+# wcm, 2008.10.10 - 2008.10.10
+# ===
+
+In normal configurations of perp, there will be a single instance
+of perpd running per machine, monitoring the service directory
+/etc/perp with its .control directory "shadowed" to /var/run/perp.
+
+Some users may instead wish to configure multiple instances of
+perpd running concurrently.  This may be desired, for example, to
+simulate the concept of "runlevels" by grouping together collections
+of services.
+
+One possible way to configure multiple instances of perpd is shown
+in the example below.
+
+First, setup a master instance of perpd as usual in /etc/perp.  In it
+are service definitions for each of the other instances of perpd:
+
+/etc/perp
+  .control --> /var/run/perp
+  perp0/
+  perp1/
+  perp2/
+  ...
+
+Then, set up service directories for each of the other perp
+instances:
+
+/etc/perp.d
+  perp0/
+    .control --> /var/run/perp0
+    sv1/
+    sv2/
+    ...
+  perp1/
+    .control --> /var/run/perp1
+    svA/
+    svB/
+    ...
+  perp2/
+    .control --> /var/run/perp2
+    svX/
+    svY/
+    ...
+
+
+The runscript in /etc/perp/perp0/rc.main may look something like:
+
+#!/bin/rc
+# rc.main for perp0
+# ===
+
+PERP_BASE=/etc/perp.d/perp0
+
+if(~ $1 "start"){
+  exec /bin/perpd-boot -d $PERP_BASE
+}
+
+exit 0
+### EOF
+
+
+Each of the other /etc/perp/perp?/rc.main would be defined similarly.
+
+Then, to start/stop a collection of services, switch into /etc/perp
+and use the chmod tool as usual.  For example:
+
+# cd /etc/perp
+# chmod -t perp2
+
+This will bring down all the services in /etc/perp.d/perp2.
+
+
+Here is another directory schema.  This example is basically the
+same as shown above, with different naming to suggest how services
+may be grouped according to "single-user", "multi-user", and
+"X-session" runlevels.
+
+/etc/perp
+  .control --> /var/run/perp
+  perp.S/
+  perp.M/
+  perp.X/
+
+/etc/perp.d/
+  perp.S/
+    .control --> /var/run/perp.S
+    sv1/
+    sv2/
+    ...
+  perp.M/
+    .control --> /var/run/perp.M
+    svA/
+    svB/
+    ...
+  perp.X/
+    .control --> /var/run/perp.X
+    svX/
+    svY/
+    ...
+
+
+Runscripts in such a schema can be as simple as shown, or they can be
+made much more clever, using "start" and "reset" targets to bring up/down
+other runlevels as necessary.
+
+
+### EOF

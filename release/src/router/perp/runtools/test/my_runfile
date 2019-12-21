@@ -1,0 +1,32 @@
+#!./runfile
+# sample runfile
+# wcm, 2009.10.06 - 2009.10.06
+# ===
+./runtool
+ -0
+ repeater
+ ## detach:
+ #-d
+ ## redirect standard file descriptors /dev/null:
+ ## note: runfile does not need the shell-protecting quotes
+ -F
+ 0<%:1>%:2>%
+ ## run service/logger pair:
+ ./rundeux
+   ## first, the service: setup with runtool stuff:
+   ./runtool
+     ## set stderr to stdout:
+     ## (again, argument without shell-protecting quotes)
+     -F
+     2=1
+     ## exec the actual service:
+     ./repeat
+   ## next up ...
+   ::
+   ## ... the logger:
+   ./tinylog
+     ## timestamp:
+     -t
+     ./tinydir
+###
+### EOF

@@ -1,0 +1,207 @@
+.\" runtools_intro.8
+.\" wcm, 2009.12.15 - 2012.01.04
+.\" ===
+.TH runtools_intro 8 "January 2013" "runtools-2.07" "runtools"
+.SH NAME
+runtools_intro \- overview of the
+.B runtools
+utilities
+.SH DESCRIPTION
+The
+.B runtools
+package provides a set of utilities for configuring and constraining
+the process execution environment of other programs.
+Most of the utilities exec into the process environment they create.
+That is, they are designed to replace themselves with some other program.
+A few of the utilities act as lightweight supervisors,
+remaining resident themselves while monitoring some other process or processes. 
+The
+.B runtools
+utilities include:
+.TP
+.BR runargs (8)
+Runs a program with arguments specified in an
+.IR argfile .
+.TP
+.BR runargv0 (8)
+Runs a program with an alias in place of the 0th argument.
+.TP
+.BR runchoom (8)
+Runs a program with linux ``oom killer'' abatement.
+.TP
+.BR rundetach (8)
+Runs a program in the background,
+detached from the controlling terminal.
+.TP
+.BR rundeux (8)
+Runs and supervises a program with an associated logger.
+.TP
+.BR runenv (8)
+Runs a program with an environment defined in either an
+.I envfile
+or an
+.IR envdir .
+.TP
+.BR runfile (8)
+Runs a program described in an
+.IR argvfile .
+.TP
+.BR runlimit (8)
+Runs a program with modified resource limits.
+.TP
+.BR runlock (8)
+Runs a program with an associated
+.IR lockfile ,
+optionally containing the pid of the process.
+.TP
+.BR runpause (8)
+Runs a program after waiting some delay or receiving a signal.
+.TP
+.BR runsession (8)
+Runs a program in a new session and process group.
+.TP
+.BR runtool (8)
+Multipurpose utility for running a program in a configured process environment,
+combining many of the functions of other
+.B runtools
+within a single executable.
+.TP
+.BR runtrap (8)
+Runs and supervises a program with an associated signal trapper.
+.TP
+.BR runuid (8)
+Runs a program with specific user and group permissions.
+.SH EXEC CHAINS
+The
+.B runtools
+utilities are designed primarily for use within the runscripts of service supervisors,
+such as
+.BR perpd (8)
+and
+.BR daemontools .
+In this case,
+they will normally be used to define and constrain such things as resources,
+privileges,
+environmental variables,
+file descriptors,
+etc.
+They may be used to provide carefully regulated execution environments for
+long-running programs,
+for security and resource optimization.
+.PP
+Most of the utilities in the
+.B runtools
+package are very small programs designed to do one simple thing.
+Because the effects of multiple
+.B runtools
+are often required,
+it is customary to use whatever
+.B runtools
+are needed in an ``exec chain''.
+An exec chain is a sequence of
+.B runtools
+commands, one calling another,
+often in a specific order,
+with the final command execing into the actual program intended.
+The following
+.BR perpetrate (5)
+snippet shows an example in
+.BR sh (1)
+syntax:
+.PP
+.RS
+.nf
+if test ${1} = 'start' ; then
+  exec runenv -i ./envfile \\
+      runlimit -c 0 -f 2000000 -m 30000000 \\
+          runuid fooman \\
+            /usr/sbin/foo -f
+fi
+.fi
+.RE
+.PP
+In the example above,
+the program
+.I /usr/sbin/foo
+is ultimately desired as the long-running process.
+An exec chain is used to:
+.IP \(bu 4
+define the environment for ``foo'' with
+.BR runenv (8)
+.IP \(bu 4
+constrain corefiles, file size, and memory usage with
+.BR runlimit (8)
+.IP \(bu 4
+drop privilege to the user account ``fooman'' with
+.BR runuid (8)
+.PP
+Each of the
+.B runtools
+programs execs into the next,
+until finally the
+.BR runuid (8)
+utility execs into
+.IR /usr/sbin/foo .
+.SH EXIT STATUS
+The
+.B runtools
+that exec themselves into another
+.I program
+will exit with the following values:
+.TP
+0
+.I program
+was invoked and completed successfully.
+In this case,
+the exit code is returned by the
+.IR program ,
+rather than by the
+.B runtools
+program itself.
+.TP
+100
+The
+.B runtools
+program failed because of a usage error,
+such as an invalid command\-line option or argument.
+In this case,
+the
+.B runtools
+program prints a brief error message and usage help to stderr on exit.
+.TP
+111
+The
+.B runtools
+program failed due to some system or resource error.
+In this case,
+the
+.B runtools
+program prints a brief diagnostic message to stderr on exit.
+.TP
+1\-127
+.I program
+was invoked by the
+.B runtools
+utility and then terminated with its own non-zero exit status.
+.SH AUTHOR
+Wayne Marshall, http://b0llix.net/perp/
+.SH SEE ALSO
+.nh
+.BR runargs (8),
+.BR runargv0 (8),
+.BR runchoom (8),
+.BR rundetach (8),
+.BR rundeux (8),
+.BR runenv (8),
+.BR runfile (8),
+.BR runlimit (8),
+.BR runlock (8),
+.BR runpause (8),
+.BR runsession (8),
+.BR runtool (8),
+.BR runtrap (8),
+.BR runuid (8),
+.BR perp_intro (8),
+.BR perpd (8),
+.BR perpetrate (5)
+.\" EOF

@@ -1,0 +1,81 @@
+#!/bin/sh
+# sshd/rc.main_tcpserver
+# perp runscript for sshd service
+# wcm, 2009.10.07 - 2011.02.02
+# ===
+
+exec 2>&1
+
+TARGET=${1}
+SVNAME=${2:-sshd}
+
+## config:
+CONLIMIT=51
+
+## generate keys:
+make_keys() {
+  if test ! -f /etc/ssh/ssh_host_key ; then
+     echo "*** ${SVNAME}: generating /etc/ssh/ssh_host_key ..."
+     /usr/bin/ssh-keygen -t rsa1 -f /etc/ssh/ssh_host_key -N ''
+  fi
+  if test ! -f /etc/ssh/ssh_host_dsa_key ; then
+     echo "*** ${SVNAME}: generating /etc/ssh/ssh_host_dsa_key ..."
+     /usr/bin/ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key -N ''
+  fi
+  if test ! -f /etc/ssh/ssh_host_rsa_key ; then
+     echo "*** ${SVNAME}: generating /etc/ssh/ssh_host_rsa_key ..."
+     /usr/bin/ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -N ''
+  fi
+}
+
+
+## make_rules: setup ./tcprules.cdb for tcpserver:
+make_rules() {
+  echo "*** ${SVNAME}: making tcprules..."
+  if test ! -f ./tcprules ; then
+      ## default rule blocks all connections except localhost:
+      cat - >./tcprules << "%%"
+127.0.0.1:allow
+:deny
+%%
+  fi
+  tcprules ./tcprules.cdb ./tcprules.tmp <./tcprules 
+}
+
+
+start() {
+  echo "*** ${SVNAME}: starting sshd under tcpserver..."
+  make_keys
+  make_rules
+  ## sshd options required for running under tcpserver:
+  ##   -i  "inetd" mode
+  ##   -e  log to stderr (for tinylog) instead of syslog
+  ##
+  exec \
+    tcpserver \
+      -vR \
+      -c ${CONLIMIT} \
+      -x ./tcprules.cdb \
+      0 22 \
+        /usr/sbin/sshd -i -e -f /etc/ssh/sshd_config
+}
+
+
+## reset target:
+reset() {
+  case $3 in
+    'exit' )
+        echo "*** ${SVNAME}: exited status $4" ;;
+    'signal' )
+        echo "*** ${SVNAME}: killed on signal $5" ;;
+    * ) 
+        echo "*** ${SVNAME}: stopped ($3)" ;;
+  esac 
+  exit 0
+}
+
+
+## branch to target:
+eval ${TARGET} "$@"
+
+### EOF

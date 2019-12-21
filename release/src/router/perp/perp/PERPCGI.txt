@@ -1,0 +1,17 @@
+# PERPCGI.txt
+# wcm, 2010.06.11 - 2010.06.11
+# ===
+
+# synopsis
+# utility for producing perpls-type listing in html format
+
+# usage
+# run under tcpserver (or similar) with environment set for PERP_BASE
+
+PERPCGI_PORT=8118
+PERP_BASE=/etc/perp \
+exec tcpserver <opts, including port> \
+  perpcgi -s /etc/perpcgi/perpcgi.css
+
+
+### EOF

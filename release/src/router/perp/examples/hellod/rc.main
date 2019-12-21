@@ -1,0 +1,44 @@
+#!/bin/sh
+# rc.main for hellod: a hello (port 1789) server
+# wcm, 2010.01.16 - 2011.02.02
+# ===
+exec 2>&1
+
+TARGET=${1}
+SVNAME=${2}
+
+## start target:
+start() {
+    ## port for hello protocol:
+    PORT=1789
+    ## for testing, bind to loopback address:
+    IP=127.0.0.1
+    ## otherwise, to go "public":
+    #IP=0
+    
+    echo "*** ${SVNAME}: starting hellod..."
+    echo "*** >> using port: ${PORT}"
+    exec \
+      tcpserver -HR -l0 ${IP} ${PORT} \
+        /bin/sh -c 'echo "hello ${TCPREMOTEIP}"'
+}
+
+
+## reset target:
+reset() {
+    case $3 in
+      'exit' )
+          echo "*** ${SVNAME}: hellod exited status $4" ;;
+      'signal' )
+          echo "*** ${SVNAME}: hellod killed on signal $5" ;;
+      * )
+          echo "*** ${SVNAME}: hellod stopped ($3)" ;;
+    esac
+    exit 0
+}
+
+
+## branch to target:
+eval ${TARGET} "$@"
+
+### EOF

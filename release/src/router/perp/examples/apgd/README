@@ -1,0 +1,35 @@
+# apgd/README
+# automatic password generation service
+# wcm, 2009.12.28 - 2009.12.28
+# ===
+
+This directory contains a set of perp runscripts for a
+password generator service based on apg.
+
+It requires the apg package and the ucspi-tcp package.
+
+The service uses tcpserver to listen and respond to queries
+on port 129, the "well-known" pwdgen service port defined in
+/etc/services.
+
+Configure the POLICY variable in rc.main according to the apgd(8)
+manual, to setup the desired characteristics of the generated
+passwords.
+
+Once the service is installed and running, query it for a set
+of passwords with tcpcat:
+
+  tcpcat 0 129
+
+Other netcat-type utilities may be used instead:
+
+  nc 0 129
+
+
+NOTES:
+
+On NetBSD systems, apgd seems to suck the entropy pool dry very
+quickly!
+
+
+### EOF

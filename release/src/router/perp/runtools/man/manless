@@ -1,0 +1,7 @@
+#!/bin/rc
+# manless: display a manual page file
+# wcm, 2008.02.26 - 2008.02.26
+# ===
+groff -Tascii -mandoc $1 | less
+
+### EOF

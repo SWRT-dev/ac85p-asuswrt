@@ -1,0 +1,40 @@
+#!/bin/sh
+# sshd/rc.main
+# perp runscript for mathopd service
+# wcm, 2009.12.31 - 2011.02.02
+# ===
+
+exec 2>&1
+
+TARGET=${1}
+SVNAME=${2:-mathopd}
+
+## start target:
+start() {
+  echo "*** ${SVNAME}: starting mathopd..."
+  ## mathopd options required for perp service:
+  ##   -n  no detach, run in foreground
+  ##
+  exec \
+    /usr/sbin/mathopd -n -f ./mathopd.conf
+}
+
+
+## reset target:
+reset() {
+  case $3 in
+    'exit' )
+        echo "*** ${SVNAME}: exited status $4" ;;
+    'signal' )
+        echo "*** ${SVNAME}: killed on signal $5" ;;
+    * ) 
+        echo "*** ${SVNAME}: stopped ($3)" ;;
+  esac 
+  exit 0
+}
+
+
+## branch to target:
+eval ${TARGET} "$@"
+
+### EOF

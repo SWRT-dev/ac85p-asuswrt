@@ -1,0 +1,41 @@
+# LICENSE
+# wcm, 2009.12.12 - 2013.01.11
+# ===
+
+perp: persistent process supervision
+Copyright (c) 2008-2013, Wayne Marshall
+
+LICENSE
+
+This software in its entirety and in its separate parts, including all
+accompanying libraries and documentation, comprises a body of work
+copyright by the author(s).  The terms for the usage and redistribution
+of this software are described by this license.
+
+Permission is granted to anyone to use, modify, and/or redistribute this
+software for any purpose, in source or binary form, subject to the following
+conditions:
+
+1. This license itself, including the copyright notice and accompanying
+disclaimer, may not be altered in any way, and must be included with any
+redistribution of the software, whether in source or binary form.
+
+2. Under no circumstances shall the author(s) be held liable for any losses,
+damages, or claims of any kind related to the use and/or redistribution of
+this software, whatever harm or consequence may arise.
+
+DISCLAIMER
+
+  THIS SOFTWARE IS PROVIDED BY THE AUTHOR(S) STRICTLY ``AS IS''.
+  ANY EXPRESS OR IMPLIED WARRANTIES ARE DISCLAIMED, INCLUDING, BUT NOT
+  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  A PARTICULAR PURPOSE.  IN NO EVENT SHALL THE AUTHOR(S) BE LIABLE FOR
+  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+  DAMAGES (INCLUDING, BUT NOT LIMITED TO:  PROCUREMENT OF SUBSTITUTE GOODS
+  OR SERVICES; LOSS OF USE, DATA, OR PROFITS; BUSINESS INTERRUPTION; AND/OR
+  ANY CLAIMS RELATED TO PROPERTY, PRIVACY, OR SECURITY INFRINGEMENT)
+  HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+  STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE), ARISING
+  IN ANY CONNECTION WITH THE USE AND/OR DISTRIBUTION OF THIS SOFTWARE.
+
+### EOF

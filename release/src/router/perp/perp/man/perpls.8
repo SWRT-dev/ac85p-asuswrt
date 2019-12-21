@@ -1,0 +1,319 @@
+.\" perpls.8
+.\" wcm, 2009.12.03 - 2011.02.01
+.\" ===
+.TH perpls 8 "January 2013" "perp-2.07" "persistent process supervision"
+.SH NAME
+perpls \- persistent process service lister
+.SH SYNOPSIS
+.B perpls [\-hV] [\-b
+.I basedir
+.B ] [\-cGgrt] [
+.I sv ...
+.B ]
+.SH DESCRIPTION
+.B perpls
+is used to list the current status of each
+.I sv
+argument monitored by an active
+.BR perpd (8)
+supervisor.
+.PP
+.B perpls
+looks for
+.I sv
+in the directory
+.I basedir
+if given with the
+.B \-b
+option,
+or as set in the
+.B PERP_BASE
+environmental variable,
+or in the current directory if neither of the previous is given.
+If no
+.I sv
+is given,
+.B perpls
+reports on all the subdirectories found in the base directory
+not beginning with `.'.
+.PP
+For each service
+.IR sv ,
+.B perpls
+prints a single line reporting on the status of the service.
+The report for each service is given in a format similar to the following:
+.PP
+.RS
+.nf
+.B # perpls foo
+[+ +++ +++]  foo  uptime: 5s/5s  pids: 278/269
+.fi
+.RE
+.PP
+The line begins with a ``panel'' for the service,
+followed by the name of the service
+.IR sv ,
+followed by the current uptimes for the main/log processes,
+followed by the pids for the main/log processes.
+.PP
+The ``panel'' is a compact representation of the service status.
+It is displayed as a sequence of nine-characters within square brackets:
+a single character for the status of the
+.BR perpd (8)
+supervisor itself,
+followed by a pair of triple-character sequences representing
+the main and log processes under its supervision.
+.PP
+The following characters are used in the panel:
+.TP
+.B +
+Ok.
+The process is up and running.
+In the first position,
+shows that the
+.BR perpd (8)
+supervisor itself is up and running.
+If the panel is all `+',
+it means all systems are go.
+.TP
+.B .
+Down.
+The process is currently down.
+.PP
+.RS
+.nf
+.B # perpctl down foo && perpls foo
+[+ ... +++]  foo  uptime: -s/90s  pids -/269
+.fi
+.RE
+.TP
+.B !
+Attention.
+Appears in the first position of a triplet sequence
+when the service is currently in a state it doesn't want to be in.
+There is a problem somewhere,
+often indicating that a runscript is not executable.
+For example, a service currently down but ``wants'' to be up:
+.PP
+.RS
+.nf
+.B # perpctl down foo
+.B # chmod -x foo/rc.main
+.B # perpctl up foo && perpls foo
+[+ !.. +++]  foo  uptime: -s/90s  pids 299/269
+.fi
+.RE
+.TP
+.B o
+Once.
+Appears in the second position of a triplet sequence
+when the process is up and running,
+but flagged to run only once:
+.PP
+.RS
+.nf
+.B # perpctl once foo && perpls foo
+[+ +o+ +++]  foo  uptime: 90s/90s  pids 278/269
+.fi
+.RE
+.TP
+.B p
+Paused.
+Appears in the third position of a triplet sequence
+when the process is currently paused:
+.PP
+.RS
+.nf
+.B # perpctl pause foo && perpls foo
+[+ ++p +++]  foo  uptime: 90s/90s  pids 278/269
+.fi
+.RE
+.TP
+.B r
+Resetting.
+Appears in the third position of a triplet sequence
+when the service is currently resetting:
+.PP
+.RS
+.nf
+.B # perpctl pause foo && perpls foo
+[+ ++r +++]  foo  uptime: 1s/90s  pids 299/269
+.fi
+.RE
+.TP
+.B -
+Not active/available.
+In the first position of the panel,
+indicates the service definition
+.I sv
+is not active.
+The rest of the panel will be filled by `-' characters,
+and no reporting will appear for uptimes and pids.
+.PP
+.RS
+.nf
+.B # chmod -t foo && perpls foo
+[- --- ---]  foo
+.fi
+.RE
+.TP
+.B E
+Error.
+Appears only in the first position for overall status.
+Displayed when a problem was encountered in finding the
+.I sv
+argument or its
+.BR perpd (8)
+supervisor.
+The rest of the panel will be filled by `-' characters,
+and followed by a diagnostic message describing the error:
+.PP
+.RS
+.nf
+.B # perpls foo
+[E --- ---]  foo  error: failure stat() on service directory (ENOENT)
+.fi
+.RE
+.SS Colorized Listings
+On terminals with color support,
+.B perpls
+may display a ``colorized'' listing when given the
+.B \-G
+option on the command line,
+or if PERPLS_COLORS is defined with a capability string in the environment.
+The colorization is applied to the
+.I sv
+name in the report according to the status found for the service.
+Colorization is based on ANSI (ISO 6429) color sequences,
+selected from a capability table that defines
+the following entries (default values shown in parentheses):
+.TP
+.B df
+Default (df=00).
+Applied when a capability is otherwise undefined.
+.TP
+.B na
+Not active (na=00).
+Applied when a service is not activated.
+.TP
+.B an
+Active-normal (an=01).
+Applied when the main service is active and running normally.
+.TP
+.B ar
+Active-resetting (ar=01;33).
+Applied when the main service is resetting.
+.TP
+.B ap
+Active-paused (ap=01;33).
+Applied when the main service is paused.
+.TP
+.B ad
+Active-down (ad=01;34).
+Applied when the main service is down.
+.TP
+.B wu
+Want-up (wu=01;33).
+Applied when the main service is down but wants up.
+.TP
+.B wd
+Want-down (wd=01;33).
+Applied when the main service is up but wants down.
+.TP
+.B er
+Error (er=01;31).
+Applied when an error encountered.
+.TP
+.B ex
+Exception (ex=01;31).
+Applied when an exceptional condition encountered.
+.PP
+In a default installation,
+the capability table will be predefined with the following string:
+.PP
+.RS
+"df=00:na=00:an=01:ar=01;33:ap=01;33:\\
+ad=01;34:wu=01;33:wd=01;33:er=01;31:ex=01;31"
+.RE
+.SH OPTIONS
+.TP
+.B \-b basedir
+Base directory.
+Look for
+.I sv
+in
+.IR basedir .
+.TP
+.B \-c
+Current directory.
+Look for
+.I sv
+in the current directory,
+even if PERP_BASE is defined in the environment.
+.TP
+.B \-g
+No color.
+Do not colorize listing,
+even if PERPLS_COLORS is defined in the environment.
+.TP
+.B \-G
+Colorize.
+Display a colorized listing.
+Use the capability table given by PERPLS_COLORS
+if defined in the environment,
+or use a built-in capability table if PERPLS_COLORS is not defined.
+.TP
+.B \-h
+Help.
+Print a brief usage message to stderr and exit.
+.TP
+.B \-K
+Capability.
+Print the current capability table for colorized listings and exit.
+The environment variable PERPLS_COLORS must be defined.
+Otherwise this option must be combined with the
+.B \-G
+option to display the built-in capability table.
+.TP
+.B \-r
+Reverse sort.
+Display the listing in reverse order.
+Normally the listing appears in the order of
+.I sv
+given on the command line,
+or in alphabetical order if no
+.I sv
+are given.
+The
+.B \-r
+option lists in the reverse of this order.
+This option may be combined with the
+.B \-t
+option.
+.TP
+.B \-t
+Uptime.
+Display the listing ordered by uptime of the main service,
+shortest uptimes first.
+May be combined with the
+.B \-r
+option to display longest uptimes first.
+.TP
+.B \-V
+Version.
+Print the version number to stderr and exit.
+.SH AUTHOR
+Wayne Marshall, http://b0llix.net/perp/
+.SH SEE ALSO
+.nh
+.BR perp_intro (8),
+.BR perpboot (8),
+.BR perpctl (8),
+.BR perpd (8),
+.BR perpetrate (5),
+.BR perphup (8),
+.BR perpok (8),
+.BR perpstat (8),
+.BR sissylog (8),
+.BR tinylog (8)
+.\" EOF perpls.8

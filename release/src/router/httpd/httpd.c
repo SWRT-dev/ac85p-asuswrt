@@ -388,11 +388,12 @@ page_default_redirect(int fromapp_flag, char* url)
 void
 send_login_page(int fromapp_flag, int error_status, char* url, char* file, int lock_time, int logintry)
 {
-	HTTPD_DBG("error_status = %d\n", error_status);
 	char inviteCode[256]={0};
 	char buf[128] = {0};
 	//char url_tmp[64]={0};
 	char *cp, *file_var=NULL;
+
+	HTTPD_DBG("error_status = %d\n", error_status);
 
 	if(logintry){
 		if(!cur_login_ip_type)
@@ -1106,6 +1107,29 @@ handle_request(void)
         }
 #endif
         HTTPD_DBG("file = %s\n", file);
+
+#ifdef RTCONFIG_SOFTCENTER
+	char scPath[128];
+	if ((strncmp(file, "Main_S", 6)==0) || (strncmp(file, "Module_", 7)==0))//jsp
+	{
+		snprintf(scPath, sizeof(scPath), "/jffs/softcenter/webs/");
+		strcat(scPath, file);
+
+		if(check_if_file_exist(scPath)){
+			file = scPath;
+		}
+	}
+	if ((strstr(file, "res/")))//jpg,png,js,css,html
+	{
+		if(!check_if_file_exist(file)){
+			snprintf(scPath, sizeof(scPath), "/jffs/softcenter/");
+			strcat(scPath, file);
+			if(check_if_file_exist(scPath)){
+				file = scPath;
+			}
+		}
+	}
+#endif
 	mime_exception = 0;
 	do_referer = 0;
 
@@ -1312,7 +1336,18 @@ handle_request(void)
 #if defined(RTCONFIG_IFTTT) || defined(RTCONFIG_ALEXA)
 					&& !strstr(file, "asustitle.png")
 #endif
-					&& !strstr(file,"cert_key.tar")){
+					&& !strstr(file,"cert_key.tar")
+#ifdef RTCONFIG_OPENVPN
+					&& !strstr(file, "server_ovpn.cert")
+#endif
+#ifdef RTCONFIG_SOFTCENTER
+					&& !strstr(file, "ss_conf")
+					&& !strstr(file, "ss_status")
+					&& !strstr(file, "dbconf")
+					&& !strstr(file, "Main_S")
+					&& !strstr(file, "Module_")
+#endif
+					){
 				send_error( 404, "Not Found", (char*) 0, "File not found." );
 				return;
 			}

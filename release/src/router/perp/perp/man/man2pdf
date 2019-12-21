@@ -1,0 +1,7 @@
+#!/bin/sh
+# man2pdf: convert -man page to pdf
+# wcm, 2009.12.16 - 2009.12.16
+# ===
+groff -Tps -man ${1} | ps2pdf - ${1}.pdf
+
+### EOF

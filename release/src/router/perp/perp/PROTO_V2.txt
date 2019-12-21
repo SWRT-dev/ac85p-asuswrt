@@ -1,0 +1,188 @@
+# PROTO_V2.txt
+# description of the perpetrate packet protocol
+# VERSION 2
+# wcm, 2008.10.09 - 2011.01.28
+# ===
+
+This document describes the protocol and inter-process communications
+encoding for the perp package.  Specifically, this document describes
+version 2 of the protocol, applicable beginning with the perp-2.00
+release (January 2011).
+
+
+I. PROTOCOL
+
+Each active perpd(8) process listens and replies on a designated
+domain socket for query and command requests from client programs.
+
+A complete protocol transaction is illustrated below:
+
+  perpd            perpctl, perpstat
+  (server)         (client)
+  =========        ==========
+
+  listen
+                   connect,
+                   send request
+            <-----
+  accept,
+  read request
+  send reply
+            ----->
+                   read reply,
+                   send request
+            <-----
+  read request
+  send reply
+            ----->
+
+        (...continues...)
+
+                  read reply,
+                  close connection
+
+  close connection
+
+
+The communication of "requests" and "replies" is encapsulated
+in packets.  A packet is a single contiguous sequence of bytes
+described as follows:
+
+  P T L <payload>
+
+Where:
+
+  P: one byte integer for protocol identifier (2 for version 2)
+
+  T: one byte character for packet type identifier
+
+      client request packet types:
+        'Q' status query
+        'C' service command
+        'Y' "pidyank"
+
+      server response packet types:
+        'S' status data response
+        'E' error response
+
+  L: one byte unsigned integer for length of following payload
+
+  <payload>: arbitrary sequence of bytes of length L
+
+
+As a consequence of the above definitions, the maximum payload for
+a packet is 255 bytes.  A single packet may therefore be a maximum
+of 255 + 3 = 258 bytes.
+
+Note: the libasagna library provides a generalized set of operations
+on such "tiny packets" and are described in the header "lasagna/pkt.h".
+
+
+II. PACKET TYPES and EXAMPLES
+
+1) 'Q', query for status (client):
+    2 'Q' 16 <binary-encoded dev/ino for service directory>
+    [19 bytes total]
+
+2) 'S', status response (server):
+    2 'S' 66 <binary-encoded status data for service>
+    [69 bytes total]
+
+3) 'C', control command (client):
+    2 'C' 18 <binary-encoded dev/ino + command byte + flags byte>
+    [21 bytes total]
+
+4) 'E', error response (server):
+    2 'E' 4 <binary-encoded errno>
+    [7 bytes total]
+
+5) 'Y', pidyank request (client):
+    (not implemented)
+
+
+III. ENCODING
+
+Payload data is exchanged in a portable "little-endian" encoding.
+The libasagna library provides a generalized set of portable unsigned
+integer encoding/decoding utilities with the "lasagna/upak.h" interface.
+Portable encoding of "tainstamps" (TAI with nanosecond precisision) is
+provided by the "lasagna/tain.h" interface.
+
+
+1. Encoding dev/ino of service directory.
+
+Service directories are uniquely identified by their device and inode
+number obtained from stat(2).  Each numeric device and inode value is
+cast to an 8-byte unsigned integer and then packed into 8 contiguous
+bytes, least significant byte first.  Encoding for the device and inode
+values of a service directory occupies 16 contiguous bytes:
+
+  payload buffer   size     type      value
+  --------------  --------  --------  ------
+  payload[0..7]:   8 bytes  uint64_t  device
+  payload[8..15]:  8 bytes  uint64_t  inode
+
+
+2. Encoding for service status.
+
+Service status replies provide real-time information regarding the
+process state of an active service under supervision.  This information
+includes numeric process id values, timestamps, and status flags relevant
+to the service.  Encoding for the status values for a service occupies
+66 contiguous bytes:
+
+  payload buffer    size     type      value
+  --------------   --------  -------  ------------
+  payload[0..3]:    4 bytes  pid_t    pid of perpd
+  payload[4..15]:  12 bytes  tain_t   timestamp start of perpd
+
+  payload[16..27]: 12 bytes  tain_t   timestamp of service activation
+  payload[28]:      1 byte   byte     service definition flags
+
+  payload[30..33]:  4 bytes  pid_t    pid of main service
+  payload[34..45]: 12 bytes  tain_t   timestamp of main pid
+  payload[46]:      1 byte   byte     flags main service
+  payload[47]:      1 byte   byte     (reserved)
+
+  payload[48..51]:  4 bytes  pid_t    pid of log service
+  payload[52..63]: 12 bytes  tain_t   timestamp of log pid
+  payload[64]:      1 byte   byte     flags log service
+  payload[65]:      1 byte   byte     (reserved)
+
+
+3. Encoding for service command.
+
+Service command packets consist of the dev/ino for the target service
+directory (encoded as described above), plus two bytes of command:
+
+  payload buffer   size     type      value
+  --------------  --------  --------  ------
+  payload[0..7]:   8 bytes  uint64_t  device
+  payload[8..15]:  8 bytes  uint64_t  inode
+  payload[16]:     1 byte   byte      command character
+  payload[17]:     1 byte   byte      command flags
+
+
+4. Encoding for error reply.
+
+A server error response is given in two cases: 1) an error found in
+a client status request; 2) success/failure report for a client control
+request.  In each case, a single numeric value representing the error
+code is packed into a 4-byte unsigned integer encoding.  An error code of
+0 represents success (no error).  Other values are generally interpreted
+from the corresponding system errno.
+
+  payload buffer   size     type      value
+  --------------  --------  --------  ------
+  payload[0..4]:   4 bytes  uint32_t  errno
+
+
+VI. CONCURRENCY
+
+Starting with version 2, perpd(8) accepts and handles multiple concurrent
+client connections.  Processing of connections may be considered
+asynchronous, in that perpd(8) may begin processing a new connection
+dialog while continuing to process earlier connection dialogs.
+
+
+### EOF: PROTO_V2.txt

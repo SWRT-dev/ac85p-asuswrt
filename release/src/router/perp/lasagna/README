@@ -1,0 +1,142 @@
+# lasagna/README
+# wcm, 2009.12.20 - 2013.01.08
+# ===
+
+This is libasagna, or "-lasagna", a cheesy high-cholesterol general
+purpose utility library for programming on Un!x.
+
+USE AT YOUR OWN RISK!
+
+Please note: this version of the library is intended only to support
+the specific project that accompanies it.  The interfaces and function
+definitions are otherwise under continuous development, and will
+vary from release to release, and from project to project.
+
+
+USAGE
+
+Build the library (should be make-agnostic):
+
+  vi ../conf.mk
+  make
+
+Compile and link:
+
+  gcc -c foo.c -I/path/to/lasagna
+  gcc -o foo foo.o -L/path/to/lasagna -lasagna
+
+
+MODULES
+
+The library provides a set of purpose-specific modules described by
+their header files:
+
+    buf.h       operations on byte buffers
+    cdb.h       constant database hash on disk (cdb)
+    cstr.h      operations on C strings (nul-terminated char buffers)
+    devout.h    unbuffered write()
+    die.h       immediate process termination
+    domsock.h   interface to unix/local domain sockets
+    dynbuf.h    dynamic (growable) buffers
+    dynstr.h    dynamic (growable) strings
+    dynstuf.h   dynamic (growable) "stuff"
+    execvx.h    extended execve()
+    fd.h        operations on file descriptors
+    hdb.h       hash database (hdb32) file operations (hdb)
+    ioq.h       fully buffered ("queued") i/o
+    ioq_std.h   predefined ioq's for stdin, stdout, stderr
+    newenv.h    setup environment for child process
+    nextopt.h   command-line option parser
+    nfmt.h      format (stringify) numbers
+    nuscan.h    convert numeric string to numeric value
+    outvec.h    semi-buffered output using writev()
+    packet.h    [cruft]
+    padlock.h   posix advisory locking
+    pidlock.h   lockfile with process id
+    pkt.h       tiny packet protocol
+    pollio.h    poll() wrapper with elapsed time
+    rlimit.h    resource limits
+    sig.h       signal handlers
+    sigset.h    operations on sigsets
+    sysstr.h    stringify errno and signals
+    tain.h      nano-second precision tai time
+    tx64.h      base64 encoding
+    uchar.h     typedef for unsigned char
+    ufunc.h     operations on unsigned integers
+    upak.h      portable unsigned integer storage
+
+
+DESIGN
+
+In general, the library attempts to provide a consistent design
+interface following an object_method(target, args) style of
+function definition.
+
+Operations that return an int value for reporting success/failure
+follow the convention of returning 0 for success (no error), and
+-1 for failure, setting errno where appropriate.
+
+Operations that return a pointer value follow the convention of
+returning NULL for failure, setting errno where appropriate.
+
+Otherwise, functions are generally designed to return a useful
+value.
+
+The library is modularized and factored into discrete function
+objects to help the linker make small statically-linked binaries.
+
+
+DOCUMENTATION
+
+Some documentation and usage notes may be found in the header files
+for each module.  Otherwise, no separate documentation is currently
+available.
+
+
+REFERENCES
+
+Much of the source code, algorithms, and design philosophy is
+originally based on the public domain libraries included with the
+"daemontools" project by Dan Bernstein:
+
+  http://cr.yp.to/daemontools/
+
+Sources and documentation may describe this reference as "djb".
+
+This library is intended to be "portable" among contemporary Un!x
+systems that adhere to generally accepted "posix" standards.  Sigh,
+whatever that means.  In practice this library has been used
+successfully on Linux/glibc, Linux/dietlibc, and NetBSD.  The
+library is very general and will probably work on any system that
+supports poll().  It is otherwise designed and implemented to work
+on all the systems described in:
+
+  Advanced Unix Programming in the UNIX Environment, Second Edition
+  W. Richard Stevens and Stephen A. Rago
+  2005, Addison-Wesley
+
+Sources and documentation may describe this reference as "APUE/2e".
+
+The sources are defined for "Standard C" compilers following the
+C89 specification as described in:
+
+  C  A Reference Manual, Fifth Edition
+  Samuel P. Harbison III and Guy L. Steel Jr.
+  2002, Prentice-Hall
+
+Sources and documentation may describe this reference as "CARM/5e".
+
+Finally, no list of references would be complete without mentioning
+this fine manual:
+
+  The Practice of Programming
+  Brian W. Kernighan and Rob Pike
+  1999, Addison-Wesley
+
+Sources and documentation may describe this reference as "TPOP/kp".
+
+As much as this code fails to attain the wisdom embodied in this
+slim book, it nevertheless aspires to it.
+
+
+### EOF lasagna/README

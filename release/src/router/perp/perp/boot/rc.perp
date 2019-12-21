@@ -1,0 +1,27 @@
+#!/bin/sh
+# rc.perp: perpd startup script for perpboot
+# ===
+
+### --- configure ---
+PERP_VAR=/var/run/perp
+PERPD_OPTS="-a6"
+
+
+### --- script ---
+
+## note: perpboot defines PERP_BASE on startup
+
+## clean setup for runtime control files:
+rm -Rf ${PERP_VAR}
+mkdir -p ${PERP_VAR}
+chmod 0700 ${PERP_VAR}
+
+## clean symlink:
+rm -Rf ${PERP_BASE}/.control
+ln -s ${PERP_VAR} ${PERP_BASE}/.control
+
+## exec perpd, options as configured above:
+exec \
+  perpd ${PERPD_OPTS} ${PERP_BASE}
+
+### EOF

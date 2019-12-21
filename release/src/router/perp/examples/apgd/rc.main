@@ -1,0 +1,50 @@
+#!/bin/sh
+# apgd/rc.main
+# perp runscript for apgd: automatic password generator
+# (a pwdgen port 129 service)
+# wcm, 2009.10.07 - 2009.12.28
+# ===
+exec 2>&1
+
+TARGET=${1}
+SVNAME=${2}
+
+## netbsd notes:
+## this service sucks the entropy pool!
+
+## start target:
+start() {
+    ## port for pwdgen protocol:
+    PORT=129
+    CONLIMIT=13
+    POLICY="-M lN -n4 -m8 -x8"
+
+    echo "*** ${SVNAME}: starting apgd..."
+    echo "*** >> using policy: ${POLICY}"
+    exec \
+      tcpserver \
+        -v -RH \
+        -c ${CONLIMIT} \
+        0 ${PORT} \
+            apgd ${POLICY}
+}
+
+
+## reset target:
+reset() {
+    case $3 in
+      'exit' )
+          echo "*** ${SVNAME}: exited status $4" ;;
+      'signal' )
+          echo "*** ${SVNAME}: killed on signal $5" ;;
+      * )
+          echo "*** ${SVNAME}: stopped ($3)" ;;
+    esac
+    exit 0
+}
+
+
+## branch to target:
+eval ${TARGET} "$@"
+
+### EOF

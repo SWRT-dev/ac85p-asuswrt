@@ -1,0 +1,291 @@
+.\" perpctl.8
+.\" wcm, 2009.12.01 - 2013.01.07
+.\" ===
+.TH perpctl 8 "January 2013" "perp-2.07" "persistent process supervision"
+.de ZZ
+.  br
+.  ns
+..
+.SH NAME
+perpctl \- runtime control utility for
+.BR perpd (8)
+services
+.SH SYNOPSIS
+.B perpctl [-hV] [-b
+.I basedir
+.B ] [-g] [-L] [-q]
+.I cmd sv
+.B [
+.I sv ...
+.B ]
+.SH DESCRIPTION
+.B perpctl
+sends the command specified in
+.I cmd
+to the
+.BR perpd (8)
+control interface for each service argument
+.IR sv .
+.PP
+The argument
+.I cmd
+may be given as a single word of any length,
+but only the first letter is considered.
+The available commands include
+(with mnemonic in parentheses):
+.PP
+.B A
+(Activate)
+.RS
+Sets the sticky bit on each
+.I sv
+service directory argument and
+sends SIGHUP to
+.BR perpd (8).
+The effect is to activate each
+.I sv
+service.
+.RE
+.PP
+.B X
+([e]Xit)
+.RS
+Unsets the sticky bit on each
+.I sv
+service directory argument and
+sends SIGHUP to
+.BR perpd (8).
+The effect is to bring down each
+.I sv
+service and remove it
+from the set of services
+.BR perpd (8)
+is monitoring.
+.RE
+.PP
+.B d
+(down)
+.RS
+If the service is running,
+send it a sequence of SIGTERM and SIGCONT signals to bring it down.
+.BR perpd (8)
+will flag the service as wanting down:
+if the service stops it will not be restarted. 
+.RE
+.PP
+.B u
+(up)
+.RS
+If the service is not already running, start it.
+.BR perpd (8)
+will flag the service as wanting up:
+if the service stops it will be restarted.
+.RE
+.PP
+.B o
+(once)
+.RS
+If the service is not already running, start it.
+.BR perpd (8)
+will flag the service to run once:
+if the service stops it will not be restarted.
+.RE
+.PP
+.B p
+(pause)
+.RS
+Send the service a SIGSTOP signal.
+Normally this suspends execution of the service.
+.BR perpd (8)
+will flag the service as paused.
+.RE
+.PP
+.B c
+(continue)
+.RS
+Send the service a SIGCONT signal.
+Normally a paused service will then resume execution.
+.BR perpd (8)
+will remove a pause flag on the service.
+.RE
+.PP
+.B a
+(alarm)
+.ZZ
+.B h
+(hup)
+.ZZ
+.B i
+(interrupt)
+.ZZ
+.B k
+(kill)
+.ZZ
+.B q
+(quit)
+.ZZ
+.B t
+(term)
+.ZZ
+.B w
+(winch)
+.ZZ
+.B 1
+(usr1)
+.ZZ
+.B 2
+(usr2)
+.RS
+Send the service a corresponding signal:
+SIGALRM, SIGHUP, SIGINT, SIGKILL, SIGQUIT, SIGTERM, SIGWINCH, SIGUSR1 or SIGUSR2.
+.RE
+.PP
+.B D
+(meta-Down)
+.ZZ
+.B U
+(meta-Up)
+.RS
+When given in upper-case, the
+.B d
+(down) and
+.B u
+(up) commands described above
+are applied to both the main and log services.
+.RE
+.PP
+The signal/control commands listed above
+are applied to an active service process
+running from the ``start'' target of its
+.BR perpetrate (5)
+runscript.
+.BR perpd (8)
+will otherwise ignore any of the commands described above
+if received while a service is resetting,
+except for the commands
+.B c
+(continue/SIGCONT)
+or
+.B k
+(kill/SIGKILL).
+.SH OPTIONS
+.TP
+.B \-b basedir
+Base directory.
+Sets the base directory containing the
+.I sv
+arguments.
+If not set,
+.B perpctl
+will look for a value set in the environmental variable PERP_BASE.
+If neither of these is set,
+.B perpctl
+will operate on the current working directory.
+.TP
+.B \-g
+Group.
+Apply the requested command to the process group id (pgid) of each
+.I sv
+service.
+Normally the signal is applied only to the single process id of the service.
+.BR perpd (8)
+runs each main and log process in its own separate process group;
+the
+.B \-g
+option directs
+.BR perpd (8)
+to signal all process running with the pgid of the service.
+May be combined with the
+.B \-L
+option to signal all processes in the process group of the logging service.
+.TP
+.B \-h
+Help.
+Print a brief usage message to stderr and exit.
+.TP
+.B \-L
+Logger.
+Apply the
+.I cmd
+argument to the active logging service found in
+.I sv
+services.
+By default, the
+.I cmd
+argument is applied to the main service.
+The
+.B \-L
+option is not allowed when using any of the meta-commands
+.BR D ", " U ", or " X .
+.TP
+.B \-q
+Quiet.
+Normally after successfully applying the
+.I cmd
+to each
+.IR sv ,
+.B perpctl
+reports a brief message to stderr.
+The
+.B \-q
+option may be used to suppress these messages.
+.TP
+.B \-V
+Version.
+Print the version number of the program to stderr and exit.
+.SH DIAGNOSTICS
+For each
+.I sv
+successfully processed,
+.B perpctl
+prints a line to stderr in the form:
+.IP
+.IR sv :
+ok
+.PP
+For each
+.I sv
+not successfully processed,
+.B perpctl
+prints a brief diagnostic to stderr and continues processing any remaining
+.IR sv .
+.SH EXIT STATUS
+.PP
+.B perpctl
+exits with one of the following values:
+.TP
+0
+Success.
+The
+.I cmd
+was successfully delivered to all
+.I sv
+service arguments.
+.TP
+100
+Usage error.
+For unknown options, missing arguments, or other command-line errors.
+Prints a brief diagnostic message to stderr on exit.
+.TP
+111
+System error.
+One or more errors were encountered while processing.
+These may include unexpected failures of system calls,
+privilege and/or resource problems,
+or configuration errors in the base directory.
+A brief diagnostic message is printed to stderr for each error encountered.
+.SH AUTHOR
+Wayne Marshall, http://b0llix.net/perp/
+.SH SEE ALSO
+.nh
+.BR perp_intro (8),
+.BR perpboot (8),
+.BR perpd (8),
+.BR perpetrate (5),
+.BR perphup (8),
+.BR perpls (8),
+.BR perpok (8),
+.BR perpstat (8),
+.BR sissylog (8),
+.BR tinylog (8)
+.\" eof

@@ -1,0 +1,87 @@
+# CHANGES
+# perp release history and changelog
+# wcm, 2010.02.17 - 2013.01.11
+# ===
+
+perp-2.07 (2013.01.11):
+ * libasanga:
+   - merge small cleanups from development branch
+ * perpd:
+   - add support for PERP_SVPID, PERP_SVSECS within runscripts
+   - documentation added to perpd(8) and perpetrate(5)
+ * perpd_svdef.c:
+   - fixed scope of buffer declaration in perpd_svdef_run()
+ * conf.mk:
+   - support user-defined strip utility
+ * perpctl.8, runargv0.8:
+   - fix some omission and typo errors
+
+perp-2.06 (2013.01.11):
+ * withdrawn:
+   - bad version number in release
+
+perp-2.05 (2012.01.04):
+ * runuid:
+   - added option -g, set base group permission
+   - added option -s, set supplemental groups with initgroups(3)
+   - added option -S, set supplemental groups from list
+   - manpage updated
+ * perp-setup:
+   - fixed error in /etc/perp/.control symlink setup/initialization
+ * perpd:
+   - fixed "reset" targets to get correct exit/wstat arguments
+ * perpstat:
+   - fixed message for usage help
+
+perp-2.04 (2011.03.22):
+ * perphup:
+   - added option -t, trigger perpd shutdown
+ * perpboot:
+   - waitpid() for deux[1] on SIGTERM
+ * perp-setup:
+   - added arg for ctldir
+   - configure symlink /etc/perp/.control --> ctldir
+   - configure rc.perp bootscript for runchoom(8)
+ * runchoom:
+   - new, utility for linux "oom killer" abatement
+
+perp-2.03 (2011.03.11):
+ * perp-setup:
+   - in rc.perp boot script for perpd(8), setup default runlimit(8)
+     configuration to hard limits for RLIMIT_NPROC, RLIMIT_NOFILE
+
+perp-2.02 (2011.02.22):
+ * perpd:
+   - eliminated some spurious/redundant client connection logging
+
+perp-2.01 (2011.02.11):
+ * perp-setup:
+   - runlimit added to .boot/rc.perp script
+ * perpd:
+   - added option -g, enable group permission on control socket
+   - additional comments in LIMITS section of perpd(8) manual
+ * runlimit:
+   - added option -E, take resource limits from environment
+   - added option -F, take resource limits from file
+ * lasagna:
+   - outvec/mk_outvec.c: portability fix for dietlibc
+
+perp-2.00 (2011.02.02):
+ * perpd:
+   - coalesce supervisor (formerly perpetrate(8)) into scanner/controller
+   - runs as a single process
+   - all ipc with client applications via single domain socket 
+   - ipc protocol version 2 (see PROTO_V2.txt)
+ * perpetrate:
+   - eliminate perpetrate(8) executable (subsumed by perpd(8))
+   - perpetrate(5) manual page retained for runscript conventions
+ * perpctl:
+   - add commands [A | X], activate/deactivate service
+ * libasagna:
+   - nuscan.h, improve numeric scanning interface (supercedes nscan.h)
+   - other iterative improvements incorporated from projects hdb and ezcdb
+ 
+perp-0.00 (2010.01.12):
+ - maiden public release
+
+### EOF

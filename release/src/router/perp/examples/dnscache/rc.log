@@ -1,0 +1,13 @@
+#!/bin/sh
+# rc.log
+# generic perpetrate runscript
+# using tinylog_run wrapper configured by /etc/tinylog.conf
+# wcm, 2009.12.28 - 2009.12.28
+# ===
+
+if test ${1} = 'start' ; then
+  exec tinylog_run ${2}
+fi
+
+exit 0
+### EOF

@@ -1,0 +1,26 @@
+# mathopd/README
+# notes for running mathopd httpd server under perp
+# wcm, 2009.12.31 - 2011.02.02
+# ===
+
+See the mathopd wiki for all details of running mathopd:
+
+  http://www.mathopd.org/wiki
+
+Everything is configured in the mathopd.conf file, setup in rc.main
+to be local to the service directory.  The example included here
+is commented for a configuration specific to running under the
+supervision of perpetrate.  Key points:
+
+  * all logging to /dev/stderr (will be picked up by tinylog)
+  * no pid file necessary
+
+The example configuration included here also shows running mathopd
+under a non-privileged user "mathopd".  Such account will need to
+be added to the system before starting this service.
+
+Note that mathopd may be configured from stdin, so that all
+configuration could be done within the runscript itself.  The
+mathopd documentation suggests that this feature is deprecated.
+
+### EOF

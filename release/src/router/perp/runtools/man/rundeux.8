@@ -1,0 +1,192 @@
+.\" rundeux.8
+.\" wcm, 2009.12.11 - 2009.12.15
+.\" ===
+.TH rundeux 8 "January 2013" "runtools-2.07" "runtools"
+.SH NAME
+rundeux \- run a program with an associated logger
+.SH SYNOPSIS
+.B rundeux [\-hV] [\-d] [\-L
+.I label
+.B ] [\-S
+.I sep
+.B ] [\-x]
+.I program
+.BR < '::' |\c
+.RI ' sep '\c
+.B >
+.I logger
+.SH DESCRIPTION
+.I program
+and
+.I logger
+may each be one or more arguments.
+They are separated by the verbatim string ``::'',
+or by the
+.I sep
+argument defined with the
+.B \-S
+option.
+.PP
+.B rundeux
+starts
+.I program
+and
+.I logger
+with the stdout of
+.I program
+connected to the stdin of
+.IR logger .
+Normally
+.I program
+is intended to be a long-running process,
+and
+.I logger
+is a program that logs the data it reads on its standard input.
+Both
+.I program
+and
+.I logger
+should be set up to run under supervision as foreground processes.
+.PP
+After starting,
+.B rundeux
+continues to monitor both
+.I program
+and
+.IR logger .
+If either process should terminate,
+.B rundeux
+restarts it.
+When
+.B rundeux
+itself receives any signal it can catch,
+it passes it on to
+.I program
+with the
+.BR kill (2)
+command.
+.PP
+If
+.B rundeux
+receives SIGTERM,
+it flags itself to terminate and initiates a shutdown sequence.
+It sends SIGTERM and SIGCONT to
+.I program
+and waits for it to terminate.
+It then closes the stdin of
+.I logger
+and waits for it to terminate.
+Then
+.B rundeux
+itself exits normally.
+.SH OPTIONS
+.TP
+.B \-d
+Detach.
+Normally
+.B rundeux
+itself runs as a foreground process.
+The
+.B \-d
+option may be used to run
+.B rundeux
+as a background process, in its own session and process group,
+detached from the controlling terminal.
+.TP
+.B \-h
+Help.
+Print a brief usage message to stderr and exit.
+.TP
+.B \-L label
+Label.
+May be used to provide
+.I label
+as a distinctive tag for an instance of
+.BR rundeux ,
+such as for reference in
+.BR ps (1)
+listings.
+Otherwise, this option has no effect.
+.TP
+.B \-S sep
+Separator.
+Normally the
+.I program
+and
+.I logger
+arguments are separated by the verbatim string ``::''.
+This option may be used to specify
+.I sep
+as an alternative separator string.
+.TP
+.B \-V
+Version.
+Print the version number to stderr and exit.
+.TP
+.B \-x
+Exit.
+Normally
+.B rundeux
+itself stays resident as a system process that monitors
+.I program
+and
+.IR logger .
+The
+.B \-x
+option causes
+.B rundeux
+to start
+.IR logger ,
+and then replace itself with the
+.I program
+process.
+In this case,
+.I program
+and
+.I logger
+will run as unsupervised processes.
+May be combined with the
+.B \-d
+option.
+.SH SIGNALS
+When
+.B rundeux
+receives any catchable signal,
+it passes that signal on to the
+.I program
+under its supervision.
+.PP
+If
+.B rundeux
+receives SIGTERM,
+it takes it as a shutdown command and performs the following sequence:
+.IP \(bu 4
+Send SIGTERM and SIGCONT signals to the
+.I program
+process and wait for it to terminate.
+.IP \(bu 4
+Close the stdin of the
+.I logger
+process and wait for it to terminate.
+.IP \(bu 4
+.B rundeux
+itself then exits normally.
+.SH AUTHOR
+Wayne Marshall, http://b0llix.net/perp/
+.SH SEE ALSO
+.nh
+.BR runtools_intro (8),
+.BR runargs (8),
+.BR runargv0 (8),
+.BR runchoom (8),
+.BR rundetach (8),
+.BR runenv (8),
+.BR runfile (8),
+.BR runlimit (8),
+.BR runlock (8),
+.BR runpause (8),
+.BR runsession (8),
+.BR runtool (8),
+.BR runtrap (8),
+.BR runuid (8)
+.\" EOF

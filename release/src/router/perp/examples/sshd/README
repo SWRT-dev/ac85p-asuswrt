@@ -1,0 +1,32 @@
+# sshd/README
+# sshd secure shell service
+# wcm, 2009.12.28 - 2009.12.28
+# ===
+
+This directory defines a set of perp runscripts for an sshd service.
+
+The rc.main runscript provides two methods of running sshd under
+supervision:
+
+  * sshd listens itself, runs as a persistent process
+  * sshd runs once per connection under tcpserver
+
+By default the script is setup to run with the first method, that is,
+sshd itself will listen for incoming connections.  The service can
+be used on a "first-boot" system and will generate the keyfiles it
+needs automatically.
+
+To run under tcpserver, copy the rc.main_tcpserver script into
+rc.main.  Read the comments in the script and edit the script
+accordingly.  Note also to setup the CONLIMIT variable and any
+tcprules definitions in ./tcprules.  The script will rebuild
+./tcprules.cdb on each run, or may be used to rebuild the the rules
+at any time:
+
+  # vi tcprules
+  # ./rc.main make_rules
+
+It is not necessary to restart the service.  The new rules will take
+effect with the next incoming connection.
+
+### EOF

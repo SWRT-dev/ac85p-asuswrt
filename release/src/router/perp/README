@@ -1,0 +1,106 @@
+# README
+# perp: persistent process supervision
+# (includes runtools and libasagna)
+# wcm, 2009.12.28 - 2013.01.11
+# ===
+
+This is perp, aka "the perpetrator", a persistent process supervisor
+and service managment framework for un!x.
+
+The perp package provides a set of daemons and utilities to reliably
+start, monitor, log, and control a collection of persistent processes.
+
+-Huh?
+
+A "persistent process" is defined as any long-running program,
+normally starting at system boot and intended to continue running
+until system shutdown.  Also known and often described as a "service",
+a persistent process generally provides some essential, on-demand,
+system service.  Programs that serve email, domain name queries,
+and http requests are all examples of services that are normally
+run as persistent processes.
+
+-So?
+
+perp provides a portable, uniform framework for installing such
+services on any un!x platform, initializes services reliably within
+a consistent process environment, and makes sure they continue to
+run and log untended for as long as necessary.
+
+-Is that all?
+
+The big news with release 2.0 is that the perpd(8) daemon now runs as
+a single process, coalescing all the operations formerly provided by
+multiple perpetrate(8) supervisors into a single executable.  By
+eliminating all the supervisory "middle-man" processes, the context
+switching overhead of the perp system is substantially simplified over
+earlier releases.  And perpd(8) now sets up a mere 2 file objects on
+startup -- a lock file and a domain socket -- and otherwise generates
+no disk activity whatsoever during runtime.
+
+-Says you!
+
+Sigh...
+
+
+Package Layout:
+
+  ./CHANGES     changlog and release history
+  ./INSTALL     how to install/upgrade
+  ./LICENSE     copyright/license info
+  ./README      this here file right here
+  ./conf.mk     build/install configuration file
+  ./examples/*  sample service definitions
+  ./lasagna/*   libasagna utility library sources
+  ./perp/*      perp build sources
+  ./runtools/*  runtools build sources
+
+
+Requirements:
+
+This package is intended to build, install and run on any contemporary
+un!x platform without additional requirements.  It has been tested on
+the following platforms:
+
+  NetBSD 5.0, i386
+  Linux 2.6+, i686, gcc + gnu libc
+  Linux 2.6+, i686, gcc + dietlibc
+  Linux 2.6+, x86_64, gcc + dietlibc
+  Darwin 10.3.2 (Mac OSX), i386
+
+
+Installation:
+
+See INSTALL for complete instructions on building and installing the
+software, and upgrading from an earlier release.  
+
+
+Documentation:
+
+This package includes a set of troff -man pages.  To view them prior
+to installation, see the /man subdirectory within each of the ./perp
+and ./runtools subdirectories.  It is suggested to skim the following
+pages for an overview of the system:  perp_intro.8, perpd.8, perpetrate.5,
+and perp-setup.8.
+
+
+Process 1 (/sbin/init) Support:
+
+This release of perp does not include replacement for /sbin/init.
+If this is important for you -- and especially if you are interested
+in developing a complete perp-based un!x distribution -- please
+let me know.
+
+
+Feedback:
+
+This project includes the suggestions and corrections provided by perp
+users from around the world.  Thanks for your feedback!
+
+
+More information:
+
+http://b0llix.net/perp/
+
+
+### EOF

@@ -1,0 +1,459 @@
+.\" perpetrate.5
+.\" wcm, 2009.12.02 - 2013.01.09
+.\" ===
+.TH perpetrate 5 "January 2013" "perp-2.07" "persistent process supervision"
+.SH NAME
+perpetrate \- conventions for runscripts
+.SH DESCRIPTION
+.BR perpd (8)
+operates on a pair of ``runscripts'' that are executed to start and reset
+a service and an optional logger.
+.PP
+The runscripts recognized by 
+.BR perpd (8)
+are:
+.PP
+.I rc.log
+.RS
+Optional.  Controls the logger for the main service.
+.RE
+.PP
+.I rc.main
+.RS
+Required.  Controls the main service.
+.RE
+.PP
+The arguments, structure, and conventions for
+.I rc.log
+and
+.I rc.main
+are identical.
+The illustrations below will usually be shown with
+.IR rc.main ,
+but are equally applicable to
+.I rc.log
+unless noted otherwise.
+.PP
+.BR perpd (8)
+will invoke service runscripts from within the service definition directory.
+For example,
+given some service definition directory
+.PP
+.RS
+.I /etc/perp/foo
+.RE
+.PP
+.BR perpd (8)
+will switch into
+.I foo
+before invoking a runscript.
+This means that
+.I foo
+will be the current working directory within the runscript environment.
+.PP
+Runscripts are normally implemented as executable shell scripts,
+prepared and installed by the system administrator.
+A runscript will be executed at least twice during the life cycle of a service:
+.RS
+.IP \(bu 4
+to start the service
+.IP \(bu 4
+after the service exits
+.RE
+.PP
+A runscript will accordingly be structured to handle either of these events.
+.PP
+Runscripts are invoked in the general form:
+.PP
+.RS
+.B ./rc.main
+.I target svname
+.B [
+.I args...
+.B ]
+.RE
+.PP
+The argument
+.I target
+will be set to one of two literal strings,
+either ``start'' or ``reset'',
+depending on whether
+.BR perpd (8)
+is starting or resetting the service.
+The
+.I svname
+argument will be set to the basename of the service definition directory,
+such as ``foo'' for the service directory
+.IR foo .
+Any additional arguments depend on the
+.IR target .
+.PP
+When using a ``start'' target,
+.BR perpd (8)
+will invoke the runscript like this:
+.PP
+.RS
+.B ./rc.main start
+.I svname
+.RE
+.PP
+This follows the general form with no additional arguments.
+Given a ``start'' target,
+a runscript process should perform any initializations the service requires,
+and then proceed to replace itself (its process ID)
+with the desired service running in the foreground.
+A Bourne-compatible script such as
+.BR sh (1)
+will replace itself by using the
+.B exec
+command to start the service.
+This provides
+.BR perpd (8)
+with the process ID it needs for the actual running service,
+so that the service may be properly monitored and controlled.
+.PP
+Normally the ``start'' target will result in a persistent process,
+a long-running program that starts at system boot and continues until system shutdown.
+A runscript called with a ``start'' target should generally not return or exit,
+unless some error is encountered in initializing or starting the service.
+.PP
+As long-running as a service may be,
+whenever it does exit,
+for any reason,
+.BR perpd (8)
+will call the runscript again with a ``reset'' target.
+A ``reset'' target
+will invoke the runscript with additional arguments in either one of two forms,
+depending on whether the service exited normally,
+or was terminated by a signal:
+.PP
+.RS
+.B ./rc.main reset
+.I svname
+.B exit
+.I exitcode
+.RE
+or
+.RS
+.B ./rc.main reset
+.I svname
+.B signal
+.I signum signame
+.RE
+.PP
+In the first case,
+where a service has terminated normally,
+the additional arguments include the literal string ``exit'',
+followed by a string representation of the numeric exit code returned by the process.
+.PP
+In the second case,
+where a service was terminated by a signal,
+the additional arguments include the literal string ``signal'',
+followed by a string representation of the signal number that killed the process,
+followed by the symbolic name for the signal, such as SIGTERM,
+and as may be found listed in
+.BR signal (7).
+.PP
+When called with a ``reset'' target,
+a runscript may be used for any number of purposes:
+.RS
+.IP \(bu 4
+post-service logging and cleanup
+.IP \(bu 4
+sysadmin notification
+.IP \(bu 4
+shutdown of dependent services
+.RE
+.PP
+On the other hand,
+a runscript doesn't have to do anything with a ``reset'' target at all.
+There are no particular conditions or requirements for a resetting service,
+except that the runscript should normally return/exit as promptly as possible.
+A resetting runscript will usually do its job quickly so that
+.BR perpd (8)
+may start the service again as soon as possible.
+.SH EXAMPLES
+Assume that 
+.BR perpd (8)
+is supervising some service defined in the subdirectory
+.IR foo .
+The simplest barebones
+.I rc.main
+runscript will act only on the ``start'' target
+to exec into the foo service:
+.PP
+.RS
+.nf
+#!/bin/sh
+if test ${1} = 'start' ; then
+  exec /usr/bin/foo -f
+fi
+
+exit 0
+.fi
+.RE
+.PP
+This example performs no initializations,
+does not prepare for logging,
+and responds only to a ``start'' target.
+It simply
+.BR exec s
+into the
+.I /usr/bin/foo
+program,
+here called with an
+.B \-f
+argument,
+presumably required to run foo in the foreground.
+On any other target other than ``start'',
+this runscript will exit 0.
+.PP
+Here is another example of a simple foo service,
+this time with a bit of logging added:
+.PP
+.RS
+.nf
+#!/bin/sh
+exec 2>&1
+
+if test ${1} = 'start' ; then
+  echo "starting ${2}..."
+  exec /usr/bin/foo -f
+fi
+
+exit 0
+.fi
+.RE
+.PP
+This runscript starts by redirecting stderr to stdout,
+so that all output will be captured by the associated logging service.
+The runscript also emits a startup message that will be picked up by the logger,
+showing the use of the
+.I svname
+argument given as the second parameter to the runscript.
+.PP
+A simple
+.I rc.log
+runscript for this service might look like this:
+.PP
+.RS
+.nf
+#!/bin/sh
+if test ${1} = 'start' ; then
+  exec tinylog -k 5 -t /var/log/${2}
+fi
+
+exit 0
+.fi
+.RE
+.PP
+As with the
+.I rc.main
+runscript example,
+this runscript only responds to a ``start'' target.
+It execs
+.BR tinylog(8)
+to maintain a set of up to 5 rotated and timestamped log files
+in the directory
+.IR /var/log/foo ,
+supplying the final path element to the logging directory
+from the
+.I svname
+given as the second parameter to the runscript.
+.PP
+With a logger setup for the foo service,
+some post-service logging may now be added for a ``reset'' target in
+.IR rc.main :
+.PP
+.RS
+.nf
+#!/bin/sh
+exec 2>&1
+
+if test ${1} = 'start' ; then
+  echo "starting ${2}..."
+  exec /usr/bin/foo -f
+fi
+
+if test ${1} = 'reset' ; then
+  case ${3} in
+    'exit')   echo "service ${2} exited with exitcode ${4}" ;;
+    'signal') echo "service ${2} terminated on signal ${5}" ;;
+  esac
+fi
+
+exit 0
+.fi
+.RE
+.PP
+Now whenever this service exits,
+and the runscript is run with a ``reset'' target,
+the logger will pick up a timestamped record of the event
+as well as the cause/type of termination.
+.PP
+Runscripts may use whatever branching idioms are provided by the script interpreter.
+A couple of obvious possibilities in
+.BR sh (1)
+include the
+.B case
+and
+.B eval
+statements.
+Here is an example runscript using
+.BR eval :
+.PP
+.RS
+.nf
+#!/bin/sh
+exec 2>&1
+
+TARGET=${1}
+SVNAME=${2}
+
+start() {
+  echo "starting ${SVNAME}..."
+  exec /usr/bin/foo -f
+}
+
+reset() {
+  echo "resetting ${SVNAME}..."
+  exit 0
+}
+
+eval ${TARGET} "$@"
+.fi
+.RE
+.PP
+The runscripts shown above are admittedly simplistic.
+Runscripts may be, and often are,
+embellished considerably beyond the simple examples shown here.
+In particular,
+.BR runtools (8)
+are often used in the
+.B exec
+command of a runscript ``start'' target to implement resource control,
+privilege drops,
+and other manipulations of the service process environment.
+.PP
+Nevertheless,
+it is generally preferable to keep runscripts as simple as possible,
+while still starting the service safely and reliably.
+Simpler runscripts run faster,
+are easier to maintain and diagnose,
+have fewer unexpected side effects,
+and are generally more portable among different host installations.
+.SH ENVIRONMENT
+In addition to the positional arguments supplied to the runscript,
+certain other variables are also defined within the runscript environment.
+.PP
+The PERP_BASE variable is defined for both ``start'' and ``reset'' targets.
+This variable provides the base directory of the service installation,
+normally
+.IR /etc/perp ,
+and as described in
+.BR perpd (8).
+The definition of PERP_BASE permits the use of such
+.B perp
+utilities
+as
+.BR perpok (8)
+and
+.BR perpctl (8)
+directly within runscripts,
+where they may then easily reference any other service definitions as necessary.
+.PP
+The PERP_SVPID variable is defined for both ``start'' and ``reset'' targets.
+For the ``start'' target,
+PERP_SVPID gives the process ID of the service that will be started.
+For the ``reset'' target,
+PERP_SVPID gives the process ID of the service that has just terminated.
+Runscripts may choose to use the PERP_SVPID variable to generate output that
+cleanly brackets the complete life\-cycle of a service within service logs,
+or for any other purpose of reporting and notification.
+.PP
+The PERP_SVSECS variable is defined only for the ``reset'' target.
+It gives the total wallclock uptime, in seconds,
+of the service that has just terminated.
+Runscripts running ``reset'' may choose to use PERP_SVSECS
+for logging the uptime of a service,
+or for any other purpose of reporting and notification.
+.SH COMPATIBILITY
+For users familiar with the daemontools package,
+the runscript conventions described here
+are not directly interchangeable with those of
+.BR supervise (8).
+The main difference is that the
+.I run
+scripts of daemontools
+are designed to perform only on startup of a service,
+and will have no facility for properly handling a ``reset'' argument.
+.PP
+Nevertheless,
+it is trivial to provide compatibility to
+.BR perpd (8)
+for any pre-existing daemontools
+.I run
+scripts.
+Just install copies of the following
+.I rc.main
+into any daemontools service definition directory:
+.PP
+.RS
+.nf
+#!/bin/sh
+if test ${1} = 'start' ; then
+  exec ./run
+fi
+.fi
+.RE
+.PP
+Likewise,
+this
+.IR rc.log :
+.PP
+.RS
+.nf
+#!/bin/sh
+if test ${1} = 'start' ; then
+  cd ./log && exec ./run
+fi
+.fi
+.RE
+.SH HISTORY
+The
+.BR perpd (8)
+daemon formerly used multiple instances of a
+.BR perpetrate (8)
+executable,
+running one instance for each service under supervision.
+Under that architecture,
+the
+.BR perpetrate (8)
+executable performed all the supervisory operations on the service definition
+as described in this manual.
+.PP
+Beginning with version 2.0,
+the operations of the
+.BR perpetrate (8)
+executable were internally coalesced with
+.BR perpd (8)
+itself, and the need for
+.BR perpetrate (8)
+was eliminated.
+Meanwhile, all the runscript conventions have otherwise remained the same,
+and the name of this manual page has been retained to describe them.
+.SH AUTHOR
+Wayne Marshall, http://b0llix.net/perp/
+.SH SEE ALSO
+.nh
+.BR perp_intro (8),
+.BR perpboot (8),
+.BR perpctl (8),
+.BR perpd (8),
+.BR perphup (8),
+.BR perpls (8),
+.BR perpok (8),
+.BR perpstat (8),
+.BR sissylog (8),
+.BR tinylog (8)
+.\" eof: perpetrate.5

@@ -1,0 +1,429 @@
+.\" perpetrate.8
+.\" wcm, 2008.02.26 - 2009.12.15
+.\" ===
+.TH perpetrate 8 "January 2013"  "perp-2.07"  "persistent process supervision"
+.SH NAME
+perpetrate \- supervise a persistent process and optional logger
+.SH SYNOPSIS
+.\".B perpetrate [\-hV] [\-o]
+.B perpetrate [\-hV]
+.I svdir
+.\" *** DESCRIPTION ***
+.SH DESCRIPTION
+.B perpetrate
+is called by
+.BR perpd (8)
+to start and supervise a persistent process with an optional logger
+as defined by the files found in
+.IR svdir .
+.PP
+On startup,
+.B perpetrate
+inspects the directory
+.IR svdir .
+If the optional file named
+.I rc.log
+is present and executable,
+.B perpetrate
+spawns a child process to run it,
+setting up a pipe between its stdin and the stdout of the main service.
+To start the logging process,
+.B perpetrate
+invokes
+.I rc.log
+as follows:
+.PP
+.RS
+.B ./rc.log start
+.I svname
+.RE
+.PP
+The first argument is the literal string ``start'',
+with the
+.I svname
+argument set to the basename of
+.IR svdir .
+.PP
+After starting the optional logger,
+.B perpetrate
+proceeds to spawn a child process to run the required file named
+.IR rc.main .
+If a logging process has been defined as described above,
+.B perpetrate
+will also connect the stdout of the main service to the stdin of the logger.
+.PP
+When starting the main service,
+.B perpetrate
+will invoke
+.I rc.main
+exactly as described for
+.I rc.log
+above:
+.PP
+.RS
+.B ./rc.main start
+.I svname
+.RE
+.PP
+The files
+.I rc.main
+and
+.I rc.log
+are known as ``runscripts''.
+The result of running ``start'' on a runscript
+should normally be a persistent process,
+some long-running program designed to start at system boot
+and continue running until system shutdown.
+Runscript conventions and examples may be found in the
+.BR perpetrate (5)
+manual.
+.PP
+.B perpetrate
+monitors its ``start'' processes to make sure they continue running.
+If it notices that one of these processes has terminated,
+it will attempt to reset and then restart it.
+.PP
+To reset a process that has terminated from ``start'',
+.B perpetrate
+will invoke its associated runscript again in either one of two forms,
+depending on whether the process exited normally,
+or was terminated by a signal:
+.PP
+.RS
+.B ./rc.main reset
+.I svname
+.B exit
+.I exitcode
+.RE
+or
+.RS
+.B ./rc.main reset
+.I svname
+.B signal
+.I signum signame
+.RE
+.PP
+The first argument in both cases is the literal string ``reset''.
+If the service exited normally,
+this is followed by the literal string ``exit'' and a string representation
+of the numeric exit code returned by the process.
+If the service was terminated by a signal,
+the ``reset'' is followed by the literal string ``signal'',
+a string representation of the numeric signal number that killed the process,
+and the symbolic name for the signal, such as SIGTERM.
+.PP
+A runscript process running ``reset'' will normally run to completion
+and return/exit promptly.
+After the resetting process terminates,
+.B perpetrate
+will then attempt to restart the service,
+invoking its runscript with the same
+``start'' and
+.I svname
+arguments as described above.
+.PP
+To avoid chronic service failures from looping too quickly, 
+.B perpetrate
+delays at least one second beyond the last ``start'' time
+before trying to restart a service.
+.PP
+While
+.B perpetrate
+monitors its services,
+it also maintains and publishes current status information
+for client utilities such as
+.BR perpls (8)
+and
+.BR perpstat (8).
+.B perpetrate
+also listens on a control interface
+for administrative control commands from utilities such as
+.BR perpctl (8).
+.PP
+.B perpetrate
+will exit with failure immediately after startup under certain conditions.
+These include:
+being unable to find or change into the service directory;
+being unable to find or change or write certain control files;
+finding another instance of
+.B perpetrate
+running on the service directory;
+or being unable to create a pipe to the logging service.
+Otherwise,
+once
+.B perpetrate
+has started successfully,
+it is designed to run continuously until shutdown of the system.
+.\" *** STARTUP MODIFICATION
+.SS STARTUP MODIFICATION
+.PP
+The startup procedures for
+.B perpetrate
+as described above may be modified by installing certain specific ``flag'' files
+into the service directory.
+.PP
+If a file named
+.I flag.down
+is present,
+.B perpetrate
+will not attempt to start the
+.I rc.main
+control executable immediately at startup.
+In such cases,
+the
+.BR perpctl (8)
+utility may be used to tell
+.B perpetrate
+to start the service at a later time.
+.PP
+If a file named
+.I flag.once
+is present,
+.B perpetrate
+will attempt to start the
+.I rc.main
+control executable immediately at startup, as usual,
+and then reset it if it terminates.
+But when the reset completes,
+.B perpetrate
+will not restart the main service.
+Again,
+the
+.BR perpctl (8)
+utility may be used to tell
+.B perpetrate
+to restart the service if necessary,
+or to ``unflag'' its
+.I once
+setting.
+.PP
+If both files
+.I flag.down
+and
+.I flag.once
+are present when
+.B perpetrate
+is starting,
+the behavior described for
+.I flag.down
+takes precedence.
+.PP
+The existence of either of the flag files
+.I flag.down
+and
+.I flag.once
+only affects the behavior of
+.B perpetrate
+at startup.
+If they are installed in the service directory after an instance of
+.B perpetrate
+has already started and is running,
+they will have no effect until
+.B perpetrate
+itself is stopped and restarted.
+.PP
+The presence of either of these flag files also has no effect
+on the optional logging service.
+If a file named
+.I rc.log
+is present and executable at startup,
+.B perpetrate
+will attempt to start and supervise a logging service,
+irrespective of the presence of any of the flag files described above.
+.\" *** OPTIONS ***
+.SH OPTIONS
+.TP
+.B \-h
+Help.
+Print a brief usage message to stderr and exit.
+.TP
+.B \-V
+Version.
+Print the program version to stderr and exit.
+.\".TP
+.\".B \-o
+.\"Once.
+.\"Start and run the main service only once;
+.\"do not restart it if it terminates.
+.\"This option has no effect on any logging service.
+.\"Note that the ``once'' flag may be unset with the
+.\".BR perpctl (8)
+.\"utility.
+.\" *** FILES ***
+.SH FILES
+In the pathnames described below,
+let the name CWD refer to the directory from which
+.B perpetrate
+is started.
+.TP
+.I CWD/
+The startup directory for
+.BR perpetrate .
+This will be the base directory for
+.BR perpd (8),
+normally
+.IR /etc/perp .
+After
+.B perpetrate
+inspects
+.I svdir
+and sets up its control files,
+it will continue to operate from this directory.
+.TP
+.I CWD/.control/<hash_svdir>/
+Each
+.B perpetrate
+instance creates and maintains certain runtime control files in a directory 
+that shadows the service directory under its supervision.
+The path to this shadow directory is based on a required directory named
+.I .control
+found in the startup directory.
+The full path to the control directory is completed by
+a unique string representing the device/inode of
+.IR svdir .
+(Note: normally
+.I .control
+will itself be configured as a symlink to a directory within the
+.I /var
+hierarchy.)
+.TP
+.I svdir/
+The service definition directory for this
+.B perpetrate
+instance,
+setup by
+.BR perpd (8)
+as the first argument on the command line.
+In a normal installation,
+.I svdir
+will be a simple relative pathname,
+equivalent to its
+.BR basename (1).
+.B perpetrate
+uses
+.I svdir
+as
+.I svname
+in its arguments to
+.I rc.main
+and
+.IR rc.log ,
+and to locate certain control files as described above.
+While
+.B perpetrate
+itself operates from
+.IR CWD ,
+the child processes spawned to execute
+.I rc.main
+and
+.I rc.log
+switch into
+.I svdir
+before calling the runscript.
+.TP
+.I svdir/rc.log
+Optional.
+Controls the logger for the main service.
+See
+.BR perpetrate (5).
+.TP
+.I svdir/rc.main
+Required.
+Controls the main service.
+See
+.BR perpetrate (5).
+.TP
+.I svdir/flag.down
+Optional.
+A ``flag'' file used to tell
+.B perpetrate
+to not start the main service on startup.
+May be zero length and created with the
+.BR touch (1)
+command.
+A service flagged as down on startup may be brought up at a later time
+with the
+.BR perpctl (8)
+utility.
+.TP
+.I svdir/flag.once
+Optional.
+A ``flag'' file used to tell
+.B perpetrate
+to run the main service (and reset it) only once,
+and not restart it.
+May be zero length and created with the
+.BR touch (1)
+command.
+A service flagged as ``once'' on startup may be unflagged at a later time
+with the
+.BR perpctl (8)
+utility.
+.\" *** ENVIRONMENT ***
+.SH ENVIRONMENT
+PERP_BASE
+.RS
+.BR perpd (8)
+defines the variable PERP_BASE in the environment for each
+.B perpetrate
+supervisor it starts.
+This provides
+.BR perpetrate (5)
+runscripts the means to access the base service directory as necessary.
+.B perpetrate
+itself does not interact with the PERP_BASE variable, however.
+Instead it relies on being started within the base service directory
+in which the subdirectory
+.I svdir
+is located.
+.RE
+.SH ERROR LOGGING
+.B perpetrate
+prints any of its own runtime diagnostics
+to the stderr file descriptor it inherits from
+.BR perpd (8).
+In a normal installation,
+where
+.BR perpd (8)
+is associated with a logging utility,
+the diagnostics for
+.B perpetrate
+will be captured by the logger for
+.BR perpd (8).
+.\" *** SIGNALS ***
+.SH SIGNALS
+If
+.B perpetrate
+receives a TERM signal,
+it exits following a controlled shutdown of the services under its supervision.
+First it sends TERM and CONT signals to the main service
+and waits for it to terminate.
+It then runs
+.I rc.main
+``reset'' and waits for that process to terminate.
+It then closes the stdin to the logging process
+and waits for it to terminate.
+It then runs
+.I rc.log
+``reset'' and waits for that process to terminate.
+Then
+.B perpetrate
+itself exits 0.
+.\" *** AUTHOR ***
+.SH AUTHOR
+Wayne Marshall, http://b0llix.net/perp/
+.\" *** SEE ALSO ***
+.SH SEE ALSO
+.nh
+.BR perp_intro (8),
+.BR perpboot (8),
+.BR perpctl (8),
+.BR perpd (8),
+.BR perpetrate (5),
+.BR perphup (8),
+.BR perpls (8),
+.BR perpok (8),
+.BR perpstat (8),
+.BR sissylog (8),
+.BR tinylog (8)
+.\" EOF (perpetrate.8)

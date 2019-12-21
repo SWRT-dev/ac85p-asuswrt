@@ -1,0 +1,75 @@
+#!/bin/sh
+# tinylog_run.sh
+# wrapper script for tinylog
+# argument $1 is logging dir within TINYLOG_BASE
+# wcm, 2009.10.06 - 2009.12.28
+# ===
+
+## available configs in /etc/tinylog.conf:
+##   TINYLOG_USER
+##   TINYLOG_BASE
+##   TINYLOG_OPTS
+
+_PROG=$(basename $0)
+_CONF=/etc/tinylog.conf
+_DIR=$1
+
+_mesg() {
+  echo "${_PROG}($$): $1" >/dev/stderr  
+}
+
+_fail() {
+  _mesg "failure: $1"
+  exit 1
+}
+
+
+## required argument:
+if test ${_DIR}'X' = 'X'; then
+  _fail "directory argument missing"
+fi
+
+## load configuration:
+if test -r ${_CONF} ; then
+  . ${_CONF}
+fi
+
+if test ${TINYLOG_USER}'X' = 'X'; then
+  TINYLOG_USER=tinylog
+fi
+
+## initialize user:
+if id ${TINYLOG_USER} >/dev/null 2>/dev/null ; then
+  my_uid=$(id -u ${TINYLOG_USER})
+  my_gid=$(id -g ${TINYLOG_USER})
+else
+  TINYLOG_USER=$(id -un)
+  my_uid=$(id -u ${TINYLOG_USER})
+  my_gid=$(id -g ${TINYLOG_USER})
+fi
+
+
+## initialize dir:
+if test ${TINYLOG_BASE}'X' = 'X'; then
+  TINYLOG_BASE=/var/log
+fi
+
+TINYLOG_DIR=${TINYLOG_BASE}/${_DIR}
+
+if test ! -d ${TINYLOG_DIR} ; then
+  mkdir -p ${TINYLOG_DIR}  ||\
+      _fail "failure mkdir for ${TINYLOG_DIR}"
+fi
+chown -R ${my_uid}:${my_gid} ${TINYLOG_DIR} ||\
+  _fail "failure chown for ${TINYLOG_DIR}"
+chmod 0755 ${TINYLOG_DIR} ||\
+  _fail "failure chmod for ${TINYLOG_DIR}"
+
+
+## good to go:
+exec \
+  runtool -u ${TINYLOG_USER} \
+    tinylog ${TINYLOG_OPTS} ${TINYLOG_DIR}
+
+
+### EOF

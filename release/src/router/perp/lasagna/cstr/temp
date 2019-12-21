@@ -1,0 +1,9 @@
+/* note:
+** this implementation derived from analysis of wildcmp(),
+** by Jack Handy, as posted on codeproject.com:
+**
+**   http://www.codeproject.com/KB/string/wildcmp.aspx
+**
+** (noted 2010.11.09)
+*/
+

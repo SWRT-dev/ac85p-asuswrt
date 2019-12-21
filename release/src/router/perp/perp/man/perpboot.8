@@ -1,0 +1,362 @@
+.\" perpboot.8
+.\" wcm, 2009.11.30 - 2011.02.01
+.\" ===
+.TH perpboot 8 "January 2013" "perp-2.07" "persistent process supervision"
+.SH NAME
+perpboot \- startup utility for
+.BR perpd (8)
+and an associated logger
+.SH SYNOPSIS
+.B perpboot [\-hV] [\-dx] [
+.I basedir
+.B ]
+.SH DESCRIPTION
+.B perpboot
+is a utility for starting and monitoring a
+.BR perpd (8)
+instance on
+.I basedir
+with an associated logger.
+If
+.I basedir
+is not specified,
+.B perpboot
+will use the environmental variable PERP_BASE.
+If PERP_BASE is not set or empty,
+.B perpboot
+will use a compiled-in value for
+.IR basedir ,
+normally
+.IR /etc/perp .
+.PP
+Within
+.IR basedir ,
+.B perpboot
+switches into a subdirectory named
+.IR .boot/ .
+It then forks two child processes to exec
+.I ./rc.log
+and
+.IR ./rc.perp ,
+with a pipe connected between their respective stdin and stdout.
+.PP
+Normally
+.I ./rc.log
+will be an executable script that execs into a stdin logger,
+such as
+.BR tinylog (8)
+or
+.BR sissylog (8).
+Similarly,
+.I ./rc.perp
+will be an executable script that ultimately execs into
+.BR perpd (8).
+See the examples section below for sample scripts.
+.PP
+.B perpboot
+sets up its
+.I ./rc.log
+and
+.I ./rc.perp
+child processes with an environment that:
+.RS
+.IP \(bu 4
+closes all extraneous file descriptors
+.IP \(bu 4
+redirects unused stdin, stdout, and stderr to
+.I /dev/null
+.IP \(bu 4
+redirects the stdin of
+.I ./rc.log
+to the stdout of
+.I ./rc.perp
+(and vice versa)
+.IP \(bu 4
+redirects the stderr of
+.I ./rc.perp
+to stdout (with the effect that both stdout and stderr of
+.I ./rc.perp
+are captured by the logger)
+.IP \(bu 4
+sets the environmental variable PERP_BASE to the value used for
+.I basedir
+.RE
+.PP
+By default,
+.B perpboot
+itself acts as lightweight supervisor for the
+.I ./rc.log
+and
+.I ./rc.perp
+child processes.
+If
+.B perpboot
+notices that either of these processes has died,
+it will try to restart them.
+.SH OPTIONS
+.TP
+.B \-d
+Detach.
+Normally
+.B perpboot
+itself runs in the foreground.
+The
+.B \-d
+option causes
+.B perpboot
+to detach from the controlling terminal and run as a background process.
+This option is useful when starting
+.B perpboot
+from within a BSD-type boot script
+such as
+.IR rc.local .
+.TP
+.B \-h
+Help.
+Print a brief usage message to stderr and exit.
+.TP
+.B \-V
+Version.
+Print the version number to stderr and exit.
+.TP
+.B \-x
+Exit.
+Normally
+.B perpboot
+stays resident as a system process that monitors its
+.I ./rc.log
+and
+.I ./rc.perp
+child processes.
+The
+.B \-x
+option causes
+.B perpboot
+to start
+.I ./rc.log
+and then replace itself with the
+.I ./rc.perp
+process.
+This option is used to reduce process overhead
+and/or when you don't feel the need to retain
+.B perpboot
+as a supervisor.
+As one example,
+this option might be used within an
+.BR inittab (5)
+specification configured with the
+.I action
+specified as ``respawn''.
+.SH EXAMPLES
+An example
+.I ./rc.log
+script may look like this:
+.PP
+.RS
+.nf
+#!/bin/sh
+LOGDIR=/var/log/perpd
+exec tinylog -k 8 -s 100000 -t ${LOGDIR}
+.fi
+.RE
+.PP
+This script execs into an instance of
+.BR tinylog (8)
+maintaining a rotated set of log files in
+.I /var/log/perpd
+with a maximum of 8 keep files,
+a maximum log size of 100000 bytes,
+and with timestamp prepended entries.
+.PP
+An example
+.I ./rc.perp
+script:
+.PP
+.RS
+.nf
+#!/bin/sh
+exec perpd -a 6 $PERP_BASE
+.fi
+.RE
+.PP
+Here the script execs into
+.BR perpd (8)
+with autoscanning set to 6 seconds.
+Note also that the environmental variable PERP_BASE is defined and available for the
+.I ./rc.perp
+and
+.I ./rc.log
+scripts.
+.PP
+These simple scripts could be customized and embellished considerably.
+For example, the
+.I ./rc.log
+script could:
+.RS
+.IP \(bu 4
+check/create existence/permissions of log directory
+.IP \(bu 4
+drop privilege before running
+.BR tinylog (8)
+\-\- see
+.BR runuid (8)
+.RE
+.PP
+Similarly, the
+.I ./rc.perp
+script could perform other initializations before the
+.BR perpd (8)
+exec:
+.RS
+.IP \(bu 4
+check/create existence and symlink for
+.I /etc/perp/.control
+.IP \(bu 4
+clean out stale control directories/files in
+.I /etc/perp/.control
+.RE
+.PP
+.B perpd
+itself may be invoked in the way that best suits the
+.BR init (8)
+system and boot scripts of the host environment.
+A sysv-compatible system may use an
+.BR inittab (5)
+file configured with this entry:
+.PP
+.RS
+.nf
+PB:23456:respawn:/usr/sbin/perpboot -x /etc/perp
+.fi
+.RE
+.PP
+This example shows the
+.B \-x
+option,
+with the effect that
+.BR init (8)
+itself will monitor the
+.BR perpd (8)
+process and respawn it if it dies.
+.PP
+A BSD-type system may use an
+.I rc.local
+file with this entry:
+.PP
+.RS
+.nf
+if [ -x /usr/sbin/perpboot ]; then
+    echo -n ' perpd'
+      /usr/sbin/runenv -i /etc/perp/.boot/perp.env \\\^ 
+          /usr/sbin/perpboot -d /etc/perp
+fi
+.fi
+.RE
+.PP
+In this example, the
+.B \-d
+option is used to run
+.B perpboot
+as a daemon process.
+.PP
+This example is further embellished to show the use of the
+.BR runenv (8)
+runtool to setup a clean environment for the
+.BR perpd (8)
+process and its children.
+.SH FILES
+.I /etc/perp/
+.RS
+The default base operating directory for
+.BR perpd (8).
+.RE
+.PP
+.I /etc/perp/.boot/
+.RS
+Directory containing the startup scripts used by
+.BR perpboot .
+.RE
+.PP
+.I /etc/perp/.boot/rc.log
+.RS
+Control script used by
+.B perpboot
+to start a logger for
+.BR perpd (8).
+.RE
+.PP
+.I /etc/perp/.boot/rc.perp
+.RS
+Control script used by
+.B perpboot
+to start up
+.BR perpd (8).
+.RE
+.SH ENVIRONMENT
+PERP_BASE
+.RS
+If no
+.I basedir
+argument is given at the command-line on startup,
+.B perpboot
+checks for a value defined by PERP_BOOT.
+If this is not defined or empty,
+.B perpboot
+uses a compiled-in default, normally
+.IR /etc/perp .
+.SH SIGNALS
+If
+.B perpboot
+gets the SIGTERM signal,
+it performs a shutdown sequence on its child processes:
+.RS
+.IP \(bu 4
+sends SIGTERM and SIGCONT to the
+.I ./rc.perp
+process and waits for it to terminate
+.IP \(bu 4
+closes its own copy of the input pipe to the
+.I ./rc.log
+process and waits for the logger to terminate
+.IP \(bu 4
+exits 0
+.RE
+.PP
+Otherwise, when
+.B perpboot
+runs as a lightweight supervisor
+(without the
+.B \-x
+option),
+it traps all the other signals it can and relays them directly to the
+.I ./rc.perp
+child process with
+.BR kill (2).
+.SH NOTES
+The
+.B perpboot
+utility is a purpose-specific modification of
+.BR rundeux (8).
+.SH AUTHOR
+Wayne Marshall, http://b0llix.net/perp/
+.SH SEE ALSO
+See the
+.BR perp-setup (8)
+utility for an ``automagic'' configuration of a
+.B perpboot
+installation.
+.PP
+.nh
+.BR perp_intro (8),
+.BR perp-setup (8),
+.BR perpctl (8),
+.BR perpd (8),
+.BR perpetrate (5),
+.BR perphup (8),
+.BR perpls (8),
+.BR perpok (8),
+.BR perpstat (8),
+.BR sissylog (8),
+.BR tinylog (8),
+.BR rundeux (8)
+.\" EOF perpboot.8

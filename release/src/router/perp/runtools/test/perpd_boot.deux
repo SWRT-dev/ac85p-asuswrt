@@ -1,0 +1,19 @@
+#!/bin/sh
+# perpd_boot
+# startup script for perpd daemon
+# wcm, 2009.10.06 - 2009.10.06
+# ===
+
+## note:
+## perpd/tinylog pair supervised under rundeux
+## rundeux is detached from controlling terminal
+
+exec \
+runtool -d -F'0<%:1>%:2>%' \
+  rundeux \
+    runtool -F'2=1' perpd /etc/perp \
+    '::' \
+    tinylog -t -z /var/log/perpd
+   
+
+### EOF

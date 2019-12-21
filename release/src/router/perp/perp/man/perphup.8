@@ -1,0 +1,111 @@
+.\" perphup.8
+.\" wcm, 2009.12.01 - 2013.01.09
+.\" ===
+.TH perphup 8 "January 2013" "perp-2.07" "persistent process supervision"
+.SH NAME
+perphup \- trigger a
+.BR perpd (8)
+rescan
+.SH SYNOPSIS
+.B perphup [\-hV] [\-q] [\-t] [
+.I basedir
+.B ]
+.SH DESCRIPTION
+.B perphup
+is used to trigger
+.BR perpd (8)
+to rescan its service installation directory.
+.B perphup
+may also be used to trigger the controlled shutdown of
+.BR perpd (8)
+and all of its services.
+.PP
+.B perphup
+looks for an instance of
+.BR perpd (8)
+running on the argument given by
+.IR basedir .
+Otherwise,
+.B perphup
+looks for a value in the environmental variable PERP_BASE.
+If neither of these are defined or are empty,
+.B perphup
+uses a compiled-in default, normally
+.IR /etc/perp .
+.PP
+When
+.B perphup
+finds the 
+.BR perpd (8)
+process, it sends it a SIGHUP signal.
+.SH OPTIONS
+.TP
+.B \-h
+Help.
+Print a brief usage message to stderr and exit.
+.TP
+.B \-q
+Quiet.
+Normally after successfully finding and triggering a
+.BR perpd (8)
+process,
+.B perphup
+prints a brief message to stderr.
+The
+.B \-q
+option may be used to suppress this message.
+.TP
+.B \-t
+Term.
+Normally
+.B perphup
+sends a SIGHUP signal to the
+.BR perpd (8)
+process to trigger a rescan.
+The
+.B \-t
+option is used to send a SIGTERM instead,
+and triggers the
+.BR perpd (8)
+shutdown sequence.
+.TP
+.B \-V
+Version.
+Print the version number to stderr and exit.
+.SH EXIT STATUS
+.B perphup
+exits with the following values:
+.TP
+0
+Success.
+An active
+.BR perpd (8)
+process was found and triggered.
+.TP
+100
+Usage error.
+For unknown options or other command-line errors.
+Prints a brief diagnostic message to stderr on exit.
+.TP
+111
+System error.
+Unexpected failures during system calls, privilege and/or resource problems,
+or configuration problems in the
+.BR perpd (8)
+directory.
+Prints a brief diagnostic message to stderr on exit.
+.SH AUTHOR
+Wayne Marshall, http://b0llix.net/perp/
+.SH SEE ALSO
+.nh
+.BR perp_intro (8),
+.BR perpboot (8),
+.BR perpctl (8),
+.BR perpd (8),
+.BR perpetrate (5),
+.BR perpls (8),
+.BR perpok (8),
+.BR perpstat (8),
+.BR sissylog (8),
+.BR tinylog (8)
+.\" EOF perphup.8

@@ -1,0 +1,183 @@
+.\" runtrap.8
+.\" wcm, 2009.12.11 - 2011.02.01
+.\" ===
+.TH runtrap 8 "January 2013" "runtools-2.07" "runtools"
+.SH NAME
+runtrap \- run a program with a signal trapper
+.SH SYNOPSIS
+.B runtrap [\-hV]
+.I id trapper program
+.B [
+.I args ...
+.B ]
+.SH DESCRIPTION
+.B runtrap
+starts
+.I program
+with any
+.I args
+and monitors it as a long-running process.
+If
+.B runtrap
+notices that
+.I program
+terminates,
+it restarts it.
+.PP
+Whenever
+.B runtrap
+itself receives any signal it can catch,
+it invokes the argument given by
+.I trapper
+in this form:
+.PP
+.RS
+.BR trapper " ``" trap ''
+.I id pid signum signame
+.RE
+.PP
+Where:
+.PP
+.RS
+.B trapper
+.PP
+.RS
+The name of an executable specified in the
+.I trapper
+argument on the command-line.
+.RE
+.PP
+.RB `` trap ''
+.PP
+.RS
+The verbatim string ``trap''. 
+.RE
+.PP
+.I id
+.PP
+.RS
+A simple string specified in the
+.I id
+argument on the command-line.
+.RE
+.PP
+.I pid
+.PP
+.RS
+The process ID of the
+.I program
+that
+.B runtrap
+is monitoring.
+.RE
+.PP
+.I signum
+.PP
+.RS
+The numeric decimal representation of the signal
+received by
+.BR runtrap .
+.RE
+.PP
+.I signame
+.PP
+.RS
+The symbolic name for the signal received by
+.BR runtrap .
+.RE
+.RE
+.PP
+Presumably
+.I trapper
+is a short-running program
+designed to perform some special handling of signals destined for
+.IR program .
+After invoking
+.IR trapper ,
+.B runtrap
+waits for
+it to complete and then resumes monitoring
+.IR program .
+.PP
+If
+.B runtrap
+receives a SIGTERM,
+it flags itself to terminate.
+It then invokes
+.I trapper
+as above with SIGTERM arguments.
+When
+.I program
+terminates,
+.B runtrap
+itself then exits normally.
+.SH OPTIONS
+.TP
+.B \-h
+Help.
+Print a brief usage message to stderr and exit.
+.TP
+.B \-V
+Version.
+Print the version number to stderr and exit.
+.SH EXAMPLES
+.B runtrap
+is designed for use in
+.BR perpetrate (5)
+runscripts for services that need special signal handling.
+The example below shows how an
+.I rc.main
+runscript may be multiplexed to handle ``trap'' targets:
+.PP
+.RS
+.nf
+#!/bin/sh
+exec 2>&1
+
+TARGET=${1}
+SVNAME=${2}
+
+start() {
+  echo "starting ${SVNAME} ..."
+  exec runtrap ${SVNAME} ./rc.main /usr/sbin/foo -f
+}
+
+reset() {
+  echo "resetting ${SVNAME} ..."
+  #...
+}
+
+trap() {
+  SVPID=${3}
+  SIGNUM=${4}
+  SIGNAME=${5}
+  echo "trapping ${SVNAME} for signal ${SIGNAME} ..."
+  kill -${SIGNUM} ${SVPID}
+} 
+
+eval ${TARGET} "$@"
+
+### EOF
+.fi
+.RE
+.SH AUTHOR
+Wayne Marshall, http://b0llix.net/perp/
+.SH SEE ALSO
+.nh
+.BR runtools_intro (8),
+.BR runargs (8),
+.BR runargv0 (8),
+.BR runchoom (8),
+.BR rundetach (8),
+.BR rundeux (8),
+.BR runenv (8),
+.BR runfile (8),
+.BR runlimit (8),
+.BR runlock (8),
+.BR runpause (8),
+.BR runsession (8),
+.BR runtool (8),
+.BR runuid (8),
+.BR perpd (8),
+.BR perpetrate (5)
+.\" EOF

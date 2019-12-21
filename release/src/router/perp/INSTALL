@@ -1,0 +1,134 @@
+# INSTALL
+# perp: persistent process supervision
+# (includes runtools and libasagna)
+# wcm, 2009.12.23 - 2013.01.09
+# ===
+
+SYNOPSIS
+
+  $ vi conf.mk
+  $ make && make strip
+  $ su
+  # make install
+  # perp-setup /etc/perp
+
+
+DESCRIPTION
+
+The build system and source code are intended to be generic and
+portable.
+
+Using your preferred text editor, open the file "conf.mk" in the
+top-level directory to configure the compiler, the compiler options,
+and the installation directories:
+
+  $ vi conf.mk
+
+As an unprivileged user, build the software with:
+
+  $ make
+
+The system is intended to be make(1) "agnostic", and should build
+correctly with any standard make provided with either BSD or Linux
+systems.
+
+Strip debugging symbols for smaller executables:
+
+  $ make strip
+
+To install the compiled binaries and man pages, gain administrator
+privilege and run:
+
+  $ su
+  # make install
+
+The software is now installed on the system.
+
+
+ACTIVATION
+
+Before activating the software for the first time, take some moments
+to become familiar with its configuration and operation.  In particular,
+skim the manual pages for perp_intro(8), perpd(8), and perpetrate(5).
+
+It is recommended to use perpboot(8) to start and log the perp
+system.  The perp-setup(8) utility may be used to automatically
+install and configure perpboot(8) into the system's init(8) scripts,
+whether System-V style (/etc/inittab) or BSD style (/etc/rc.local):
+
+  # perp-setup /etc/perp
+
+Review the startup scripts now installed in /etc/perp/.boot and
+the perpboot(8) stanza added to either /etc/inittab or /etc/rc.local.
+
+Activation of the system then depends on the host system.  If
+System-V style (/etc/inittab), just send a SIGHUP to init(8):
+
+  # kill -HUP 1
+
+If BSD-style (/etc/rc.local), you will need to reboot the machine:
+
+  # shutdown -r now
+
+The perp system will then be activated and services may be added to
+/etc/perp at anytime.
+
+
+UPGRADING
+
+If upgrading a previous perp installation, follow all the steps above.
+The perp-setup(8) utility script will not disturb any previous
+configuration it finds in any of /etc/inittab, /etc/rc.local, or
+/etc/perp/.boot.
+
+To restart perpd without rebooting the system, become super-user, find
+the pid of the currently running perpd process, and then kill(1) it:
+
+  $ su
+  # ps ux | grep perpd
+  root  233  ...   1:11PM 0:00.01 perpd -a6 /etc/perp 
+  # kill 233
+
+In this example, the current instance of perpd is shown running as
+process id 233.  The SIGTERM sent to perpd initiates a controlled
+shutdown of all services, before perpd terminates itself.
+
+As a simpler alternative to the above, the perphup(8) utility may also
+be used with the `-t' option to perform the controlled termination
+and restart of an active perpd installation:
+
+  $ su
+  # perphup -t /etc/perp
+
+Under a normal configuration, perpd is itself supervised by either
+init(8) through a "respawn" entry in /etc/inittab, or by perpboot(8)
+started in /etc/rc.local.  In either of these cases, the newly installed
+version of perpd will normally be restarted automatically after the
+old version exits.  All the services installed and activated in
+/etc/perp will then be automatically restarted and restored to operation.
+
+The perp-setup script may install new versions of perpboot(8) scripts
+in /etc/perp/.boot/ without disturbing any existing ones.  The new
+files may be found with a ".new" extension.  The administrator may
+inspect the ".new" files and decide whether any modification of existing
+scripts is in order.
+
+As a special case, if upgrading from perp-0.00 to a later release in
+the perp-2.* series, it will be necessary to remove a couple of old
+files from the earlier release manually.  These are the executable
+perpetrate(8) and its associated manpage.  The normal locations of these
+files will be:
+
+  /usr/sbin/perpetrate
+  /usr/share/man/man8/perpetrate.8
+
+
+EXAMPLES
+
+The examples subdirectory in the distribution package contains a small
+collection of ready-made service definitions.  The README file in that
+directory, and with each example service definition, explains its usage
+and installation procedure.
+
+
+### EOF

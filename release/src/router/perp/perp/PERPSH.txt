@@ -1,0 +1,43 @@
+# PERPSH.txt
+# re: an interactive "shell" for perp
+# preliminary notes/ideas
+# wcm, 2008.10.09 - 2008.10.09
+# ===
+
+NAME
+  perpsh - interactive "shell" for perp administration
+
+SYNOPSIS
+  perpsh [DIR]
+
+
+EXAMPLE
+
+$ perpsh /etc/perp
+perpsh 1.0
+enter 'h' for help, 'q' to quit
+>> ls
+dnscache
+qmail
+>> ls -l
+dnscache, up 3000s, has log, up 3000s
+qmail, up 3000s, has log, up 3000s
+>> activate ssh
+ok, ssh activated
+>> ls
+dnscache
+qmail
+ssh
+>> rm qmail
+ok
+>> ls -all
+[+] dnscache
+[-] qmail
+[+] ssh
+>> activate foobar
+error, foobar not found
+>> q
+$
+
+
+### EOF

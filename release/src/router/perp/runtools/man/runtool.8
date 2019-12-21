@@ -1,0 +1,452 @@
+.\" runtool.8
+.\" wcm, 2009.12.11 - 2009.12.15
+.\" ===
+.TH runtool 8 "January 2013" "runtools-2.07" "runtools"
+.SH NAME
+runtool \- run a program in a configured process environment
+.SH SYNOPSIS
+.B runtool [\-hV] [\-0
+.I argv0\c
+.B ] [\<\-a | \-A>
+.I argfile\c
+.B ] [\-c
+.I chdir\c
+.B ] [\-C
+.I chroot\c
+.B ] [\-d] [<\-e | \-E>
+.I envfile\c
+.B ] [\-F
+.I fdset\c
+.B ] [\-L [:]\c
+.I lockfile
+.B | \-P [:]\c
+.I pidlock\c
+.B ] [\-m
+.I umask\c
+.B ] [\-R <a|c|d|f|m|o|p|r|s|t>=<\c
+.I num\c
+.B |!>[:\c
+.I ...\c
+.B ]] [\- s] [\-S
+.I altpath\c
+.B ] [\-u
+.I user\c
+.B ] [\-U
+.I user\c
+.B ] [\-W] [\-z
+.I secs\c
+.B ]
+.I program
+.B [
+.I args ...\c
+.B ]
+.SH DESCRIPTION
+.B runtool
+modifies a process environment according to its options,
+then runs
+.I program
+with any additional
+.IR args .
+.PP
+If
+.I program
+does not contain a ``/'' slash character,
+.B runtool
+will perform a shell-like search for the executable using the
+.B PATH
+variable in the current environment.
+.SH OPTIONS
+.B runtool
+combines the functions of several individual
+.BR runtools_intro (8)
+into a single utility.
+The corresponding utility is noted in each option description,
+and may be referenced there for more complete information.
+.TP
+.B \-0 argv0
+.BR runargv0 (8).
+Sets up
+.I program
+to run with an argv[0] of
+.IR argv0 .
+.TP
+.B <\-a|\-A> argfile
+.BR runargs (8).
+Runs
+.I program
+with arguments specified in
+.IR argfile .
+The
+.B \-a
+form of the option sets up any arguments taken from
+.I argfile
+to preceed any arguments given by
+.IR args .
+The
+.B \-A
+form of the option inverts this order,
+so that any options taken from
+.I argfile
+will follow any arguments given by
+.IR args .
+.TP
+.B \-c chdir
+.BR chdir (2).
+Changes the current working directory to
+.I chdir
+before running
+.IR program .
+.TP
+.B \-C chroot
+.BR chroot (2).
+Sets up the root directory to
+.I chroot
+before running
+.IR program .
+.TP
+.B \-d
+.BR rundetach (8).
+Detaches from the controlling terminal to run
+.I program
+in the background.
+.TP
+.B <\-e|\-E> envfile
+.BR runenv (8).
+Sets up the environmental variables in the process of
+.I program
+according to definitions in
+.IR envfile .
+The
+.B \-e
+form of the option merges any variables defined in
+.I envfile
+with the existing environment.
+The
+.B \-E
+form of the option defines the new environment exclusively according to
+.I envfile
+and ignores any existing environment.
+As with
+.BR runenv (8),
+the argument
+.I envfile
+may be either a file or a directory.
+.PP
+.B \-F fdset
+.RS
+Sets up file descriptors according to the specification
+.IR fdset ,
+given as a single contiguous string in the form:
+.PP
+.RS
+<fd> <op> <target> [: ...]
+.RE
+.PP
+Where:
+.TP
+.IR fd :
+single ascii file descriptor numeral, 0..9
+.TP
+.IR op :
+a single character from the set `<', `>', '+', or '='
+.TP
+.IR target :
+Depends on
+.I op
+as follows:
+If
+.I op
+is redirection operator '<', `>', or '+',
+.I target
+is an absolute pathname (must begin with `/'),
+or the special character `%'.
+Otherwise, if
+.I op
+is the duplication operator '=',
+.I target
+is a single ascii file descriptor numeral, 0..9,
+or the special character '!'.
+.PP
+The operator character `<'
+is used to specify redirection of input to
+.I fd
+from the file argument given in
+.IR target .
+The operator characters `>' and `+'
+are used to specify redirection of output from
+.I fd
+to the file argument given by
+.IR target .
+The `>' redirection causes
+.I target
+to be overwritten,
+while the `+' operator appends to any
+.I target
+that may already exist.
+The special
+.I target
+character `%'
+may be used as shorthand to represent the file
+.I /dev/null
+for either input or output redirection.
+.PP
+The operator character `='
+is used to specify duplication of the file descriptor given in
+.I fd
+to the file descriptor given in
+.IR target .
+The special
+.I target
+character `!'
+is used to close the file descriptor given in
+.IR fd .
+.PP
+Normally the
+.I fdset
+argument string will be enclosed in quotes to protect it from shell processing.
+.RE
+.TP
+.B \-L [:]lockfile
+.BR runlock (8).
+Sets up a
+.I lockfile
+before running
+.IR program .
+If the name of the
+.I lockfile
+is prefixed by the `:' character,
+.B runtool
+will block until a lock can be acquired.
+Otherwise,
+.B runtool
+will exit immediately if an existing lock is found on the
+.IR lockfile .
+To write the pid of the process into
+.IR lockfile ,
+use the
+.B \-P
+option instead.
+.TP
+.B \-m umask
+.BR umask (2).
+Sets up the file creation mask for
+.IR program .
+.TP
+.B \-P [:]pidlock
+.BR runlock (8).
+Same as the description for the
+.B \-L
+option,
+except that the pid for the process is written into the lock file
+.IR pidlock .
+.PP
+.B \-R rlims
+.RS
+.BR runlimit (8).
+Sets up the soft resource limits for
+.I program
+where
+.I rlims
+is given as a single contiguous string in the form:
+.PP
+.RS
+<rlim> = <value> [: ...]
+.RE
+.PP
+Where:
+.TP
+.IR rlim :
+single character in the set
+`a', `c', `d', `f', `m', `o', `p', `r', `s', or `t'.
+.TP
+.RI ` = ':
+the literal character `='.
+.TP
+.IR value :
+A positive numeric value for the resource limit,
+or the special character `!' used to specify ``unlimited'',
+that is, sets the soft limit equal to the current hard limit.
+.PP
+The
+.I rlim
+arguments and their meanings are described in the
+.BR runlimit (8)
+manual.
+Multiple rlimit specifications may be concatenated with the `:' character.
+Normally the
+.I rlims
+argument string will be enclosed in quotes to protect it from shell processing.
+.RE
+.TP
+.B \-s
+.BR runsession (8).
+Runs
+.I program
+in a separate session and new process group.
+.TP
+.B \-S altpath
+.B runtool
+will use a PATH-like string given in 
+.I altpath
+to search for the executable
+.IR program ,
+rather than within the PATH variable.
+The
+.I altpath
+is only used to search for
+.IR program ,
+and does not affect any PATH variable that may already be set,
+nor does
+.I altpath
+persist in the environment of
+.IR program .
+.TP
+.B \-u user
+.BR runuid (8).
+Sets up
+.I program
+to run as the user-id and group-id of the system account given by
+.IR user .
+.TP
+.B \-U user
+.BR runenv (8).
+Sets up the two variables UID and GID in the environment of
+.I program
+with the user-id and group-id of the system account given by
+.IR user .
+IMPORTANT:
+This option does not, by itself, change the permissions with which
+.I program
+runs.
+It only sets up a couple of environmental variables that some programs
+may use to subsequently change their own permissions.
+.TP
+.B \-z secs
+.BR runpause (8).
+Sleep for
+.I secs
+seconds, or until interrrupted by a signal,
+before running
+.IR program .
+An argument of 0 will cause
+.B runtool
+to pause indefinitely, or until interrupted by a signal,
+before running
+.IR program .
+.PP
+.B runtool
+also provides the following standard
+.BR runtools_intro (8)
+options:
+.TP
+.B \-h
+Help.
+Print a brief usage message to stderr and exit.
+.TP
+.B \-V
+Version.
+Print the version number to stderr and exit.
+.SH OPERATING SEQUENCE
+The order in which
+.B runtool
+applies its operations is independent of the order in which the options are given
+on the command line.
+The sequence that
+.B runtool
+takes is:
+.IP \(bu 4
+process
+.I argfile
+and
+.I argv0
+.IP \(bu 4
+process
+.I envfile
+.IP \(bu 4
+process
+.B \-U
+.I user
+.IP \(bu 4
+detach
+.IP \(bu 4
+setsid
+.IP \(bu 4
+acquire lockfile/pidlock
+.IP \(bu 4
+set umask
+.IP \(bu 4
+setup file descriptors according to
+.I fdset
+.IP \(bu 4
+setup resource limits
+.IP \(bu 4
+chdir
+.IP \(bu 4
+chroot
+.IP \(bu 4
+setuid
+.IP \(bu 4
+sleep
+.IP \(bu 4
+finally execute
+.I program
+.PP
+When necessary to achieve a different sequence of operations,
+more than one
+.B runtool
+invocation may be combined in an exec chain, and/or
+combined in an exec chain with one or more of the other purpose-specific utilities
+of the
+.BR runtools_intro (8)
+suite.
+.SH EXIT STATUS
+.B runtool
+exits with one of the following values:
+.TP
+0
+.I program
+was invoked and completed successfully.
+In this case,
+the exit code is returned by the
+.IR program ,
+rather than by
+.B runtool
+itself.
+.TP
+100
+.B runtool
+failed because of a usage error,
+such as an invalid command\-line option or argument.
+In this case,
+.B runtool
+prints a brief error message and usage help to stderr on exit.
+.TP
+111
+.B runtool
+failed due to some system or resource error.
+In this case,
+.B runtool
+prints a brief diagnostic message to stderr on exit.
+.TP
+1\-127
+.I program
+was invoked and failed with its own non-zero exit status.
+.SH AUTHOR
+Wayne Marshall, http://b0llix.net/perp/
+.SH SEE ALSO
+.nh
+.BR runtools_intro (8),
+.BR runargs (8),
+.BR runargv0 (8),
+.BR runchoom (8),
+.BR rundetach (8),
+.BR rundeux (8),
+.BR runenv (8),
+.BR runfile (8),
+.BR runlimit (8),
+.BR runlock (8),
+.BR runpause (8),
+.BR runsession (8),
+.BR runtrap (8),
+.BR runuid (8)
+.\" EOF
