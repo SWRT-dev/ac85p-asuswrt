@@ -2939,7 +2939,7 @@ skipdbv2-install: skipdbv2
 	$(STRIP) $(INSTALLDIR)/skipdbv2/usr/sbin/dbus
 
 libmnl/stamp-h1:
-	cd $(TOP)/libmnl && CC=$(CC) STRIP=$(STRIP) \
+	cd $(TOP)/libmnl && CC=$(CC) STRIP="$(STRIP)" \
 	CFLAGS="-Os -Wall $(EXTRACFLAGS) -ffunction-sections -fdata-sections" \
 	LDFLAGS="-ffunction-sections -fdata-sections -Wl,--gc-sections" \
 	$(CONFIGURE) --prefix=/usr
@@ -2962,7 +2962,7 @@ libmnl-clean:
 	-@rm -rf libmnl/staged
 
 ipset/stamp-h1: libmnl
-	cd $(TOP)/ipset && CC=$(CC) STRIP=$(STRIP) \
+	cd $(TOP)/ipset && CC=$(CC) STRIP="$(STRIP)" \
 	autoreconf -i -f && \
 	CFLAGS="-Os -Wall $(EXTRACFLAGS) -ffunction-sections -fdata-sections" \
 	LDFLAGS="-ffunction-sections -fdata-sections -Wl,--gc-sections" \
@@ -2991,7 +2991,7 @@ ipset-clean:
 	-@rm -rf ipset/Makefile ipset/stamp-h1
 
 libnfnetlink/stamp-h1:
-	cd $(TOP)/libnfnetlink && CC=$(CC) STRIP=$(STRIP) \
+	cd $(TOP)/libnfnetlink && CC=$(CC) STRIP="$(STRIP)" \
 		CFLAGS="-Os -Wall $(EXTRACFLAGS) -ffunction-sections -fdata-sections" \
 		LDFLAGS="-ffunction-sections -fdata-sections -Wl,--gc-sections" \
 		$(CONFIGURE) --prefix=/usr --enable-shared --enable-static
