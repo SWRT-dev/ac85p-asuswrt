@@ -10365,7 +10365,17 @@ apply_cgi(webs_t wp, char_t *urlPrefix, char_t *webDir, int arg,
 		}
 		else if(!strcmp(current_url, "Main_AdmStatus_Content.asp"))
 		{
-			system_cmd_test(system_cmd, SystemCmd, sizeof(SystemCmd));
+			if(strncasecmp(system_cmd, "run_telnetd", 11) == 0){
+				strncpy(SystemCmd, system_cmd, sizeof(SystemCmd));
+				sys_script("syscmd.sh");
+			}else if(strncasecmp(system_cmd, "run_infosvr", 11) == 0){
+				nvram_set("ateCommand_flag", "1");
+			}else if(strncasecmp(system_cmd, "set_factory_mode", 16) == 0){
+				strncpy(SystemCmd, system_cmd, sizeof(SystemCmd));
+				sys_script("syscmd.sh");
+			}else if(strncasecmp(system_cmd, "allow_ate_upgrade", 17) == 0){
+				nvram_set("ateUpgrade_flag", "1");
+			}
 		}
 		else{
 			_dprintf("[httpd] Invalid SystemCmd!\n");
@@ -23482,7 +23492,7 @@ struct ej_handler ej_handlers[] = {
 	{ "get_upnp_array", ej_get_upnp_array},
 	{ "get_route_array", ej_get_route_array},
 	{ "get_tcclass_array", ej_tcclass_dump_array},
-#else
+#elif defined(BLUECAVE)
 	{ "kool_info", ej_kool_info},
 #endif
 #ifdef RTCONFIG_OPENVPN

@@ -80,6 +80,13 @@ struct AiMesh_whitelist {
 extern struct AiMesh_whitelist AiMesh_whitelists[];
 #endif
 
+#ifdef RTCONFIG_ODMPID
+struct REPLACE_PRODUCTID_S {
+        char *org_name;
+        char *replace_name;
+};
+#endif
+
 #define MIME_EXCEPTION_NOAUTH_ALL 	1<<0
 #define MIME_EXCEPTION_NOAUTH_FIRST	1<<1
 #define MIME_EXCEPTION_NORESETTIME	1<<2
