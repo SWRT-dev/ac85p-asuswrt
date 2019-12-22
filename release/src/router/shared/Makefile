@@ -111,6 +111,7 @@ OBJS += bwdpi_utils.o
 OBJS += bwdpi_utils.o
 OBJS += mac_name_tab.o
 OBJS += stun.o
+OBJS += scripts.o
 ifeq ($(RTCONFIG_TRAFFIC_LIMITER),y)
 OBJS += tld_utils.o
 endif
@@ -170,6 +171,7 @@ OBJS += ipq40xx.o
 else
 OBJS += qca8337.o
 endif
+OBJS += qca.o
 else ifeq ($(RTCONFIG_ALPINE),y)
 OBJS += flash_mtd.o api-alpine.o
 ifeq ($(RTCONFIG_EXT_RTL8370MB),y)
@@ -393,3 +395,4 @@ prebuild/%.o:
 	@$(CC) $(CFLAGS) -E $< > $@
 
 -include $(OBJS:%.o=.%.depend)
+

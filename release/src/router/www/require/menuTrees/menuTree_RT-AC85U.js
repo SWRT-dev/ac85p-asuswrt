@@ -1,4 +1,4 @@
-﻿/* menuTree_RT-AC85U.js */
+/* menuTree_RT-AC85U.js */
 define(function(){
 	var menuTree = {
 		list: [
@@ -85,6 +85,14 @@ define(function(){
 				] 
 			},
 			{
+				menuName: "网易UU加速器",
+				index: "menu_UU", 
+				tab: [
+					{url: "UUAccelerator.asp", tabName: "网易UU加速器"},
+					{url: "NULL", tabName: "__INHERIT__"}
+				] 
+			},
+			{
 				menuName: "<#Traffic_Analyzer#>",
 				index: "menu_TrafficAnalyzer", 
 				tab: [
@@ -124,6 +132,15 @@ define(function(){
 					{url: "cloud_router_sync.asp", tabName: "<#Server_Sync#>"},
 					{url: "cloud_settings.asp", tabName: "<#Settings#>"},
 					{url: "cloud_syslog.asp", tabName: "<#Log#>"},
+					{url: "NULL", tabName: "__INHERIT__"}
+				] 
+			},
+			{
+				menuName: "<#Softcenter_tool#>",
+				index: "menu_Tools",
+				tab: [
+					{url: "Tools_Sysinfo.asp", tabName: "Sysinfo"},
+					{url: "key.asp", tabName: "Verify"},
 					{url: "NULL", tabName: "__INHERIT__"}
 				] 
 			},
@@ -256,6 +273,22 @@ define(function(){
 					{url: "Advanced_Smart_Connect.asp", tabName: "<#smart_connect_rule#>"},
 					{url: "NULL", tabName: "__INHERIT__"}
 				]
+			},
+			{
+				menuName: "<#Softcenter#>",
+				index: "menu_Split",
+				tab: [
+					{url: "NULL", tabName: "__HIDE__"}
+				]
+			},
+			{
+				menuName: "<#Softcenter#>",
+				index: "menu_Softcenter",
+				tab: [
+					{url: "Main_Soft_center.asp", tabName: "<#Softcenter#>"},
+					{url: "Main_Soft_setting.asp", tabName: "Offline Mode"},
+					{url: "NULL", tabName: "__INHERIT__"}
+				]
 			}
 		],
 
@@ -305,6 +338,9 @@ define(function(){
 					retArray.push("menu_GameBoost");
 				}
 
+				if(!uu_support){
+					retArray.push("menu_UU");
+				}
 				/* Operation Mode */
 				if(isSwMode("re")){
 					retArray.push("menu_GuestNetwork");
@@ -623,3 +659,4 @@ define(function(){
 
 	return menuTree;
 });
+

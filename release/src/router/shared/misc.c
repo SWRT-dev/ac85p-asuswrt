@@ -418,6 +418,29 @@ int illegal_ipv4_netmask(char *netmask)
 	return 0;
 }
 
+#if defined(RTCONFIG_QCA)
+void convert_mac_string(char *mac)
+{
+	int i;
+	char mac_str[18], mac_str_t[18];
+	memset(mac_str,0,sizeof(mac_str));
+
+	for(i=0;i<strlen(mac);i++)
+	{
+		if(*(mac+i)>0x60 && *(mac+i)<0x67){
+			snprintf(mac_str_t, sizeof(mac_str), "%s%c",mac_str,*(mac+i)-0x20);
+			strlcpy(mac_str, mac_str_t, sizeof(mac_str));
+		}
+		else{
+			snprintf(mac_str_t, sizeof(mac_str), "%s%c",mac_str,*(mac+i));
+			strlcpy(mac_str, mac_str_t, sizeof(mac_str));
+		}
+
+	}
+	strlcpy(mac, mac_str, strlen(mac_str) + 1);
+}
+#endif
+
 #if defined(RTCONFIG_PORT_BASED_VLAN) || defined(RTCONFIG_TAGGED_BASED_VLAN)
 /**
  * Get all vlan rules.
