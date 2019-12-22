@@ -1,13 +1,6 @@
 include ../common.mak
 
-all: versioncmp base64_encode resolveip
-
-versioncmp:
-	$(CC) versioncmp.c -o versioncmp
-base64_encode:
-	$(CC) base64.c -o base64_encode
-resolveip:
-	$(CC) resolveip.c -o resolveip
+all:
 
 install:
 	install -d $(INSTALLDIR)/www
