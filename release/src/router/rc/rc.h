@@ -1538,7 +1538,11 @@ extern void stop_dsl_diag(void);
 extern int start_dsl_diag(void);
 #endif
 #endif
-#ifdef RTCONFIG_PUSH_EMAIL
+#ifdef RTCONFIG_FRS_LIVE_UPDATE
+extern int firmware_check_update_main(int argc, char *argv[]);
+#endif
+#ifdef RTCONFIG_FRS_FEEDBACK
+extern void start_sendfeedback(void);
 extern void start_DSLsendmail(void);
 #ifdef RTCONFIG_DBLOG
 extern void start_senddblog(char *path);
@@ -1548,11 +1552,12 @@ extern void stop_dblog(void);
 #ifdef RTCONFIG_DSL_TCLINUX
 extern void start_DSLsenddiagmail(void);
 #endif
-#endif
+#endif /* RTCONFIG_FEEDBACK */
 #ifdef RTCONFIG_SNMPD
 extern void start_snmpd(void);
 extern void stop_snmpd(void);
 #endif
+int ddns_custom_updated_main(int argc, char *argv[]);
 #ifdef RTCONFIG_TIMEMACHINE
 extern int start_timemachine(void);
 extern void stop_timemachine(void);
@@ -1842,7 +1847,9 @@ extern int start_tr(void);
 extern void stop_tr(void);
 extern int dhcpc_lease_main(int argc, char *argv[]);
 #endif
-
+#if defined(RTAC3200) || defined(RTAC85P)
+extern int dnsmasq_script_main(int argc, char **argv);
+#endif
 #ifdef RTCONFIG_NEW_USER_LOW_RSSI
 extern void stop_roamast(void);
 extern void start_roamast(void);
@@ -2061,4 +2068,9 @@ extern void start_adtbw();
 extern void start_aae();
 #endif
 
+// private.c
+#ifdef RTCONFIG_UUPLUGIN
+extern void exec_uu();
+#endif
 #endif	/* __RC_H__ */
+

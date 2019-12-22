@@ -1662,14 +1662,14 @@ _dprintf("%s: stop_cloudsync.\n", __func__);
 	nvram_set("dsltmp_diag_log_path", "");
 #endif
 
-#ifdef RTCONFIG_PUSH_EMAIL
+#ifdef RTCONFIG_FRS_FEEDBACK
 #ifdef RTCONFIG_DBLOG
 	if(nvram_match("dblog_enable", "1")) {
 		eval("dblogcmd", "exit"); // to stop dblog daemon
 	}
 	nvram_set("dblog_usb_path", "");
 	#endif /* RTCONFIG_DBLOG */
-#endif /* RTCONFIG_PUSH_EMAIL */
+#endif /* RTCONFIG_FRS_FEEDBACK */
 
 	if(!g_reboot && nvram_match("apps_mounted_path", mnt->mnt_dir))
 		stop_app();
@@ -1678,6 +1678,11 @@ _dprintf("%s: stop_cloudsync.\n", __func__);
 #ifdef RTCONFIG_USB_SWAP	
 		stop_usb_swap(mnt->mnt_dir);
 #endif	
+
+	run_custom_script("unmount", 120, mnt->mnt_dir, NULL);
+
+	sync();
+	sleep(1);       // Give some time for buffers to be physically written to disk
 
 	for (count = 0; count < 35; count++) {
 		sync();
@@ -1859,6 +1864,8 @@ int mount_partition(char *dev_name, int host_num, char *dsc_name, char *pt_name,
 
 	find_label_or_uuid(dev_name, the_label, uuid);
 
+	run_custom_script("pre-mount", 120, dev_name, type);
+
 	if (f_exists("/etc/fstab")) {
 		if (strcmp(type, "swap") == 0) {
 			_eval(swp_argv, NULL, 0, NULL);
@@ -2021,7 +2028,7 @@ _dprintf("usb_path: 4. don't set %s.\n", tmp);
 		}
 #endif
 
-#ifdef RTCONFIG_PUSH_EMAIL
+#ifdef RTCONFIG_FRS_FEEDBACK
 #ifdef RTCONFIG_DBLOG
 		if(ret == MOUNT_VAL_RW) {
 			if(nvram_match("dblog_usb_path", "")) {
@@ -2033,7 +2040,7 @@ _dprintf("usb_path: 4. don't set %s.\n", tmp);
 			}
 		}
 #endif /* RTCONFIG_DBLOG */
-#endif /* RTCONFIG_PUSH_EMAIL */
+#endif /* RTCONFIG_FRS_FEEDBACK */
 
 		// check the permission files.
 		if(ret == MOUNT_VAL_RW)
@@ -2041,6 +2048,8 @@ _dprintf("usb_path: 4. don't set %s.\n", tmp);
 
 		if (nvram_get_int("usb_automount"))
 			run_nvscript("script_usbmount", mountpoint, 3);
+
+		run_custom_script("post-mount", 120, mountpoint, NULL);
 
 #if defined(RTCONFIG_APP_PREINSTALLED) && defined(RTCONFIG_CLOUDSYNC)
 		char word[PATH_MAX], *next_word;
@@ -2586,7 +2595,11 @@ void write_ftpd_conf()
 		fprintf(fp, "xferlog_file=/var/log/vsftpd.log\n");
 	}
 
+	append_custom_config("vsftpd.conf", fp);
 	fclose(fp);
+
+	use_custom_config("vsftpd.conf", "/etc/vsftpd.conf");
+	run_postconf("vsftpd", "/etc/vsftpd.conf");
 }
 
 /*
@@ -3457,6 +3470,8 @@ void start_dms(void)
 		if (nvram_get_int("dms_web"))
 			argv[index++] = "-W";
 #endif
+		use_custom_config(MEDIA_SERVER_APP".conf","/etc/"MEDIA_SERVER_APP".conf");
+		run_postconf(MEDIA_SERVER_APP, "/etc/"MEDIA_SERVER_APP".conf");
 
 		/* start media server if it's not already running */
 		if (pidof(MEDIA_SERVER_APP) <= 0) {

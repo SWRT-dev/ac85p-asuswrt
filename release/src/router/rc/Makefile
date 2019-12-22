@@ -7,6 +7,9 @@ endif
 ifneq ($(or $(findstring linux-3.10.14,$(LINUXDIR))),)
 CFLAGS += -idirafter$(LINUXDIR)/include/uapi
 endif
+ifneq ($(or $(findstring linux-3.10.108,$(LINUXDIR))),)
+CFLAGS += -idirafter$(LINUXDIR)/include/uapi
+endif
 CFLAGS += $(PRIVATE_EXTRACFLAGS)
 CFLAGS += -I. -I$(TOP)/shared -I$(SRCBASE)/include
 ifneq ($(HND_ROUTER),y)
@@ -147,9 +150,11 @@ endif
 endif
 endif
 
-ifeq ($(RTCONFIG_PUSH_EMAIL),y)
+ifeq ($(RTCONFIG_HTTPS),y)
+ifeq ($(RTCONFIG_FRS_FEEDBACK),y)
 CFLAGS  += -I$(TOP)/openssl/include
 LDFLAGS += -L$(TOP)/openssl -lcrypto -lssl
+endif
 endif
 
 ifeq ($(RTCONFIG_FBWIFI),y)
@@ -364,11 +369,15 @@ OBJS += pc_tmp.o
 endif
 
 ifeq ($(RTCONFIG_HTTPS),y)
-ifeq ($(RTCONFIG_PUSH_EMAIL),y)
+ifeq ($(RTCONFIG_FRS_FEEDBACK),y)
 OBJS += dsl_fb.o
 endif
 endif
-
+ifeq ($(RTCONFIG_FRS_LIVE_UPDATE),y)
+ifneq ($(MERLINR_NAME), $(filter $(MERLINR_NAME), K3 K3C R7900P SBRAC3200P RTAC85P))
+OBJS += frs_service.o
+endif
+endif
 ifeq ($(RTCONFIG_DSL),y)
 OBJS += asustest.o
 endif
@@ -455,10 +464,6 @@ CFLAGS += -I$(TOP)/libletsencrypt
 LDFLAGS += -L$(TOP)/libletsencrypt -lletsencrypt
 endif
 
-ifeq ($(BUILD_NAME), GT-AC5300)
-CFLAGS += -DSUPPORT_GAME_PROFILE
-endif
-
 CFLAGS += $(if $(RTCONFIG_BLINK_LED),-I$(TOP)/bled)
 
 export CFLAGS
@@ -497,8 +502,12 @@ endif
 
 
 ifeq ($(RTCONFIG_HTTPS),y)
+CFLAGS += -I$(TOP)/curl-7.21.7/include
+LDFLAGS += -L$(TOP)/curl-7.21.7/lib/.libs -lcurl
 ifeq ($(or $(RTCONFIG_PUSH_EMAIL),$(RTCONFIG_NOTIFICATION_CENTER)),y)
 OBJS += pwdec.o
+CFLAGS += -I$(TOP)/json-c
+LDFLAGS += -L$(TOP)/json-c/.libs -ljson-c
 endif
 endif
 
@@ -715,6 +724,7 @@ ifeq ($(RTCONFIG_DETWAN),y)
 	@cd $(INSTALLDIR)/sbin && ln -sf rc detwan
 endif
 	@cd $(INSTALLDIR)/sbin && ln -sf rc ddns_updated
+	@cd $(INSTALLDIR)/sbin && ln -sf rc ddns_custom_updated
 
 #	@cd $(INSTALLDIR)/sbin && ln -sf rc wldist
 
@@ -900,7 +910,11 @@ endif
 ifeq ($(RTCONFIG_HTTPS),y)
 	@cd $(INSTALLDIR)/sbin && ln -sf rc rsasign_check
 	@cd $(INSTALLDIR)/sbin && ln -sf rc rsarootca_check
+ifeq ($(RTCONFIG_FRS_FEEDBACK),y)
+	@cd $(INSTALLDIR)/sbin && ln -sf rc firmware_check_update
 endif
+endif
+
 	@cd $(INSTALLDIR)/sbin && ln -sf rc test_endian
 ifeq ($(RTCONFIG_BWDPI),y)
 	@cd $(INSTALLDIR)/sbin && ln -sf rc rsasign_sig_check
@@ -928,6 +942,9 @@ ifeq ($(RTCONFIG_INTERNAL_GOBI),y)
 	@cd $(INSTALLDIR)/sbin && ln -sf rc lteled
 endif
 ifeq ($(RTCONFIG_TR069),y)
+	@cd $(INSTALLDIR)/sbin && ln -sf rc dhcpc_lease
+endif
+ifeq ($(MERLINR_NAME), $(filter $(MERLINR_NAME), SBRAC3200P RTAC85P))
 	@cd $(INSTALLDIR)/sbin && ln -sf rc dhcpc_lease
 endif
 
@@ -978,6 +995,10 @@ ifeq ($(RTCONFIG_ADTBW),y)
 	@cd $(INSTALLDIR)/sbin && ln -sf rc adtbw
 endif
 
+ifeq ($(strip $(MERLINR_NAME)),$(filter $(MERLINR_NAME), SBRAC1900P SBRAC3200P RTAC68U R8000P))
+	@cd $(INSTALLDIR)/sbin && ln -sf rc toolbox
+endif
+
 clean:
 	rm -f rc *.o .*.depend *.prep
 
@@ -986,7 +1007,7 @@ size: rc
 
 # handle prebuilt object here
 ifneq ($(wildcard ./prebuild/dsl_fb.o),)
-ifeq ($(RTCONFIG_PUSH_EMAIL),y)
+ifeq ($(RTCONFIG_FRS_FEEDBACK),y)
 dsl_fb.o:
 	@-cp -f ./prebuild/dsl_fb.o .
 endif
@@ -998,7 +1019,7 @@ endif
 endif
 else
 ifeq ($(RTCONFIG_HTTPS),y)
-ifeq ($(RTCONFIG_PUSH_EMAIL),y)
+ifeq ($(RTCONFIG_FRS_FEEDBACK),y)
 dsl_fb.o:dsl_fb.c
 #	@echo "encrypt dsl password"
 #	./dsl_fb_enc.sh
@@ -1063,7 +1084,7 @@ ifneq ($(wildcard ./prebuild/ate.o),)
 ate.o:
 	@-cp -f ./prebuild/ate.o .
 endif
-ifeq ($(BUILD_NAME),$(filter $(BUILD_NAME),RT-AC68U RT-AC3200))
+ifeq ($(BUILD_NAME),$(filter $(BUILD_NAME),RT-AC68U RT-AC3200 4G-AC68U GT-AC2900))
 ifneq ($(wildcard ./prebuild/cfe.o),)
 cfe.o:
 	@-cp -f ./prebuild/cfe.o .
@@ -1257,3 +1278,4 @@ pswatch: pswatch.c
 	@$(CC) -o $@ $^
 	$(STRIP) $@
 	$(CPTMP)
+

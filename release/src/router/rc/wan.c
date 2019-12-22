@@ -620,6 +620,10 @@ void update_wan_state(char *prefix, int state, int reason)
 		snprintf(tmp, sizeof(tmp), "/var/run/ppp-wan%d.status", unit);
 		unlink(tmp);
 	}
+    else if (state == WAN_STATE_CONNECTED) {
+	sprintf(tmp,"%c",prefix[3]);
+               run_custom_script("wan-start", 0, tmp, NULL);
+    }
 
 #if defined(RTCONFIG_WANRED_LED)
 	switch (state) {
@@ -1761,6 +1765,10 @@ stop_wan_if(int unit)
 		stop_igmpproxy();
 	}
 
+#ifdef RTCONFIG_OPENVPN
+	stop_ovpn_eas();
+#endif
+
 #ifdef RTCONFIG_VPNC
 	/* Stop VPN client */
 	stop_vpnc();
@@ -1935,6 +1943,18 @@ int update_resolvconf(void)
 		fclose(fp);
 		goto error;
 	}
+#if defined(RTCONFIG_SMARTDNS)
+	FILE *fp_smartdns;
+	if (!(fp_smartdns = fopen("/tmp/resolv.smartdns", "w+"))) {
+		perror("/tmp/resolv.smartdns");
+		fclose(fp);
+		fclose(fp_servers);
+		goto error;
+	}
+	fprintf(fp_smartdns, "server=127.0.0.1#9053\n");
+	fclose(fp_smartdns);
+	start_smartdns();
+#endif
 
 #ifdef RTCONFIG_OPENVPN
 	if (!write_ovpn_resolv(fp, fp_servers))
@@ -2742,7 +2762,7 @@ wan_up(const char *pwan_ifname)
 				break;
 			}
 		}
-		fclose(fp);
+		pclose(fp);
 	}
 #else
 	snprintf(tmp, sizeof(tmp), "ip neigh show %s dev %s 2>/dev/null", gateway, wan_ifname);
@@ -3370,9 +3390,6 @@ stop_wan(void)
 	fc_fini();
 #endif
 
-#ifdef RTCONFIG_OPENVPN
-	stop_ovpn_eas();
-#endif
 #if defined(RTCONFIG_PPTPD) || defined(RTCONFIG_ACCEL_PPTPD)
 	if (nvram_get_int("pptpd_enable"))
 		stop_pptpd();

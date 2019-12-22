@@ -24,6 +24,20 @@
 #include <lp5523led.h>
 #endif
 
+#if defined(K3)
+#include <k3.h>
+#elif defined(R7900P)
+#include <r7900p.h>
+#elif defined(K3C)
+#include <k3c.h>
+#elif defined(SBRAC1900P)
+#include "ac1900p.h"
+#elif defined(SBRAC3200P)
+#include "ac3200p.h"
+#elif defined(RTAC85P)
+#include "ac85p.h"
+#endif
+
 #ifndef ARRAYSIZE
 #define ARRAYSIZE(a) (sizeof(a) / sizeof(a[0]))
 #endif /* ARRAYSIZE */
@@ -259,6 +273,11 @@ static int rctest_main(int argc, char *argv[])
 	else if (strcmp(argv[1], "rc_service")==0) {
 		notify_rc(argv[2]);
 	}
+#if defined(RTCONFIG_FRS_FEEDBACK)
+	else if (strcmp(argv[1], "sendfeedback")==0) {
+		start_sendfeedback();
+	}
+#endif
 #ifdef RTCONFIG_BCM_7114
 	else if (strcmp(argv[1], "spect")==0) {
 		start_dfs();
@@ -780,6 +799,7 @@ static const applets_t applets[] = {
 	{ "usbled",			usbled_main			},
 #endif
 	{ "ddns_updated", 		ddns_updated_main		},
+	{ "ddns_custom_updated",	ddns_custom_updated_main	},
 	{ "radio",			radio_main			},
 	{ "udhcpc",			udhcpc_wan			},
 	{ "udhcpc_lan",			udhcpc_lan			},
@@ -842,6 +862,13 @@ static const applets_t applets[] = {
 	{ "disk_remove",		diskremove_main			},
 #endif
 	{ "firmware_check",		firmware_check_main		},
+#if defined(RTCONFIG_FRS_LIVE_UPDATE)
+#if defined(RTCONFIG_BCMARM) || defined(RTCONFIG_LANTIQ) || defined(HND_ROUTER) || defined(RTCONFIG_QCA) || defined(RTCONFIG_RALINK)
+	{ "firmware_check_update",	merlinr_firmware_check_update_main	},
+#else
+	{ "firmware_check_update",	firmware_check_update_main	},
+#endif
+#endif
 #ifdef BUILD_READMEM
 	{ "readmem",			readmem_main			},
 #endif
@@ -869,8 +896,8 @@ static const applets_t applets[] = {
 #endif
 #endif
 #endif
-#ifdef RTCONFIG_TR069
-	{ "dhcpc_lease",		dhcpc_lease_main		},
+#if defined(RTCONFIG_TR069) || defined(RTAC3200) || defined(RTAC85P)
+	{ "dhcpc_lease",		dnsmasq_script_main		},
 #endif
 #ifdef RTCONFIG_NEW_USER_LOW_RSSI
 	{ "roamast",			roam_assistant_main		},
@@ -1961,3 +1988,4 @@ int main(int argc, char **argv)
 	printf("Unknown applet: %s\n", base);
 	return 0;
 }
+

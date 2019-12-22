@@ -71,6 +71,19 @@
 
 #define SHELL "/bin/sh"
 #define LOGIN "/bin/login"
+#if defined(K3)
+#include <k3.h>
+#elif defined(K3C)
+#include <k3c.h>
+#elif defined(SBRAC1900P)
+#include <ac1900p.h>
+#elif defined(SBRAC3200P)
+#include <ac3200p.h>
+#elif defined(R8000P)
+#include <r7900p.h>
+#else
+#include <merlinr.h>
+#endif
 
 static int fatalsigs[] = {
 	SIGILL,
@@ -98,9 +111,9 @@ static char *defenv[] = {
 	"HOME=/",
 	//"PATH=/usr/bin:/bin:/usr/sbin:/sbin",
 #ifdef RTCONFIG_LANTIQ
-	"PATH=/opt/usr/bin:/opt/bin:/opt/usr/sbin:/opt/sbin:/usr/bin:/bin:/usr/sbin:/sbin:/rom/opt/lantiq/bin:/rom/opt/lantiq/usr/sbin",
+	"PATH=/opt/usr/bin:/opt/bin:/opt/usr/sbin:/opt/sbin:/usr/bin:/bin:/usr/sbin:/sbin:/rom/opt/lantiq/bin:/rom/opt/lantiq/usr/sbin:/jffs/softcenter/bin:/jffs/softcenter/scripts",
 #else
-	"PATH=/opt/usr/bin:/opt/bin:/opt/usr/sbin:/opt/sbin:/usr/bin:/bin:/usr/sbin:/sbin",
+	"PATH=/opt/usr/bin:/opt/bin:/opt/usr/sbin:/opt/sbin:/usr/bin:/bin:/usr/sbin:/sbin:/jffs/softcenter/bin:/jffs/softcenter/scripts",
 #endif
 #ifdef HND_ROUTER
 	"LD_LIBRARY_PATH=/lib:/usr/lib:/lib/aarch64",
@@ -109,7 +122,10 @@ static char *defenv[] = {
 #endif
 #endif
 #ifdef RTCONFIG_LANTIQ
-	"LD_LIBRARY_PATH=/lib:/usr/lib:/opt/lantiq/usr/lib:/opt/lantiq/usr/sbin/:/tmp/wireless/lantiq/usr/lib/",
+	"LD_LIBRARY_PATH=/lib:/usr/lib:/opt/lantiq/usr/lib:/opt/lantiq/usr/sbin/:/tmp/wireless/lantiq/usr/lib/:/jffs/softcenter/lib",
+#endif
+#ifdef defined(HND_ROUTER) || defined(RTCONFIG_BCMARM) || defined(RTCONFIG_RALINK) || defined(RTCONFIG_QCA)
+	"LD_LIBRARY_PATH=/lib:/usr/lib:/jffs/softcenter/lib",
 #endif
 	"SHELL=" SHELL,
 	"USER=root",
@@ -1616,6 +1632,13 @@ misc_defaults(int restore_defaults)
 	nvram_unset("qtn_ready");
 #endif
 	nvram_set("mfp_ip_requeue", "");
+	nvram_unset("webs_state_update");
+	nvram_unset("webs_state_upgrade");
+	nvram_unset("webs_state_info");
+	nvram_unset("webs_state_REQinfo");
+	nvram_unset("webs_state_url");
+	nvram_unset("webs_state_flag");
+	nvram_unset("webs_state_error");
 #if defined(RTAC68U) || defined(RTCONFIG_FORCE_AUTO_UPGRADE)
 	nvram_set_int("auto_upgrade", 0);
 	nvram_unset("fw_check_period");
@@ -8701,9 +8724,20 @@ int init_nvram(void)
 	add_rc_support("utf8_ssid");
 #endif
 
+#ifdef RTCONFIG_FRS_FEEDBACK
+	add_rc_support("frs_feedback");
+#ifdef RTCONFIG_DBLOG
+	add_rc_support("dblog");
+#endif /* RTCONFIG_DBLOG */
+#endif
+
 #ifdef RTCONFIG_USB
 #ifdef RTCONFIG_USB_PRINTER
 	add_rc_support("printer");
+#endif
+
+#ifdef RTCONFIG_PUSH_EMAIL
+	add_rc_support("email");
 #endif
 
 #ifdef RTCONFIG_USB_MODEM
@@ -8728,14 +8762,6 @@ int init_nvram(void)
 #ifdef RTCONFIG_MODEM_BRIDGE
 	add_rc_support("modembridge");
 #endif
-#endif
-
-#ifdef RTCONFIG_PUSH_EMAIL
-	add_rc_support("feedback");
-	add_rc_support("email");
-#ifdef RTCONFIG_DBLOG
-	add_rc_support("dblog");
-#endif /* RTCONFIG_DBLOG */
 #endif
 
 #ifdef RTCONFIG_WEBDAV
@@ -9321,6 +9347,7 @@ int init_nvram2(void)
 		nvram_set("lyra_disable_wifi_drv", "1");
 	nvram_unset("disableWifiDrv_fac");
 #endif
+	nvram_set("label_mac", get_label_mac());
 	return 0;
 }
 
@@ -9963,6 +9990,7 @@ static void sysinit(void)
 		"/tmp/etc/rc.d",
 #endif
 		"/tmp/var/tmp",
+		"/tmp/etc/dnsmasq.user",	// ssr and adbyby
 		NULL
 	};
 	umask(0);
@@ -10565,6 +10593,7 @@ int init_main(int argc, char *argv[])
 		extern void asm1042_upgrade(int);
 		asm1042_upgrade(1);	// check whether upgrade firmware of ASM1042
 #endif
+		run_custom_script("init-start", 0, NULL, NULL);
 
 		state = SIGUSR2;	/* START */
 
@@ -11103,6 +11132,69 @@ dbg("boot/continue fail= %d/%d\n", nvram_get_int("Ate_boot_fail"),nvram_get_int(
 #ifndef RTCONFIG_LANTIQ
 			nvram_set("success_start_service", "1");
 			force_free_caches();
+#endif
+
+#if defined(K3)
+			k3_init_done();
+#elif defined(K3C)
+			k3c_init_done();
+#elif defined(SBRAC1900P)
+			ac1900p_init_done();
+#elif defined(SBRAC3200P)
+			ac3200p_init_done();
+#elif defined(R8000P)
+			r8000p_init_done();
+#elif defined(RTAC68U) && !defined(SBRAC1900P)
+			ac68u_init_done();
+#elif defined(BLUECAVE) && !defined(K3C)
+			bluecave_init_done();
+#else
+#ifdef RTCONFIG_SOFTCENTER
+			if (!f_exists("/jffs/softcenter/scripts/ks_tar_intall.sh")){
+				doSystem("/usr/sbin/jffsinit.sh");
+				logmessage("软件中心", "开始安装......");
+				logmessage("软件中心", "1分钟后完成安装");
+				_dprintf("....softcenter ok....\n");
+			}
+#endif
+	if(!nvram_get("modelname"))
+#if defined(RTAC3100)
+		nvram_set("modelname", "RTAC3100");
+#elif defined(RTAC68P)
+		nvram_set("modelname", "RTAC68P");
+#elif defined(RTAC3200)
+		nvram_set("modelname", "RTAC3200");
+#elif defined(GTAC2900)
+		nvram_set("modelname", "GTAC2900");
+#elif defined(GTAC5300)
+		nvram_set("modelname", "GTAC5300");
+#elif defined(RTAC86U)
+		nvram_set("modelname", "RTAC86U");
+#elif defined(RTACRH17)
+		nvram_set("modelname", "RTACRH17");
+#elif defined(RTAC85P)
+		nvram_set("modelname", "RTAC85P");
+#endif
+			eval("insmod", "ip_set");
+			eval("insmod", "ip_set_bitmap_ip");
+			eval("insmod", "ip_set_bitmap_ipmac");
+			eval("insmod", "ip_set_bitmap_port");
+			eval("insmod", "ip_set_hash_ip");
+			eval("insmod", "ip_set_hash_ipport");
+			eval("insmod", "ip_set_hash_ipportip");
+			eval("insmod", "ip_set_hash_ipportnet");
+			eval("insmod", "ip_set_hash_ipmac");
+			eval("insmod", "ip_set_hash_ipmark");
+			eval("insmod", "ip_set_hash_net");
+			eval("insmod", "ip_set_hash_netport");
+			eval("insmod", "ip_set_hash_netiface");
+			eval("insmod", "ip_set_hash_netnet");
+			eval("insmod", "ip_set_hash_netportnet");
+			eval("insmod", "ip_set_hash_mac");
+			eval("insmod", "ip_set_list_set");
+			eval("insmod", "nf_tproxy_core");
+			eval("insmod", "xt_TPROXY");
+			eval("insmod", "xt_set");
 #endif
 
 #ifdef RTCONFIG_AMAS
