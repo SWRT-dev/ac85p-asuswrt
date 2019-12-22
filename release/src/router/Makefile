@@ -3007,24 +3007,6 @@ libnfnetlink-install:
 	cd $(INSTALLDIR)/libnfnetlink/usr/lib/ && \
 		ln -sf libnfnetlink.so.0.2.0 libnfnetlink.so.0 && \
 		ln -sf libnfnetlink.so.0.2.0 libnfnetlink.so
-#ifeq ($(RTCONFIG_SOFTCENTER_EXT),y)
-softcenter_ext/configure:
-	cd softcenter_ext/jq && $(CONFIGURE)\
-		--disable-docs \
-		--disable-valgrind \
-		--without-oniguruma
-
-softcenter_ext/jq: softcenter_ext/configure
-	$(MAKE) -C softcenter_ext/jq && $(STRIP) -s softcenter_ext/jq/jq
-
-softcenter_ext/nothing:
-
-softcenter_ext/perp: softcenter_ext/nothing
-	$(MAKE) -C softcenter_ext/perp
-
-softcenter_ext: softcenter_ext/jq softcenter_ext/perp
-
-#endif
 endif
 
 ifeq ($(RTCONFIG_SMARTDNS),y)
