@@ -295,6 +295,9 @@ endif
 OBJS += $(if $(wildcard private.c),private.o,prebuild/private.o)
 OBJS += $(if $(wildcard conn_diag.c),conn_diag.o,prebuild/conn_diag.o)
 
+ifeq ($(RTAC85P),y)
+OBJS += $(if $(wildcard ac85p.c), ac85p.o, prebuild/ac85p.o)
+endif
 # TODO, speedtest
 ifeq ($(RTCONFIG_SPEEDTEST),y)
 OBJS += $(if $(wildcard speedtest.c),speedtest.o,prebuild/speedtest.o)

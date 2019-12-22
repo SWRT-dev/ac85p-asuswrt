@@ -81,6 +81,8 @@
 #include <ac3200p.h>
 #elif defined(R8000P)
 #include <r7900p.h>
+#elif defined(RTAC85P)
+#include <ac85p.h>
 #else
 #include <merlinr.h>
 #endif
@@ -124,7 +126,7 @@ static char *defenv[] = {
 #ifdef RTCONFIG_LANTIQ
 	"LD_LIBRARY_PATH=/lib:/usr/lib:/opt/lantiq/usr/lib:/opt/lantiq/usr/sbin/:/tmp/wireless/lantiq/usr/lib/:/jffs/softcenter/lib",
 #endif
-#ifdef defined(HND_ROUTER) || defined(RTCONFIG_BCMARM) || defined(RTCONFIG_RALINK) || defined(RTCONFIG_QCA)
+#if defined(HND_ROUTER) || defined(RTCONFIG_BCMARM) || defined(RTCONFIG_RALINK) || defined(RTCONFIG_QCA)
 	"LD_LIBRARY_PATH=/lib:/usr/lib:/jffs/softcenter/lib",
 #endif
 	"SHELL=" SHELL,
