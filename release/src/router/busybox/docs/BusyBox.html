@@ -1025,8 +1025,7 @@ TYPE:
 
 <p>Show list of processes</p>
 
-<pre><code>        w       Wide output
-        T       Show threads</code></pre>
+<pre><code>        w       Wide output</code></pre>
 
 </dd>
 <dt id="pwd"><b>pwd</b></dt>
@@ -1330,22 +1329,19 @@ Other:
 <dt id="top"><b>top</b></dt>
 <dd>
 
-<p>top [-b] [-nCOUNT] [-dSECONDS] [-m]</p>
+<p>top [-b] [-nCOUNT] [-dSECONDS]</p>
 
 <p>Provide a view of process activity in real time. Read the status of all processes from /proc each SECONDS and display a screenful of them. Keys:</p>
 
-<pre><code>        N/M/P/T: show CPU usage, sort by pid/mem/cpu/time
-        S: show memory
+<pre><code>        N/M/P/T: sort by pid/mem/cpu/time
         R: reverse sort
-        H: toggle threads, 1: toggle SMP
         Q,^C: exit</code></pre>
 
 <p>Options:</p>
 
 <pre><code>        -b      Batch mode
         -n N    Exit after N iterations
-        -d N    Delay between updates
-        -m      Same as &#39;s&#39; key</code></pre>
+        -d N    Delay between updates</code></pre>
 
 </dd>
 <dt id="touch"><b>touch</b></dt>

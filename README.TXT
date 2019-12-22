@@ -86,6 +86,10 @@ Set Up Environment(Tested in Fedora 8/9 and Ubuntu)
 
    3. setup development system
 
+=============================================
+sudo ln -sf $(pwd)/tools/buildroot-gcc463 /opt
+sudo ln -sf $(pwd)/tools/brcm /opt
+
 	Broadcom SoC models
 	===================
 

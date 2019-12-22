@@ -935,7 +935,6 @@ ps
 Show list of processes
 
 	w	Wide output
-	T	Show threads
 
 =item B<pwd>
 
@@ -1202,17 +1201,15 @@ Handle incoming telnet connections
 
 =item B<top>
 
-top [-b] [-nCOUNT] [-dSECONDS] [-m]
+top [-b] [-nCOUNT] [-dSECONDS]
 
 Provide a view of process activity in real time.
 Read the status of all processes from /proc each SECONDS
 and display a screenful of them.
 Keys:
 
-	N/M/P/T: show CPU usage, sort by pid/mem/cpu/time
-	S: show memory
+	N/M/P/T: sort by pid/mem/cpu/time
 	R: reverse sort
-	H: toggle threads, 1: toggle SMP
 	Q,^C: exit
 
 Options:
@@ -1220,7 +1217,6 @@ Options:
 	-b	Batch mode
 	-n N	Exit after N iterations
 	-d N	Delay between updates
-	-m	Same as 's' key
 
 =item B<touch>
 

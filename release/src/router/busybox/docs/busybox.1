@@ -133,7 +133,7 @@
 .\" ========================================================================
 .\"
 .IX Title "BUSYBOX 1"
-.TH BUSYBOX 1 "2019-12-11" "version 1.25.1" "busybox"
+.TH BUSYBOX 1 "2019-12-22" "version 1.25.1" "busybox"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -1110,9 +1110,8 @@ ps
 .Sp
 Show list of processes
 .Sp
-.Vb 2
+.Vb 1
 \&        w       Wide output
-\&        T       Show threads
 .Ve
 .IP "\fBpwd\fR" 4
 .IX Item "pwd"
@@ -1392,28 +1391,25 @@ Handle incoming telnet connections
 .Ve
 .IP "\fBtop\fR" 4
 .IX Item "top"
-top [\-b] [\-nCOUNT] [\-dSECONDS] [\-m]
+top [\-b] [\-nCOUNT] [\-dSECONDS]
 .Sp
 Provide a view of process activity in real time.
 Read the status of all processes from /proc each \s-1SECONDS\s0
 and display a screenful of them.
 Keys:
 .Sp
-.Vb 5
-\&        N/M/P/T: show CPU usage, sort by pid/mem/cpu/time
-\&        S: show memory
+.Vb 3
+\&        N/M/P/T: sort by pid/mem/cpu/time
 \&        R: reverse sort
-\&        H: toggle threads, 1: toggle SMP
 \&        Q,^C: exit
 .Ve
 .Sp
 Options:
 .Sp
-.Vb 4
+.Vb 3
 \&        \-b      Batch mode
 \&        \-n N    Exit after N iterations
 \&        \-d N    Delay between updates
-\&        \-m      Same as \*(Aqs\*(Aq key
 .Ve
 .IP "\fBtouch\fR" 4
 .IX Item "touch"

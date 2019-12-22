@@ -18,6 +18,7 @@ export KERNELCC := /opt/buildroot-gcc463/usr/bin/mipsel-linux-gcc
 export KERNELLD := /opt/buildroot-gcc463/usr/bin/mipsel-linux-ld
 export TOOLS := $(SRCBASE)/../../tools/brcm/hndtools-mipsel-linux
 export RTVER := 0.9.30.1
+export PATH := $(SRCBASE)/../../tools/brcm/hndtools-mipsel-uclibc/bin:$(PATH)
 
 EXTRA_CFLAGS := -DLINUX26 -DCONFIG_RALINK -pipe -DDEBUG_NOISY -DDEBUG_RCTEST
 
