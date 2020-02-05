@@ -64,7 +64,6 @@ install:
 	install -m 0755 jffsinit.sh $(INSTALLDIR)/usr/sbin
 	install -m 0755 plugin.sh $(INSTALLDIR)/usr/sbin
 	install -m 0755 helper.sh $(INSTALLDIR)/usr/sbin
-	install -m 0755 key.asp  $(INSTALLDIR)/www
 
 
 clean:
