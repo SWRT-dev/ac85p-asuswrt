@@ -25,7 +25,7 @@
 extern void merlinr_init(void);
 extern void merlinr_init_done(void);
 #ifdef RTCONFIG_UUPLUGIN
-extern void exec_uu_merlinr(void);
+extern void exec_uu(void);
 #endif
 #ifdef RTCONFIG_FRS_LIVE_UPDATE
 extern int merlinr_firmware_check_update_main(int argc, char *argv[]);

@@ -441,13 +441,23 @@ GODONE:
 	return 0;
 }
 #if !defined(BLUECAVE)
-void exec_uu_merlinr()
+#if defined(RTAC85P)
+void isCN()
+{
+	if(!strncmp(nvram_safe_get("territory_code"), "CN", 2))
+		add_rc_support("uu_accel");
+}
+#endif
+void exec_uu()
 {
 	FILE *fpmodel, *fpmac, *fpuu, *fpurl, *fpmd5, *fpcfg;
 	char buf[128];
 	int download,i;
 	char *dup_pattern, *g, *gg;
 	char p[10][100];
+#if defined(RTAC85P)
+	isCN();
+#endif
 	if(nvram_get_int("sw_mode") == 1){
 		if ((fpmodel = fopen("/var/model", "w"))){
 			fprintf(fpmodel, nvram_get("productid"));
