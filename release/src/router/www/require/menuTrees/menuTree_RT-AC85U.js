@@ -140,7 +140,7 @@ define(function(){
 				index: "menu_Tools",
 				tab: [
 					{url: "Tools_Sysinfo.asp", tabName: "Sysinfo"},
-					{url: "key.asp", tabName: "Verify"},
+					{url: "Softcenter.asp", tabName: "<#Softcenter_tool#>"},
 					{url: "NULL", tabName: "__INHERIT__"}
 				] 
 			},
@@ -389,7 +389,9 @@ define(function(){
 					retArray.push("menu_VLAN");
 					retArray.push("menu_Firewall");
 				}
-
+				else if (<% nvram_get("sc_installed"); %> == "0"){
+					retArray.push("menu_Softcenter");
+				}
 				return retArray;
 			},
 

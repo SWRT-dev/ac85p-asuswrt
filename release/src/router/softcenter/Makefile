@@ -4,6 +4,8 @@ all:
 
 install:
 	install -d $(INSTALLDIR)/www
+	install -d $(INSTALLDIR)/www/js
+	install -d $(INSTALLDIR)/www/res
 	install -d $(INSTALLDIR)/usr/sbin
 	install -d $(INSTALLDIR)/usr/bin
 	install -d $(INSTALLDIR)/usr/share
@@ -19,7 +21,10 @@ install:
 	install -d $(INSTALLDIR)/rom/etc/softcenter/scripts
 	install -d $(INSTALLDIR)/rom/etc/softcenter/perp/.boot
 	install -d $(INSTALLDIR)/rom/etc/softcenter/perp/.control
-
+ifeq ($(BUILD_NAME), $(filter $(BUILD_NAME), GT-AC2900 GT-AC5300))
+	install -d $(INSTALLDIR)/rom/etc/softcenter/ROG/res
+	install -d $(INSTALLDIR)/rom/etc/softcenter/ROG/webs
+endif
 # softcenter
 	install -m 0755 softcenter/bin/base64_encode $(INSTALLDIR)/rom/etc/softcenter/bin
 	install -m 0755 softcenter/bin/jq $(INSTALLDIR)/rom/etc/softcenter/bin
@@ -61,10 +66,21 @@ install:
 	install -m 0755 softcenter/scripts/ks_app_install.sh $(INSTALLDIR)/rom/etc/softcenter/scripts
 	install -m 0755 softcenter/scripts/ks_tar_intall.sh $(INSTALLDIR)/rom/etc/softcenter/scripts
 	#install -m 0755 softcenter/scripts/pluginbase.sh $(INSTALLDIR)/rom/etc/softcenter/scripts
+ifeq ($(BUILD_NAME), $(filter $(BUILD_NAME), GT-AC2900 GT-AC5300))
+	install -m 0755 softcenter/ROG/res/softcenter.css $(INSTALLDIR)/rom/etc/softcenter/ROG/res
+	install -m 0755 softcenter/ROG/webs/Main_Soft_center.asp $(INSTALLDIR)/rom/etc/softcenter/ROG/webs
+	install -m 0755 softcenter/ROG/webs/Main_Soft_setting.asp $(INSTALLDIR)/rom/etc/softcenter/ROG/webs
+endif
 	install -m 0755 jffsinit.sh $(INSTALLDIR)/usr/sbin
 	install -m 0755 plugin.sh $(INSTALLDIR)/usr/sbin
 	install -m 0755 helper.sh $(INSTALLDIR)/usr/sbin
-
+	install -m 0755 key.asp  $(INSTALLDIR)/www
+	install -m 0755 Softcenter.asp $(INSTALLDIR)/www
+	install -m 0755 Softcenter_mount.asp $(INSTALLDIR)/www
+	install -m 0755 i18n.js $(INSTALLDIR)/www/js
+	install -m 0755 scCN.json $(INSTALLDIR)/www/res
+	install -m 0755 scEN.json $(INSTALLDIR)/www/res
+	install -m 0755 scTW.json $(INSTALLDIR)/www/res
 
 clean:
 

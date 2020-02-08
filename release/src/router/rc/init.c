@@ -81,8 +81,6 @@
 #include <ac3200p.h>
 #elif defined(R8000P)
 #include <r7900p.h>
-#elif defined(RTAC85P)
-#include <ac85p.h>
 #else
 #include <merlinr.h>
 #endif
@@ -3839,6 +3837,7 @@ int init_nvram(void)
 
 #if defined(RTAC85P) 
 	case MODEL_RTAC85P:
+		merlinr_init();
 		nvram_set("boardflags", "0x100"); // although it is not used in ralink driver, set for vlan
 		nvram_set("vlan1hwname", "et0");  // vlan. used to get "%smacaddr" for compare and find parent interface.
 		nvram_set("vlan2hwname", "et0");  // vlan. used to get "%smacaddr" for compare and find parent interface.
@@ -11149,54 +11148,9 @@ dbg("boot/continue fail= %d/%d\n", nvram_get_int("Ate_boot_fail"),nvram_get_int(
 #elif defined(RTAC68U) && !defined(SBRAC1900P)
 			ac68u_init_done();
 #elif defined(BLUECAVE) && !defined(K3C)
-			bluecave_init_done();
+			lantiq_init_done();
 #else
-#ifdef RTCONFIG_SOFTCENTER
-			if (!f_exists("/jffs/softcenter/scripts/ks_tar_intall.sh")){
-				doSystem("/usr/sbin/jffsinit.sh");
-				logmessage("软件中心", "开始安装......");
-				logmessage("软件中心", "1分钟后完成安装");
-				_dprintf("....softcenter ok....\n");
-			}
-#endif
-	if(!nvram_get("modelname"))
-#if defined(RTAC3100)
-		nvram_set("modelname", "RTAC3100");
-#elif defined(RTAC68P)
-		nvram_set("modelname", "RTAC68P");
-#elif defined(RTAC3200)
-		nvram_set("modelname", "RTAC3200");
-#elif defined(GTAC2900)
-		nvram_set("modelname", "GTAC2900");
-#elif defined(GTAC5300)
-		nvram_set("modelname", "GTAC5300");
-#elif defined(RTAC86U)
-		nvram_set("modelname", "RTAC86U");
-#elif defined(RTACRH17)
-		nvram_set("modelname", "RTACRH17");
-#elif defined(RTAC85P)
-		nvram_set("modelname", "RTAC85P");
-#endif
-			eval("insmod", "ip_set");
-			eval("insmod", "ip_set_bitmap_ip");
-			eval("insmod", "ip_set_bitmap_ipmac");
-			eval("insmod", "ip_set_bitmap_port");
-			eval("insmod", "ip_set_hash_ip");
-			eval("insmod", "ip_set_hash_ipport");
-			eval("insmod", "ip_set_hash_ipportip");
-			eval("insmod", "ip_set_hash_ipportnet");
-			eval("insmod", "ip_set_hash_ipmac");
-			eval("insmod", "ip_set_hash_ipmark");
-			eval("insmod", "ip_set_hash_net");
-			eval("insmod", "ip_set_hash_netport");
-			eval("insmod", "ip_set_hash_netiface");
-			eval("insmod", "ip_set_hash_netnet");
-			eval("insmod", "ip_set_hash_netportnet");
-			eval("insmod", "ip_set_hash_mac");
-			eval("insmod", "ip_set_list_set");
-			eval("insmod", "nf_tproxy_core");
-			eval("insmod", "xt_TPROXY");
-			eval("insmod", "xt_set");
+			merlinr_init_done();
 #endif
 
 #ifdef RTCONFIG_AMAS

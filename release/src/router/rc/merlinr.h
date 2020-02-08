@@ -20,13 +20,22 @@
  *
  */
 
-
+#ifndef __MERLINR_H__
+#define __MERLINR_H__
+extern void merlinr_init(void);
+extern void merlinr_init_done(void);
 #ifdef RTCONFIG_UUPLUGIN
-extern void exec_uu(void);
+extern void exec_uu_merlinr(void);
 #endif
 #ifdef RTCONFIG_FRS_LIVE_UPDATE
-#if defined(RTCONFIG_BCMARM) || defined(RTCONFIG_LANTIQ) || defined(RTCONFIG_QCA) || defined(RTCONFIG_HND_ROUTER) || defined(RTCONFIG_RALINK) 
 extern int merlinr_firmware_check_update_main(int argc, char *argv[]);
 #endif
+#if defined(RTCONFIG_SOFTCENTER)
+enum {
+	SOFTCENTER_WAN=1,
+	SOFTCENTER_NAT,
+	SOFTCENTER_MOUNT
+};
+extern void softcenter_eval(int sig);
 #endif
-
+#endif
