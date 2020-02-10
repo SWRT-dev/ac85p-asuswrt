@@ -1,6 +1,3 @@
-etherstate = "<% sysinfo("ethernet"); %>";
-rtkswitch = <% sysinfo("ethernet.rtk"); %>;
-
 wlc_24_arr = ["<% sysinfo("conn.wifi.0.assoc"); %>", "<% sysinfo("conn.wifi.0.autho"); %>", "<% sysinfo("conn.wifi.0.authe"); %>"];
 wlc_51_arr = ["<% sysinfo("conn.wifi.1.assoc"); %>", "<% sysinfo("conn.wifi.1.autho"); %>", "<% sysinfo("conn.wifi.1.authe"); %>"];
 wlc_52_arr = ["<% sysinfo("conn.wifi.2.assoc"); %>", "<% sysinfo("conn.wifi.2.autho"); %>", "<% sysinfo("conn.wifi.2.authe"); %>"];

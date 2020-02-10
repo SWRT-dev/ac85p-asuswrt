@@ -83,7 +83,10 @@ if [ "$ARCH" == "armv7l" ]; then
 		dbus set softcenter_arch="$ARCH"
 	fi
 else
-	dbus set softcenter_arch="$ARCH"
+	if [ "$KVER" == "3.10.14" ];then
+		dbus set softcenter_arch="mipsle"
+	else
+		dbus set softcenter_arch="$ARCH"
 fi
 
 dbus set softcenter_api=`cat /jffs/softcenter/.soft_ver`
