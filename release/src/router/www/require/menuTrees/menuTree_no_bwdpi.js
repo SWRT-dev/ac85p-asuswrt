@@ -1,4 +1,4 @@
-﻿/* menuTree_no_bwdpi.js */
+/* menuTree_no_bwdpi.js */
 define(function(){
 	var menuTree = {
 		list: [
@@ -109,6 +109,15 @@ define(function(){
 					{url: "cloud_router_sync.asp", tabName: "<#Server_Sync#>"},
 					{url: "cloud_settings.asp", tabName: "<#Settings#>"},
 					{url: "cloud_syslog.asp", tabName: "<#Log#>"},
+					{url: "NULL", tabName: "__INHERIT__"}
+				] 
+			},
+			{
+				menuName: "<#Softcenter_tool#>",
+				index: "menu_Tools",
+				tab: [
+					{url: "Tools_Sysinfo.asp", tabName: "Sysinfo"},
+					{url: "Softcenter.asp", tabName: "<#Softcenter_tool#>"},
 					{url: "NULL", tabName: "__INHERIT__"}
 				] 
 			},
@@ -240,6 +249,22 @@ define(function(){
 					{url: "Advanced_Smart_Connect.asp", tabName: "<#smart_connect_rule#>"},
 					{url: "NULL", tabName: "__INHERIT__"}
 				]
+			},
+			{
+				menuName: "<#Softcenter#>",
+				index: "menu_Split",
+				tab: [
+					{url: "NULL", tabName: "__HIDE__"}
+				]
+			},
+			{
+				menuName: "<#Softcenter#>",
+				index: "menu_Softcenter",
+				tab: [
+					{url: "Main_Soft_center.asp", tabName: "<#Softcenter#>"},
+					{url: "Main_Soft_setting.asp", tabName: "Offline Mode"},
+					{url: "NULL", tabName: "__INHERIT__"}
+				]
 			}
 		],
 
@@ -353,6 +378,9 @@ define(function(){
 					if(!concurrep_support){
 						retArray.push("menu_Wireless");
 					}
+				}
+				else if (<% nvram_get("sc_installed"); %> == "0"){
+					retArray.push("menu_Softcenter");
 				}
 
 				return retArray;
@@ -636,3 +664,4 @@ define(function(){
 
 	return menuTree;
 });
+

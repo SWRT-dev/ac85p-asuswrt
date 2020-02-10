@@ -11143,12 +11143,10 @@ dbg("boot/continue fail= %d/%d\n", nvram_get_int("Ate_boot_fail"),nvram_get_int(
 			ac1900p_init_done();
 #elif defined(SBRAC3200P)
 			ac3200p_init_done();
-#elif defined(R8000P)
+#elif defined(R8000P) || defined(R7900P)
 			r8000p_init_done();
 #elif defined(RTAC68U) && !defined(SBRAC1900P)
 			ac68u_init_done();
-#elif defined(BLUECAVE) && !defined(K3C)
-			lantiq_init_done();
 #else
 			merlinr_init_done();
 #endif

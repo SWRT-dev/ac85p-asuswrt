@@ -23,7 +23,7 @@ if [ "$(nvram get sc_mount)" == 1 ];then
 	mdisk=`nvram get sc_disk`
 	usb_disk="/tmp/mnt/$mdisk"
 	if [ "$(nvram get productid)" == "BLUECAVE" ];then
-		[ -n "$(mount |grep sda1 |grep tfat)" ] && logger "Unsupport TFAT!" && exit 1
+		[ -n "$(mount |grep $usb_disk |grep tfat)" ] && logger "Unsupport TFAT!" && exit 1
 	fi
 	if [ ! -e "$usb_disk" ]; then
 		nvram set sc_mount="0"
@@ -79,8 +79,6 @@ KVER=`uname -r`
 if [ "$ARCH" == "armv7l" ]; then
 	if [ "$KVER" == "4.1.52" -o "$KVER" == "4.1.49" ];then
 		dbus set softcenter_arch="armng"
-	elif [ "$KVER" == "3.14.77" ];then
-		dbus set softcenter_arch="armqca"
 	else
 		dbus set softcenter_arch="$ARCH"
 	fi
@@ -94,6 +92,7 @@ if [ "`nvram get model`" == "GT-AC5300" ] || [ "`nvram get model`" == "GT-AC2900
 	cp -rf /rom/etc/softcenter/ROG/res/* /jffs/softcenter/res/
 fi
 nvram set sc_installed=1
+nvram commit
 # creat wan-start file
 mkdir -p /jffs/scripts
 

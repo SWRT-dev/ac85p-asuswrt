@@ -14,7 +14,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
  * MA 02111-1307 USA
  *
- * Copyright 2019, paldier <paldier@hotmail.com>.
+ * Copyright 2019-2020, paldier <paldier@hotmail.com>.
  * All Rights Reserved.
  * 
  *
@@ -77,17 +77,18 @@ void merlinr_init_done()
 #ifdef RTCONFIG_SOFTCENTER
 	if (!f_exists("/jffs/softcenter/scripts/ks_tar_intall.sh") && nvram_match("sc_mount","0")){
 		doSystem("/usr/sbin/jffsinit.sh &");
-		logmessage("软件中心", "开始安装......");
-		logmessage("软件中心", "1分钟后完成安装");
+		logmessage("Softcenter/软件中心", "Installing/开始安装......");
+		logmessage("Softcenter/软件中心", "Wait a minute/1分钟后完成安装");
 		_dprintf("....softcenter ok....\n");
 	} else if (f_exists("/jffs/softcenter/scripts/ks_tar_intall.sh") && nvram_match("sc_mount","0"))
 		nvram_set("sc_installed","1");
+	//else if (!f_exists("/jffs/softcenter/scripts/ks_tar_intall.sh") && nvram_match("sc_mount","1"))
+		//nvram_set("sc_installed","0");
 	if(f_exists("/jffs/.asusrouter")){
 		unlink("/jffs/.asusrouter");
 		doSystem("sed -i '/softcenter-wan.sh/d' /jffs/scripts/wan-start");
 		doSystem("sed -i '/softcenter-net.sh/d' /jffs/scripts/nat-start");
 		doSystem("sed -i '/softcenter-mount.sh/d' /jffs/scripts/post-mount");
-
 	}
 #endif
 #if defined(RTCONFIG_QCA)
@@ -112,8 +113,8 @@ void merlinr_init_done()
 		nvram_set("modelname", "R8000P");
 #elif defined(RTAC3100)
 		nvram_set("modelname", "RTAC3100");
-#elif defined(BULECAVE)
-		nvram_set("modelname", "BULECAVE");
+#elif defined(BLUECAVE)
+		nvram_set("modelname", "BLUECAVE");
 #elif defined(RTAC68U)
 		nvram_set("modelname", "RTAC68U");
 #elif defined(RTAC68P)
@@ -151,8 +152,8 @@ void merlinr_init_done()
 #endif
 #if defined(R8000P) || defined(R7900P)
 	nvram_set("ping_target","www.taobao.com");
-	nvram_commit();
 #endif
+	nvram_commit();
 }
 
 

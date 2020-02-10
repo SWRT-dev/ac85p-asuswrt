@@ -74,7 +74,6 @@ endif
 	install -m 0755 jffsinit.sh $(INSTALLDIR)/usr/sbin
 	install -m 0755 plugin.sh $(INSTALLDIR)/usr/sbin
 	install -m 0755 helper.sh $(INSTALLDIR)/usr/sbin
-	install -m 0755 key.asp  $(INSTALLDIR)/www
 	install -m 0755 Softcenter.asp $(INSTALLDIR)/www
 	install -m 0755 Softcenter_mount.asp $(INSTALLDIR)/www
 	install -m 0755 i18n.js $(INSTALLDIR)/www/js
