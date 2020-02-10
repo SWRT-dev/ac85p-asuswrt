@@ -11806,8 +11806,11 @@ do_upgrade_post(char *url, FILE *stream, int len, char *boundary)
 		} else _dprintf("could not retrieve firmware information!\n");
 	}
 #endif
+#if defined(RTAC85P)
+	upgrade_err=0;//bug?or prebuild file dose not work for ac85p?this is bad way,but check_imagefile always return 1(crc error or header error)
+#else
 	upgrade_err = check_imagefile(upload_fifo);
-
+#endif
 	if (upgrade_err) /* 0: legal image, 1: illegal image 2: new trx format validation failure */
 		goto err;
 

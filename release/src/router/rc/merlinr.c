@@ -94,6 +94,9 @@ void merlinr_init_done()
 #if defined(RTCONFIG_QCA)
 	if(!nvram_get("bl_ver"))
 		nvram_set("bl_ver", "1.0.0.0");
+#elif defined(RTCONFIG_RALINK)
+	if(!nvram_get("bl_ver"))
+		nvram_set("bl_ver", nvram_get("blver"));
 #elif defined(RTCONFIG_LANTIQ)
 #if !defined(K3C)
 	if(!nvram_get("bl_ver"))

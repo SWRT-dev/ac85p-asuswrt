@@ -173,6 +173,12 @@ int ej_show_sysinfo(int eid, webs_t wp, int argc, char_t ** argv)
 				if (tmp)
 					sscanf(tmp, "system type  :  %[^\n]", result);
 				else
+					strcpy(result, "MT7621");
+#elif defined(RTCONFIG_RALINK)
+				tmp = strstr(buffer, "system type");
+				if (tmp)
+					sscanf(tmp, "system type  :  %[^\n]", result);
+				else
 					strcpy(result, "GRX500 rev 1.2");
 #elif  defined(RTCONFIG_QCA)
 				char model[64];
@@ -233,7 +239,8 @@ int ej_show_sysinfo(int eid, webs_t wp, int argc, char_t ** argv)
 			}
 			else
 				strcpy(result, "0");//bug?
-
+#elif defined(RTCONFIG_RALINK)
+			strcpy(result, "0");
 #endif
 		} else if(strcmp(type,"memory.total") == 0) {
 			sysinfo(&sys);
@@ -410,7 +417,7 @@ int ej_show_sysinfo(int eid, webs_t wp, int argc, char_t ** argv)
 				free(buffer);
 			}
 			unlink("/rom/opt/lantiq/etc/wave_components.ver");
-#elif defined(RTCONFIG_QCA)
+#elif defined(RTCONFIG_QCA) || defined(RTCONFIG_RALINK)
 					strcpy(result,"Unknow");
 #endif
 #ifdef RTCONFIG_QTN
