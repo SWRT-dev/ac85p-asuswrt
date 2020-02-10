@@ -1,3 +1,15 @@
+asus official firmware has a bug, you always get an error:illegal image when you upload firmware or anything,i think asus confuses ac85p and ac85u, webui too
+
+follow these steps
+1.online firmware update to 51599,no other way
+2.enable ssh
+3.upload firmware to /tmp
+4.rename firmware to linux.trx
+5.execute "rc rc_service restart_upgrade"
+6.after automatic rebooting, everything is ok
+
+
+
 The GPL source is created for ASUS wireless router related products. Please visit the ASUS support site (http://support.asus.com) to get the latest GPL tarball.It has a lot in common with many wireless router open source projects, including Oleg/Tomato/DD-WRT/OpenWRT. Thanks the developers of those projects for making the source code available.
 
 Set Up Environment(Tested in Fedora 8/9 and Ubuntu)
