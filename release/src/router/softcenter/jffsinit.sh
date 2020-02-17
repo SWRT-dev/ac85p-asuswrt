@@ -37,16 +37,17 @@ if [ "$(nvram get sc_mount)" == 1 ];then
 			mkdir -p $usb_disk/res
 			mkdir -p $usb_disk/webs
 			mkdir -p $usb_disk/scripts
+			mkdir -p $usb_disk/lib
 			mkdir -p /jffs/softcenter/etc
 			mkdir -p /jffs/softcenter/init.d
 			mkdir -p /jffs/softcenter/configs
 			mkdir -p /jffs/softcenter/ss
-			mkdir -p /jffs/softcenter/lib
 			mkdir -p /jffs/softcenter/perp
 			ln -sf $usb_disk/bin /jffs/softcenter/bin
 			ln -sf $usb_disk/res /jffs/softcenter/res
 			ln -sf $usb_disk/webs /jffs/softcenter/webs
 			ln -sf $usb_disk/scripts /jffs/softcenter/scripts
+			ln -sf $usb_disk/lib /jffs/softcenter/lib
 		fi
 	fi
 else
@@ -87,6 +88,7 @@ else
 		dbus set softcenter_arch="mipsle"
 	else
 		dbus set softcenter_arch="$ARCH"
+	fi
 fi
 
 dbus set softcenter_api=`cat /jffs/softcenter/.soft_ver`
@@ -110,5 +112,4 @@ export PERP_BASE=/softcenter/perp
 
 EOF
 fi
-
 
