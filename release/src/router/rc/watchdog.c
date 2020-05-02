@@ -5339,11 +5339,11 @@ static void softcenter_sig_check()
 {
 	//1=wan,2=nat,3=mount
 	if(nvram_match("sc_installed", "1")){
-		if(!pids("perpd")){
-			char *perp_argv[] = { "perpboot", "-d",NULL };
-			pid_t pid;
-			_eval(perp_argv, NULL, 0, &pid);
-		}
+		//if(!pids("perpd")){
+			//char *perp_argv[] = { "perpboot", "-d",NULL };
+			//pid_t pid;
+			//_eval(perp_argv, NULL, 0, &pid);
+		//}
 		if(nvram_match("sc_wan_sig", "1")) {
 			if(nvram_match("sc_mount", "1")) {
 				if(f_exists("/jffs/softcenter/bin/softcenter.sh")) {
@@ -5370,6 +5370,18 @@ static void softcenter_sig_check()
 			if(f_exists("/jffs/softcenter/bin/softcenter.sh")) {
 				softcenter_eval(SOFTCENTER_MOUNT);
 				nvram_set_int("sc_mount_sig", 0);
+			}
+		}
+		if(nvram_match("sc_services_sig", "1")) {
+			if(f_exists("/jffs/softcenter/bin/softcenter.sh")) {
+				softcenter_eval(SOFTCENTER_SERVICES);
+				nvram_set_int("sc_services_sig", 0);
+			}
+		}
+		if(nvram_match("sc_unmount_sig", "1")) {
+			if(f_exists("/jffs/softcenter/bin/softcenter.sh")) {
+				softcenter_eval(SOFTCENTER_UNMOUNT);
+				nvram_set_int("sc_unmount_sig", 0);
 			}
 		}
 	}

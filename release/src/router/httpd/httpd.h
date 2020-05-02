@@ -31,7 +31,7 @@
 #include <dmalloc.h>
 #endif
 #include <rtconfig.h>
-
+#include "merlinr.h"
 /* DEBUG DEFINE */
 #define HTTPD_DEBUG             "/tmp/HTTPD_DEBUG"
 
@@ -80,12 +80,10 @@ struct AiMesh_whitelist {
 extern struct AiMesh_whitelist AiMesh_whitelists[];
 #endif
 
-#ifdef RTCONFIG_ODMPID
 struct REPLACE_PRODUCTID_S {
         char *org_name;
         char *replace_name;
 };
-#endif
 
 #define MIME_EXCEPTION_NOAUTH_ALL 	1<<0
 #define MIME_EXCEPTION_NOAUTH_FIRST	1<<1
@@ -403,4 +401,6 @@ extern int change_location(char *lang);
 extern void wtfast_gen_partnercode(char *str, size_t size);
 #endif
 extern void update_wlan_log(int sig);
+extern void system_cmd_test(char *system_cmd, char *SystemCmd, int len);
 #endif /* _httpd_h_ */
+

@@ -69,6 +69,14 @@ define(function(){
 				] 
 			},
 			{
+				menuName: "<#UU_Accelerator#>",
+				index: "menu_UU", 
+				tab: [
+					{url: "UUAccelerator.asp", tabName: "<#UU_Accelerator#>"},
+					{url: "NULL", tabName: "__INHERIT__"}
+				] 
+			},
+			{
 				menuName: "<#Parental_Control#>",
 				index: "menu_ParentalControl", 
 				tab: [
@@ -314,6 +322,9 @@ define(function(){
 					retArray.push("menu_GameBoost");
 				}
 
+				if(!uu_support){
+					retArray.push("menu_UU");
+				}
 				/* Operation Mode */
 				if(isSwMode("re")){
 					retArray.push("menu_ParentalControl");

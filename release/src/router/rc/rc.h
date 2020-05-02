@@ -368,6 +368,14 @@ extern int setWlOffLed(void);
 #ifndef CONFIG_BCMWL5
 extern int IS_ATE_FACTORY_MODE(void);
 #endif
+extern int set_HwId(const char *HwId);
+extern int get_HwId(void);
+extern int set_HwVersion(const char *HwVer);
+extern int get_HwVersion(void);
+extern int set_HwBom(const char *HwBom);
+extern int get_HwBom(void);
+extern int set_DateCode(const char *DateCode);
+extern int get_DateCode(void);
 
 /* board API under sysdeps/ralink/ralink.c */
 #ifdef RTCONFIG_RALINK
@@ -859,6 +867,10 @@ extern void ip2class(char *lan_ip, char *netmask, char *buf);
 #ifdef RTCONFIG_WIFI_SON
 extern void set_cap_apmode_filter(void);
 #endif
+extern void write_extra_filter(FILE *fp);
+#ifdef RTCONFIG_IPV6
+extern void write_extra_filter6(FILE *fp);
+#endif
 
 /* pc.c */
 #ifdef RTCONFIG_PARENTALCTRL
@@ -1023,6 +1035,7 @@ extern void stop_jffs2(int stop);
 static inline void start_jffs2(void) { }
 static inline void stop_jffs2(int stop) { }
 #endif
+extern void userfs_prepare(const char *folder);
 
 // watchdog.c
 extern void led_control_normal(void);

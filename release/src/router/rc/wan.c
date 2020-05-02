@@ -1766,10 +1766,6 @@ stop_wan_if(int unit)
 		stop_igmpproxy();
 	}
 
-#ifdef RTCONFIG_OPENVPN
-	stop_ovpn_eas();
-#endif
-
 #ifdef RTCONFIG_VPNC
 	/* Stop VPN client */
 	stop_vpnc();
@@ -3391,6 +3387,9 @@ stop_wan(void)
 	fc_fini();
 #endif
 
+#ifdef RTCONFIG_OPENVPN
+	stop_ovpn_eas();
+#endif
 #if defined(RTCONFIG_PPTPD) || defined(RTCONFIG_ACCEL_PPTPD)
 	if (nvram_get_int("pptpd_enable"))
 		stop_pptpd();

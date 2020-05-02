@@ -649,16 +649,6 @@ void setup_passwd(void)
 	create_passwd();
 }
 
-static char *admin_user(void)
-{
-	char *http_user = NULL;
-
-	if (((http_user =  nvram_get("http_username")) == NULL) || (*http_user == 0))
-		http_user = "admin";
-
-	return http_user;
-}
-
 void create_passwd(void)
 {
 	char s[512];
@@ -666,7 +656,7 @@ void create_passwd(void)
 	char salt[32];
 	FILE *f;
 	mode_t m;
-	char *http_user = admin_user();
+	char *http_user;
 #ifdef RTCONFIG_NVRAM_ENCRYPT
 	char dec_passwd[64];
 #endif
@@ -704,6 +694,8 @@ void create_passwd(void)
 		p = dec_passwd;
 	}
 #endif
+	if (((http_user = nvram_get("http_username")) == NULL) || (*http_user == 0)) http_user = "admin";
+
 #ifdef RTCONFIG_SAMBASRV	//!!TB
 	if (((smbd_user = nvram_get("smbd_user")) == NULL) || (*smbd_user == 0) || !strcmp(smbd_user, "root"))
 		smbd_user = "nas";
@@ -946,6 +938,7 @@ static void link_down(void)
 	eval("rtkswitch", "15");
 #endif
 
+#ifdef RTCONFIG_CONCURRENTREPEATER
 #ifdef RTCONFIG_REALTEK
 	if(access_point_mode()) {
 #else
@@ -956,22 +949,33 @@ static void link_down(void)
 		foreach (word, ifnames, next) {
 			SKIP_ABSENT_FAKE_IFACE(word);
 #ifdef RTCONFIG_REALTEK
-			eval("iwpriv", word, "set_mib", "func_off=1");
-			eval("iwpriv", word, "del_sta", "all");
-#elif defined(RTCONFIG_RALINK)
-			eval("iwpriv",word,"set", "RadioOn=0");
-#else /* RTCONFIG_QCA */
-			ifconfig(word, 0, NULL, NULL);
+				eval("iwpriv", word, "set_mib", "func_off=1");
+				eval("iwpriv", word, "del_sta", "all");
+#else
+				eval("iwpriv",word,"set", "RadioOn=0");
 #endif
 		}
 	}
+	else
+#endif
+	{
+		/* ifconfig down wireless */
+		strcpy(ifnames, nvram_safe_get("wl_ifnames"));
+		foreach (word, ifnames, next) {
+			SKIP_ABSENT_FAKE_IFACE(word);
+			ifconfig(word, 0, NULL, NULL);
+		}
+	}
+
 }
 
 static void link_up(void)
 {
 	char word[256], *next, ifnames[128];
+#ifdef RTCONFIG_CONCURRENTREPEATER
 	char  tmp[100], prefix[]="wlXXXXXXX_";
 	int  band = 0;
+#endif
 	/* link up LAN ports */
 #ifdef RTCONFIG_REALTEK
 	lanport_ctrl(1);
@@ -979,6 +983,7 @@ static void link_up(void)
 	eval("rtkswitch", "14");
 #endif
 
+#ifdef RTCONFIG_CONCURRENTREPEATER
 #ifdef RTCONFIG_REALTEK
 	if(access_point_mode()) {
 #else
@@ -992,12 +997,20 @@ static void link_up(void)
 			if (nvram_match(strcat_r(prefix, "radio", tmp), "1"))
 #ifdef RTCONFIG_REALTEK
 				eval("iwpriv",word,"set_mib", "func_off=0");
-#elif defined(RTCONFIG_RALINK)
+#else
 				eval("iwpriv",word,"set", "RadioOn=1");
-#else /* RTCONFIG_QCA */
-				ifconfig(word, IFUP, NULL, NULL);
 #endif
 			band++;
+		}
+	}
+	else
+#endif
+	{
+		/* ifconfig up wireless */
+		strcpy(ifnames, nvram_safe_get("wl_ifnames"));
+		foreach (word, ifnames, next) {
+			SKIP_ABSENT_FAKE_IFACE(word);
+			ifconfig(word, IFUP, NULL, NULL);
 		}
 	}
 }
@@ -1053,9 +1066,8 @@ void gen_apmode_dnsmasq(void)
 	if ((value = strrchr(glan, '.')) != NULL) *(value + 1) = 0;
 
 	fprintf(fp, "pid-file=/var/run/dnsmasq.pid\n"
-		    "user=%s\n"
+		    "user=nobody\n"
 		    "bind-dynamic\n"		// listen only on interface & lo
-		  , admin_user()
 		);
 	fprintf(fp,"interface=%s\n",BR_GUEST);
 	fprintf(fp,"resolv-file=/tmp/resolv.conf\n");
@@ -1244,12 +1256,11 @@ void start_dnsmasq(void)
 		return;
 
 	fprintf(fp, "pid-file=/var/run/dnsmasq.pid\n"
-		    "user=%s\n"
+		    "user=nobody\n"
 		    "bind-dynamic\n"		// listen only on interface & lo
 #if defined(RTCONFIG_SOFTCENTER)
 		    "conf-dir=/tmp/etc/dnsmasq.user\n"
 #endif
-		, admin_user()
 		);
 
 #if defined(RTCONFIG_REDIRECT_DNAME)
@@ -4105,9 +4116,6 @@ start_smartdns(void)
 		killall_tk("smartdns");
 	if (f_exists("/etc/smartdns.conf"))
 		unlink("/etc/smartdns.conf");
-	//doSystem("cp /rom/etc/smartdns.conf /etc/smartdns.conf");
-	//doSystem("echo server $(nvram get wan_dns1_x) >> /etc/smartdns.conf");
-	//doSystem("echo server $(nvram get wan_dns2_x) >> /etc/smartdns.conf");
 	if ((fp = fopen("/etc/smartdns.conf", "w")) == NULL){
 		logmessage(LOGNAME, "start smartdns failed\n");
 		return;
@@ -4115,6 +4123,7 @@ start_smartdns(void)
 	fprintf(fp, "server-name MerlinR-smartdns\n");
 	fprintf(fp, "conf-file /etc/blacklist-ip.conf\n");
 	fprintf(fp, "conf-file /etc/whitelist-ip.conf\n");
+	//fprintf(fp, "conf-file /etc/seconddns.conf\n");
 	fprintf(fp, "bind [::]:9053\n");
 	//fprintf(fp, "bind-tcp [::]:5353\n");
 	fprintf(fp, "cache-size 9999\n");
@@ -4124,19 +4133,27 @@ start_smartdns(void)
 	//fprintf(fp, "whitelist-ip 1.0.0.0/16\n");
 	//fprintf(fp, "ignore-ip 1.0.0.0/16\n");
 	//fprintf(fp, "force-AAAA-SOA yes\n");
-	//fprintf(fp, "dualstack-ip-selection yes\n");
 	//fprintf(fp, "edns-client-subnet 1.0.0.0/16\n");
 	//fprintf(fp, "rr-ttl 300\n");
 	//fprintf(fp, "rr-ttl-min 60\n");
 	//fprintf(fp, "rr-ttl-max 86400\n");
-	fprintf(fp, "log-level info\n");
-	//fprintf(fp, "log-level %s\n",nvram_get("smartdns_loglevel"));
+	fprintf(fp, "log-level warn\n");
 	//fprintf(fp, "log-file /var/log/smartdns.log\n");
 	//fprintf(fp, "log-size 128k\n");
 	//fprintf(fp, "log-num 2\n");
-	fprintf(fp, "server 114.114.114.114\n");
-	fprintf(fp, "server 119.29.29.29\n");
-	fprintf(fp, "server 223.5.5.5\n");
+#if defined(BLUECAVE) && !defined(K3C)
+	if(!strncmp(nvram_get("territory_code"), "CN",2)){
+#endif
+		fprintf(fp, "server 114.114.114.114\n");
+		fprintf(fp, "server 119.29.29.29\n");
+		fprintf(fp, "server 223.5.5.5\n");
+#if defined(BLUECAVE) && !defined(K3C)
+	} else {
+		fprintf(fp, "server 8.8.8.8\n");
+		fprintf(fp, "server 208.67.222.222\n");
+		fprintf(fp, "server 1.1.1.1\n");
+	}
+#endif
 	for (unit = WAN_UNIT_FIRST; unit < WAN_UNIT_MAX; unit++) {
 		char *wan_xdns;
 		char wan_xdns_buf[sizeof("255.255.255.255 ")*2];
@@ -4156,9 +4173,13 @@ start_smartdns(void)
 	}
 	//fprintf(fp, "server %s\n", nvram_get("wan_dns1_x"));
 	//fprintf(fp, "server %s\n", nvram_get("wan_dns2_x"));
-	fprintf(fp, "server-tcp 8.8.8.8\n");
-	fprintf(fp, "server-tcp 8.8.4.4\n");
+	//fprintf(fp, "server-tcp 8.8.8.8\n");
+	//fprintf(fp, "server-tcp 8.8.4.4\n");
+	//fprintf(fp, "tcp-idle-time 120\n");
+	//fprintf(fp, "server-tls 8.8.8.8:853\n");
 	//fprintf(fp, "server-https https://cloudflare-dns.com/dns-query\n");
+	//fprintf(fp, "speed-check-mode none\n");
+	//fprintf(fp, "dualstack-ip-selection no\n");
 	fclose(fp);
 	//logmessage(LOGNAME, "start smartdns:%d", pid);
 	_eval(smartdns_argv, NULL, 0, &pid);
@@ -6047,7 +6068,7 @@ void chilli_config(void)
 		int declen2 = pw_dec_len(chilli_macpasswd);
 		char dec_passwd2[declen2];
 		memset(dec_passwd2, 0, sizeof(dec_passwd2));
-		pw_dec(chilli_macpasswd, dec_passwd2;);
+		pw_dec(chilli_macpasswd, dec_passwd2);
 		chilli_macpasswd = dec_passwd2;
 #endif
 		if (strlen(chilli_macpasswd) > 0)
@@ -7748,7 +7769,7 @@ start_services(void)
 #endif /* RTCONFIG_DBLOG */
 #endif /* RTCONFIG_FRS_FEEDBACK */
 	run_custom_script("services-start", 0, NULL, NULL);
-	
+	nvram_set_int("sc_services_sig", 1);
 	return 0;
 }
 
@@ -9320,17 +9341,11 @@ again:
 	}
 	else if(strcmp(script, "upgrade") == 0) {
 //we must make sure that usb can umount and do not start skipd again
+//don't delete scripts in init.d
 #if defined(RTCONFIG_SOFTCENTER)
-#if defined(RTCONFIG_LANTIQ)
-	if(nvram_get_int("k3c_enable"))
-		doSystem("/usr/sbin/plugin.sh stop");
-#elif defined(RTCONFIG_BCMARM)
-	doSystem("/usr/sbin/plugin.sh stop");
-#elif defined(RTCONFIG_QCA)
-	doSystem("/usr/sbin/plugin.sh stop");
-#elif defined(RTCONFIG_RALINK)
-	doSystem("/usr/sbin/plugin.sh stop");
-#endif
+//#if defined(RTCONFIG_LANTIQ) || defined(RTCONFIG_BCMARM) || defined(RTCONFIG_QCA) || defined(RTCONFIG_RALINK)
+//		doSystem("/usr/sbin/plugin.sh stop");
+//#endif
 #endif
 		if(action&RC_SERVICE_STOP) {
 			g_upgrade = 1;

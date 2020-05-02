@@ -3851,6 +3851,9 @@ TRACE_PT("write wl filter\n");
 	}
 #endif
 
+	// extra filter
+	write_extra_filter(fp);
+
 	fprintf(fp, "COMMIT\n\n");
 	if(fp) fclose(fp);
 
@@ -3869,6 +3872,10 @@ TRACE_PT("write wl filter\n");
 		{
 			fprintf(fp_ipv6, "-A FORWARD -j %s\n", logdrop);
 		}
+
+		// extra filter
+		write_extra_filter6(fp_ipv6);
+
 		fprintf(fp_ipv6, "COMMIT\n\n");
 		fclose(fp_ipv6);
 		eval("ip6tables-restore", "/tmp/filter_rules_ipv6");
@@ -4956,6 +4963,9 @@ TRACE_PT("write wl filter\n");
 	}
 #endif
 
+	// extra filter
+	write_extra_filter(fp);
+
 	fprintf(fp, "COMMIT\n\n");
 	if(fp) fclose(fp);
 
@@ -4974,6 +4984,10 @@ TRACE_PT("write wl filter\n");
 		{
 			fprintf(fp_ipv6, "-A FORWARD -j %s\n", logdrop);
 		}
+
+		// extra filter
+		write_extra_filter6(fp_ipv6);
+
 		fprintf(fp_ipv6, "COMMIT\n\n");
 		fclose(fp_ipv6);
 		eval("ip6tables-restore", "/tmp/filter_rules_ipv6");

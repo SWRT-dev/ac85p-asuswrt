@@ -38,17 +38,11 @@
 #include <shutils.h>
 #include <shared.h>
 
-#ifdef RTCONFIG_ODMPID
 struct REPLACE_PRODUCTID_S replace_productid_t[] =
 {
 	{"LYRA_VOICE", "LYRA VOICE"},
-	{"RT-AC57U_V2", "RT-AC57U V2"},
-	{"RT-AC58U_V2", "RT-AC58U V2"},
-	{"RT-AC1300G_PLUS_V2", "RT-AC1300G PLUS V2"},
-	{"RT-AC1500G_PLUS", "RT-AC1500G PLUS"},
 	{NULL, NULL}
 };
-#endif
 
 static char * get_arg(char *args, char **next);
 static void call(char *func, FILE *stream);
@@ -148,8 +142,7 @@ process_asp (char *s, char *e, FILE *f)
 	return end;
 }
 
-#ifdef RTCONFIG_ODMPID
-static void replace_productid(char *GET_PID_STR, char *RP_PID_STR, int len){
+extern void replace_productid(char *GET_PID_STR, char *RP_PID_STR, int len){
 
 	struct REPLACE_PRODUCTID_S *p;
 
@@ -168,7 +161,6 @@ static void replace_productid(char *GET_PID_STR, char *RP_PID_STR, int len){
 			*RP_PID_STR = ' ';
 	}
 }
-#endif
 
 // Call this function if and only if we can read whole <#....#> pattern.
 static char *
@@ -189,18 +181,13 @@ translate_lang (char *s, char *e, FILE *f, kw_t *pkw)
 
 		desc = search_desc (pkw, name);
 		if (desc != NULL) {
-#ifdef RTCONFIG_ODMPID
 			static char pattern1[2048];
 			char RP_PID_STR[32];
 			char GET_PID_STR[32]={0};
 			char *p_PID_STR = NULL;
 			char *PID_STR = nvram_safe_get("productid");
-#if defined(R7900P) || defined(SBRAC1900P) || defined(SBRAC3200P) || defined(K3) || defined(K3C)
-#if defined(R7900P) 
-			char *modelname = "R8000P";
-#else
+#if defined(R7900P) || defined(SBRAC1900P) || defined(SBRAC3200P) || defined(K3) || defined(K3C) || defined(R8000P) || defined(RAX20)
 			char *modelname = nvram_safe_get("modelname");
-#endif
 			int merlinr_len;
 #endif
 			char *pSrc, *pDest;
@@ -210,15 +197,15 @@ translate_lang (char *s, char *e, FILE *f, kw_t *pkw)
 			pid_len = strlen(PID_STR);
 			get_pid_len = strlen(GET_PID_STR);
 
-#if defined(R7900P) || defined(SBRAC1900P) || defined(SBRAC3200P) || defined(K3) || defined(K3C)
-			//char *modelname = nvram_safe_get("modelname");
+#if defined(R7900P) || defined(SBRAC1900P) || defined(SBRAC3200P) || defined(K3) || defined(K3C) || defined(R8000P) || defined(RAX20)
 			merlinr_len = strlen(modelname);
-			if (merlinr_len && strcmp(PID_STR, modelname) != 0) {
+			if (merlinr_len && strcmp(RP_PID_STR, modelname) != 0)
 				strlcpy(RP_PID_STR, modelname, merlinr_len+1);
 #else 
-			if (get_pid_len && strcmp(PID_STR, GET_PID_STR) != 0) {
-				replace_productid(GET_PID_STR, RP_PID_STR, sizeof(RP_PID_STR));
+			memset(RP_PID_STR, 0, sizeof(RP_PID_STR));
+			replace_productid(GET_PID_STR, RP_PID_STR, sizeof(RP_PID_STR));
 #endif
+			if(strcmp(PID_STR, RP_PID_STR) != 0){
 				get_pid_len = strlen(RP_PID_STR);
 				pSrc  = desc;
 				pDest = pattern1;
@@ -237,7 +224,7 @@ translate_lang (char *s, char *e, FILE *f, kw_t *pkw)
 					desc = pattern1;
 				}
 			}
-#endif
+
 			fprintf (f, "%s", desc);
 		}
 
@@ -278,7 +265,7 @@ do_ej(char *path, FILE *stream)
 #ifdef TRANSLATE_ON_FLY
 	// Load dictionary file
 	lang = nvram_safe_get("preferred_lang");
-	if(!check_lang_support(lang)){
+	if(!check_lang_support_merlinr(lang)){
 		lang = nvram_default_get("preferred_lang");
 		nvram_set("preferred_lang", lang);
 	}

@@ -258,7 +258,7 @@ function initial(){
 				html += "<th>";
 				html += model_name + " ( " + mac + " )";
 				html += "<br>";
-				html += "<#AiMesh_NodeLocation#> : " + alias;
+				html += "<#AiMesh_NodeLocation#> : " + htmlEnDeCode.htmlEncode(alias);
 				html += "</th>";
 				html += "<td id='amas_" + mac_id + "'>";
 				html += "<div id='current_version'><#ADSL_FW_item1#> : " + fwver + "</div>";

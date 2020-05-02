@@ -1765,6 +1765,10 @@ config RTCONFIG_WTF_REDEEM
 	bool "wtf_redeem support"
 	default n
 
+config RTCONFIG_UUPLUGIN
+	bool "UU plugin support"
+	default n
+
 config RTCONFIG_SOFTCENTER
 	bool "softcenter"
 	default n
@@ -1775,10 +1779,6 @@ config RTCONFIG_SMARTDNS
 
 config RTCONFIG_FRS_LIVE_UPDATE
 	bool "RTCONFIG_FRS_LIVE_UPDATE support"
-	default n
-
-config RTCONFIG_UUPLUGIN
-	bool "UU plugin support"
 	default n
 
 config RTCONFIG_FRS_FEEDBACK

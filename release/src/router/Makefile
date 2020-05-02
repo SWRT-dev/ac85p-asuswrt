@@ -994,7 +994,11 @@ else
 obj-$(NEED_SAMBA3) += $(if $(RTCONFIG_SAMBA36X),samba-3.6.x,samba3)
 endif
 else
+ifeq ($(RTCONFIG_QCA),y)
+obj-$(NEED_SAMBA3) += $(if $(RTCONFIG_SAMBA36X),samba-3.6.x_opwrt,samba3)
+else
 obj-$(NEED_SAMBA3) += samba3
+endif
 endif
 
 ifeq ($(RTCONFIG_NTFS),y)
@@ -3658,7 +3662,7 @@ pppd/stamp-h1: kernel_header
 
 pppd: pppd/stamp-h1
 	@$(SEP)
-	@$(MAKE) -C pppd MFLAGS='$(if $(RTCONFIG_IPV6),HAVE_INET6=y,) \
+	@$(MAKE) -C pppd MFLAGS='$(if $(RTCONFIG_IPV6),HAVE_INET6=y,) HAVE_MULTILINK=y USE_TDB=y \
 	EXTRACFLAGS="$(EXTRACFLAGS) -idirafter $(KDIR)/include $(if $(RTCONFIG_VPNC),-DRTCONFIG_VPNC,)"'
 
 pppd-clean:
@@ -4146,7 +4150,7 @@ dropbear/config.h: dropbear/config.h.in
 			$(if $(RTCONFIG_PROTECTION_SERVER),-DSECURITY_NOTIFY,)" \
 		LDFLAGS="-ffunction-sections -fdata-sections -Wl,--gc-sections -L$(STAGEDIR)/usr/lib" \
 		LIBS="$(if $(RTCONFIG_PROTECTION_SERVER),-lptcsrv)" \
-		$(CONFIGURE) --disable-zlib --disable-pam \
+		$(CONFIGURE) --disable-harden --disable-zlib --disable-pam \
 		--enable-openpty --enable-syslog --enable-shadow --enable-bundled-libtom \
 		--disable-lastlog \
 		--disable-utmp --disable-utmpx \
@@ -5736,7 +5740,7 @@ avahi-0.6.31/Makefile:
 		CFLAGS="$(CFLAGS) -I$(STAGEDIR)/usr/include -I$(TOP)/shared -I$(SRCBASE)/include $(if $(RTCONFIG_BCMARM),-I$(SRCBASE)/shared/bcmwifi/include)" \
 		--prefix=/usr --with-distro=archlinux \
 		--disable-glib --disable-gobject --disable-qt3 --disable-qt4 --disable-gtk \
-		--enable-dbus --enable-compat-libdns_sd --disable-gdbm --disable-python \
+		--disable-dbus --disable-gdbm --disable-python \
 		--disable-pygtk --disable-python-dbus --disable-mono --disable-monodoc \
 		--disable-gtk3 --with-xml=expat \
 		--disable-silent-rules \
@@ -5750,19 +5754,11 @@ avahi-0.6.31-install:
 		install -D avahi-0.6.31/avahi-daemon/.libs/avahi-daemon $(INSTALLDIR)/avahi-0.6.31/usr/sbin/avahi-daemon ; \
 		install -D avahi-0.6.31/avahi-common/.libs/libavahi-common.so.3.5.3 $(INSTALLDIR)/avahi-0.6.31/usr/lib/libavahi-common.so.3.5.3 ; \
 		install -D avahi-0.6.31/avahi-core/.libs/libavahi-core.so.7.0.2 $(INSTALLDIR)/avahi-0.6.31/usr/lib/libavahi-core.so.7.0.2 ; \
-		install -D avahi-0.6.31/avahi-compat-libdns_sd/.libs/libdns_sd.so.1.0.0 $(INSTALLDIR)/avahi-0.6.31/usr/lib/libdns_sd.so.1.0.0 ; \
-		install -D avahi-0.6.31/avahi-client/.libs/libavahi-client.so.3.2.9 $(INSTALLDIR)/avahi-0.6.31/usr/lib/libavahi-client.so.3.2.9 ; \
 		$(STRIP) $(INSTALLDIR)/avahi-0.6.31/usr/sbin/avahi-daemon ; \
 		$(STRIP) $(INSTALLDIR)/avahi-0.6.31/usr/lib/libavahi-common.so.3.5.3 ; \
 		$(STRIP) $(INSTALLDIR)/avahi-0.6.31/usr/lib/libavahi-core.so.7.0.2 ; \
-		$(STRIP) $(INSTALLDIR)/avahi-0.6.31/usr/lib/libdns_sd.so.1.0.0 ; \
-		$(STRIP) $(INSTALLDIR)/avahi-0.6.31/usr/lib/libavahi-client.so.3.2.9 ; \
 		cd $(INSTALLDIR)/avahi-0.6.31/usr/lib && ln -sf libavahi-common.so.3.5.3 libavahi-common.so.3 ; \
 		cd $(INSTALLDIR)/avahi-0.6.31/usr/lib && ln -sf libavahi-core.so.7.0.2 libavahi-core.so.7 ; \
-		cd $(INSTALLDIR)/avahi-0.6.31/usr/lib && ln -sf libdns_sd.so.1.0.0 libdns_sd.so.1 ; \
-		cd $(INSTALLDIR)/avahi-0.6.31/usr/lib && ln -sf libdns_sd.so.1.0.0 libdns_sd.so ; \
-		cd $(INSTALLDIR)/avahi-0.6.31/usr/lib && ln -sf libavahi-client.so.3.2.9 libavahi-client.so.3 ; \
-		cd $(INSTALLDIR)/avahi-0.6.31/usr/lib && ln -sf libavahi-client.so.3.2.9 libavahi-client.so ; \
 	fi
 
 avahi-0.6.31-clean:

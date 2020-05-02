@@ -1664,10 +1664,41 @@ int get_mac_5g_2(unsigned char dst[])
 }
 #endif
 
+/**
+ * Check @buf before setting it to @nv_name.
+ * @return:
+ * 	0:	success
+ *     -1:	invalid parameter
+ *   otherwise:	error
+ */
+static int sfunc_datecode(char *nv_name, unsigned char *buf)
+{
+	int year, month, day;
+	char tmp[DATECODE_LENGTH + 1];
+
+	if (!nv_name || *nv_name == '\0' || !buf)
+		return -1;
+
+	strlcpy(tmp, buf, 4 + 1);
+	year = safe_atoi(tmp);
+	strlcpy(tmp, buf + 4, 2 + 1);
+	month = safe_atoi(tmp);
+	strlcpy(tmp, buf + 6, 2 + 1);
+	day = safe_atoi(tmp);
+
+	if (year < 2018 || year > 2100 || month < 1 || month > 12 || day < 1 || day > 31) {
+		nvram_set(nv_name, "");
+		return 0;
+	}
+
+	nvram_set(nv_name, buf);
+	return 0;
+}
+
 void init_syspara(void)
 {
 	unsigned char buffer[16];
-	unsigned char *dst;
+	unsigned char *dst, *p;
 	unsigned int bytes;
 	char macaddr[] = "00:11:22:33:44:55";
 	char macaddr2[] = "00:11:22:33:44:58";
@@ -1690,6 +1721,20 @@ void init_syspara(void)
 	char cfg_group_buf[CFGSYNC_GROUPID_LEN+1];
 #endif /* RTCONFIG_CFGSYNC */
 	char ipaddr_lan[16];
+	unsigned char factory_var_buf[256];
+	struct factory_var_s {
+		char *nv_name;
+		unsigned int factory_offset;
+		unsigned int length;
+		int (*set_func)(char *nv_name, unsigned char *buf);
+	} factory_var_tbl[] = {
+		{ "HwId", OFFSET_HWID, HWID_LENGTH, NULL },
+		{ "HwVer", OFFSET_HWVERSION, HWVERSION_LENGTH, NULL },
+		{ "HwBom", OFFSET_HWBOM, HWBOM_LENGTH, NULL },
+		{ "DCode", OFFSET_DATECODE, DATECODE_LENGTH, sfunc_datecode },
+
+		{ NULL, 0, 0, NULL }
+	}, *pfv;
 
 #if defined(RT4GAC53U) /* for Gobi */
 	boot_version_ck();
@@ -1704,6 +1749,30 @@ void init_syspara(void)
 	memset(pin, 0, sizeof(pin));
 	memset(productid, 0, sizeof(productid));
 	memset(fwver, 0, sizeof(fwver));
+
+	for (pfv = &factory_var_tbl[0]; pfv->nv_name && pfv->length; ++pfv) {
+		if (pfv->length >= sizeof(factory_var_buf))
+			continue;
+		*factory_var_buf = 0xFF;
+		if (FRead(factory_var_buf, pfv->factory_offset, pfv->length)) {
+			nvram_set(pfv->nv_name, "");
+			continue;
+		}
+
+		*(factory_var_buf + pfv->length) = '\0';
+		if ((p = strchr(factory_var_buf, 0xFF)) != NULL)
+			*p = '\0';
+		if (*factory_var_buf == '\0' || *factory_var_buf == 0xFF) {
+			nvram_set(pfv->nv_name, "");
+			continue;
+		}
+
+		if (pfv->set_func) {
+			pfv->set_func(pfv->nv_name, factory_var_buf);
+		} else {
+			nvram_set(pfv->nv_name, factory_var_buf);
+		}
+	}
 
 	if (FRead(dst, OFFSET_MAC_ADDR_2G, bytes) < 0) {  // ET0/WAN is same as 2.4G
 		_dprintf("READ MAC address 2G: Out of scope\n");

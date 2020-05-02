@@ -7,9 +7,6 @@ endif
 ifneq ($(or $(findstring linux-3.10.14,$(LINUXDIR))),)
 CFLAGS += -idirafter$(LINUXDIR)/include/uapi
 endif
-ifneq ($(or $(findstring linux-3.10.108,$(LINUXDIR))),)
-CFLAGS += -idirafter$(LINUXDIR)/include/uapi
-endif
 CFLAGS += $(PRIVATE_EXTRACFLAGS)
 CFLAGS += -I. -I$(TOP)/shared -I$(SRCBASE)/include
 ifneq ($(HND_ROUTER),y)
@@ -474,6 +471,10 @@ CFLAGS += -I$(TOP)/libletsencrypt
 LDFLAGS += -L$(TOP)/libletsencrypt -lletsencrypt
 endif
 
+ifeq ($(BUILD_NAME), GT-AC5300)
+CFLAGS += -DSUPPORT_GAME_PROFILE
+endif
+
 CFLAGS += $(if $(RTCONFIG_BLINK_LED),-I$(TOP)/bled)
 
 export CFLAGS
@@ -554,6 +555,9 @@ ifeq ($(RTCONFIG_AMAS),y)
 OBJS += ../hostapd-2.6/src/common/wpa_ctrl.o
 OBJS += ../hostapd-2.6/src/utils/os_unix.o
 endif
+endif
+ifeq ($(RTCONFIG_QCA),y)
+OBJS += roamast-qca.o
 endif
 endif
 
@@ -1094,7 +1098,7 @@ ifneq ($(wildcard ./prebuild/ate.o),)
 ate.o:
 	@-cp -f ./prebuild/ate.o .
 endif
-ifeq ($(BUILD_NAME),$(filter $(BUILD_NAME),RT-AC68U RT-AC3200 4G-AC68U GT-AC2900))
+ifeq ($(BUILD_NAME),$(filter $(BUILD_NAME),RT-AC68U RT-AC3200))
 ifneq ($(wildcard ./prebuild/cfe.o),)
 cfe.o:
 	@-cp -f ./prebuild/cfe.o .

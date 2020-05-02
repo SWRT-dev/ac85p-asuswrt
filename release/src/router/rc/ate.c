@@ -1176,6 +1176,56 @@ int asus_ate_command(const char *command, const char *value, const char *value2)
 		}
 		return 0;
 	}
+#if defined(CONFIG_BCMWL5) || defined(RTCONFIG_QCA)
+	else if (!strcmp(command, "Set_HwId")) {
+#if defined(RTCONFIG_CFEZ) && defined(RTCONFIG_BCMARM)
+		if (!chk_envrams_proc())
+			return EINVAL;
+#endif
+                if (set_HwId(value) < 0)
+                {
+                        puts("ATE_ERROR_INCORRECT_PARAMETER");
+                        return EINVAL;
+                }
+                return 0;
+	}
+	else if (!strcmp(command, "Set_HwVersion")) {
+#if defined(RTCONFIG_CFEZ) && defined(RTCONFIG_BCMARM)
+		if (!chk_envrams_proc())
+			return EINVAL;
+#endif
+                if (set_HwVersion(value) < 0)
+                {
+                        puts("ATE_ERROR_INCORRECT_PARAMETER");
+                        return EINVAL;
+                }
+                return 0;
+	}
+	else if (!strcmp(command, "Set_HwBom")) {
+#if defined(RTCONFIG_CFEZ) && defined(RTCONFIG_BCMARM)
+		if (!chk_envrams_proc())
+			return EINVAL;
+#endif
+                if (set_HwBom(value) < 0)
+                {
+                        puts("ATE_ERROR_INCORRECT_PARAMETER");
+                        return EINVAL;
+                }
+                return 0;
+	}
+	else if (!strcmp(command, "Set_DateCode")) {
+#if defined(RTCONFIG_CFEZ) && defined(RTCONFIG_BCMARM)
+		if (!chk_envrams_proc())
+			return EINVAL;
+#endif
+                if (set_DateCode(value) < 0)
+                {
+                        puts("ATE_ERROR_INCORRECT_PARAMETER");
+                        return EINVAL;
+                }
+                return 0;
+	}
+#endif
 	/*** ATE Get functions ***/
 	else if (!strcmp(command, "Get_FWVersion")) {
 		char fwver[16];
@@ -2036,6 +2086,24 @@ int asus_ate_command(const char *command, const char *value, const char *value2)
 			puts("0");
 		return 0;
 	}
+#if defined(CONFIG_BCMWL5) || defined(RTCONFIG_QCA)
+	else if (!strcmp(command, "Get_HwId")) {
+		get_HwId();
+		return 0;
+	}
+	else if (!strcmp(command, "Get_HwVersion")) {
+		get_HwVersion();
+		return 0;
+	}
+	else if (!strcmp(command, "Get_HwBom")) {
+		get_HwBom();
+		return 0;
+	}
+	else if (!strcmp(command, "Get_DateCode")) {
+		get_DateCode();
+		return 0;
+	}
+#endif
 	else if (!strcmp(command, "Get_RDG")) {
 #ifdef RTCONFIG_RALINK
 		if(nvram_match("reg_spec", "CE")) {
@@ -2206,3 +2274,4 @@ int ate_get_fw_upgrade_state(void) {
 
 		return 0;
 }
+

@@ -70,7 +70,7 @@ function initial(){
 		Reload_pdesc(document.form.fb_ptype,orig_page);
 	}		
 
-	if(modem_support == -1 || nomodem_support){
+	if(!modem_support || nomodem_support){
 		document.form.attach_modemlog.checked = false;
 		document.getElementById("attach_modem_span").style.display = "none";
 	}

@@ -706,6 +706,14 @@ define platformKernelConfig
 			sed -i "/CONFIG_RT2860V2_AP_CARRIER/d" $(1); \
 			echo "CONFIG_RT2860V2_AP_CARRIER=y" >>$(1); \
 	fi; \
+	if [ "$(RTAC85P)" = "y" ] ; then \
+			sed -i "/CONFIG_NF_CT_NETLINK/d" $(1); \
+			echo "CONFIG_NF_CT_NETLINK=m" >>$(1); \
+			sed -i "/CONFIG_NF_CT_NETLINK_TIMEOUT/d" $(1); \
+			echo "CONFIG_NF_CT_NETLINK_TIMEOUT=m" >>$(1); \
+			sed -i "/CONFIG_NETFILTER_TPROXY/d" $(1); \
+			echo "CONFIG_NETFILTER_TPROXY=m" >>$(1); \
+	fi; \
 	if [ "$(UBI)" = "y" ]; then \
 		sed -i "/CONFIG_MTD_UBI\>/d" $(1); \
 		echo "CONFIG_MTD_UBI=y" >>$(1); \
@@ -865,3 +873,4 @@ define platformKernelConfig
 	fi; \
 	)
 endef
+

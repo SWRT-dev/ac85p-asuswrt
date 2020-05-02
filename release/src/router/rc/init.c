@@ -72,17 +72,17 @@
 #define SHELL "/bin/sh"
 #define LOGIN "/bin/login"
 #if defined(K3)
-#include <k3.h>
+#include "k3.h"
 #elif defined(K3C)
-#include <k3c.h>
+#include "k3c.h"
 #elif defined(SBRAC1900P)
-#include <ac1900p.h>
+#include "ac1900p.h"
 #elif defined(SBRAC3200P)
-#include <ac3200p.h>
+#include "ac3200p.h"
 #elif defined(R8000P)
-#include <r7900p.h>
+#include "r7900p.h"
 #else
-#include <merlinr.h>
+#include "merlinr.h"
 #endif
 
 static int fatalsigs[] = {
@@ -111,9 +111,9 @@ static char *defenv[] = {
 	"HOME=/",
 	//"PATH=/usr/bin:/bin:/usr/sbin:/sbin",
 #ifdef RTCONFIG_LANTIQ
-	"PATH=/opt/usr/bin:/opt/bin:/opt/usr/sbin:/opt/sbin:/usr/bin:/bin:/usr/sbin:/sbin:/rom/opt/lantiq/bin:/rom/opt/lantiq/usr/sbin:/jffs/softcenter/bin:/jffs/softcenter/scripts",
+	"PATH=/opt/usr/bin:/opt/bin:/opt/usr/sbin:/opt/sbin:/usr/bin:/bin:/usr/sbin:/sbin:/rom/opt/lantiq/bin:/rom/opt/lantiq/usr/sbin",
 #else
-	"PATH=/opt/usr/bin:/opt/bin:/opt/usr/sbin:/opt/sbin:/usr/bin:/bin:/usr/sbin:/sbin:/jffs/softcenter/bin:/jffs/softcenter/scripts",
+	"PATH=/opt/usr/bin:/opt/bin:/opt/usr/sbin:/opt/sbin:/usr/bin:/bin:/usr/sbin:/sbin",
 #endif
 #ifdef HND_ROUTER
 	"LD_LIBRARY_PATH=/lib:/usr/lib:/lib/aarch64",
@@ -122,10 +122,7 @@ static char *defenv[] = {
 #endif
 #endif
 #ifdef RTCONFIG_LANTIQ
-	"LD_LIBRARY_PATH=/lib:/usr/lib:/opt/lantiq/usr/lib:/opt/lantiq/usr/sbin/:/tmp/wireless/lantiq/usr/lib/:/jffs/softcenter/lib",
-#endif
-#if defined(HND_ROUTER) || defined(RTCONFIG_BCMARM) || defined(RTCONFIG_RALINK) || defined(RTCONFIG_QCA)
-	"LD_LIBRARY_PATH=/lib:/usr/lib:/jffs/softcenter/lib",
+	"LD_LIBRARY_PATH=/lib:/usr/lib:/opt/lantiq/usr/lib:/opt/lantiq/usr/sbin/:/tmp/wireless/lantiq/usr/lib/",
 #endif
 	"SHELL=" SHELL,
 	"USER=root",
@@ -4721,10 +4718,10 @@ int init_nvram(void)
 		nvram_set_int("led_2g_gpio", 15|GPIO_ACTIVE_LOW);
 		nvram_set_int("led_wps_gpio", 16|GPIO_ACTIVE_LOW);
 		nvram_set_int("led_pwr_gpio", 16|GPIO_ACTIVE_LOW);
-		nvram_set_int("led_wan_gpio", 4|GPIO_ACTIVE_LOW);
+		nvram_set_int("led_wan_gpio", 5|GPIO_ACTIVE_LOW);
 #ifdef RTCONFIG_LAN4WAN_LED
-		nvram_set_int("led_lan1_gpio", 3|GPIO_ACTIVE_LOW);
-		nvram_set_int("led_lan2_gpio", 2|GPIO_ACTIVE_LOW);
+		nvram_set_int("led_lan1_gpio", 4|GPIO_ACTIVE_LOW);
+		nvram_set_int("led_lan2_gpio", 3|GPIO_ACTIVE_LOW);
 #endif
 
 		/* enable bled */
@@ -4737,6 +4734,7 @@ int init_nvram(void)
 		add_rc_support("2.4G update");
 		add_rc_support("qcawifi");
 		add_rc_support("manual_stb");
+		add_rc_support("app");
 		// the following values is model dep. so move it from default.c to here
 		nvram_set("wl0_HT_TxStream", "4");
 		nvram_set("wl0_HT_RxStream", "4");
@@ -4778,6 +4776,7 @@ int init_nvram(void)
 		add_rc_support("manual_stb");
 		add_rc_support("11AC");
 		add_rc_support("nodm");
+		add_rc_support("app");
 		// the following values is model dep. so move it from default.c to here
 		nvram_set("wl0_HT_TxStream", "4");
 		nvram_set("wl0_HT_RxStream", "4");
@@ -8727,18 +8726,11 @@ int init_nvram(void)
 
 #ifdef RTCONFIG_FRS_FEEDBACK
 	add_rc_support("frs_feedback");
-#ifdef RTCONFIG_DBLOG
-	add_rc_support("dblog");
-#endif /* RTCONFIG_DBLOG */
 #endif
 
 #ifdef RTCONFIG_USB
 #ifdef RTCONFIG_USB_PRINTER
 	add_rc_support("printer");
-#endif
-
-#ifdef RTCONFIG_PUSH_EMAIL
-	add_rc_support("email");
 #endif
 
 #ifdef RTCONFIG_USB_MODEM
@@ -8763,6 +8755,14 @@ int init_nvram(void)
 #ifdef RTCONFIG_MODEM_BRIDGE
 	add_rc_support("modembridge");
 #endif
+#endif
+
+#ifdef RTCONFIG_PUSH_EMAIL
+	add_rc_support("feedback");
+	add_rc_support("email");
+#ifdef RTCONFIG_DBLOG
+	add_rc_support("dblog");
+#endif /* RTCONFIG_DBLOG */
 #endif
 
 #ifdef RTCONFIG_WEBDAV
@@ -9348,7 +9348,6 @@ int init_nvram2(void)
 		nvram_set("lyra_disable_wifi_drv", "1");
 	nvram_unset("disableWifiDrv_fac");
 #endif
-	nvram_set("label_mac", get_label_mac());
 	return 0;
 }
 

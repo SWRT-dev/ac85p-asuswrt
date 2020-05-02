@@ -388,12 +388,11 @@ page_default_redirect(int fromapp_flag, char* url)
 void
 send_login_page(int fromapp_flag, int error_status, char* url, char* file, int lock_time, int logintry)
 {
+	HTTPD_DBG("error_status = %d\n", error_status);
 	char inviteCode[256]={0};
 	char buf[128] = {0};
 	//char url_tmp[64]={0};
 	char *cp, *file_var=NULL;
-
-	HTTPD_DBG("error_status = %d\n", error_status);
 
 	if(logintry){
 		if(!cur_login_ip_type)
@@ -842,10 +841,8 @@ handle_request(void)
 	bzero( line, sizeof line );
 
 	/* Parse the first line of the request. */
-	if ( fgets( line, sizeof(line), conn_fp ) == (char*) 0 ) {
-		send_error( 400, "Bad Request", (char*) 0, "No request found." );
+	if (fgets(line, sizeof(line), conn_fp) == NULL)
 		return;
-	}
 
 	method = path = line;
 	strsep(&path, " ");
@@ -871,60 +868,43 @@ handle_request(void)
 	while ( fgets( cur, line + sizeof(line) - cur, conn_fp ) != (char*) 0 )
 	{
 		//_dprintf("handle_request:cur = %s\n",cur);
-		if ( strcmp( cur, "\n" ) == 0 || strcmp( cur, "\r\n" ) == 0 ) {
+		if ( *cur == '\0' || strcmp( cur, "\n" ) == 0 || strcmp( cur, "\r\n" ) == 0 ) {
 			break;
 		}
 #ifdef TRANSLATE_ON_FLY
 		else if ( strncasecmp( cur, "Accept-Language:", 16) == 0 ) {
-			if(change_preferred_lang(0)){
-				char *p;
+			if (change_preferred_lang(0)) {
 				struct language_table *pLang;
-				char lang_buf[256];
-				memset(lang_buf, 0, sizeof(lang_buf));
-				alang = &cur[16];
-				strncpy(lang_buf, alang, sizeof(lang_buf)-1);
-				p = lang_buf;
-				while (p != NULL)
+				char lang_buf[256], *p, *saveptr;
+
+				alang = cur + 16;
+				strlcpy(lang_buf, alang, sizeof(lang_buf));
+
+				p = lang_buf, strsep(&p, "\r\n");
+				for (p = strtok_r(lang_buf, " ,;", &saveptr); p; p = strtok_r(NULL, " ,;", &saveptr))
 				{
-					p = strtok (p, "\r\n ,;");
-					if (p == NULL)  break;
-					//2008.11 magic{
-					int i, len=strlen(p);
-
-					for (i=0;i<len;++i)
-						if (isupper(p[i])) {
-							p[i]=tolower(p[i]);
-						}
-
-					//2008.11 magic}
-					for (pLang = language_tables; pLang->Lang != NULL; ++pLang)
+					for (pLang = language_tables; pLang->Lang != NULL; pLang++)
 					{
-						if (strcasecmp(p, pLang->Lang)==0)
+						if (strcasecmp(p, pLang->Lang) == 0)
 						{
 							char dictname[32];
 							_dprintf("handle_request: pLang->Lang = %s\n", pLang->Lang);
-							if (!check_lang_support(pLang->Target_Lang))
+							if (!check_lang_support_merlinr(pLang->Target_Lang))
 								break;
 
-							snprintf(dictname,sizeof(dictname),"%s.dict", pLang->Target_Lang);
-							if(!check_if_file_exist(dictname))
-							{
+							snprintf(dictname, sizeof(dictname), "%s.dict", pLang->Target_Lang);
+							if (!check_if_file_exist(dictname))
 								break;
-							}
 
-							snprintf(Accept_Language,sizeof(Accept_Language),"%s",pLang->Target_Lang);
+							snprintf(Accept_Language, sizeof(Accept_Language), "%s", pLang->Target_Lang);
 							break;
 						}
 					}
 
-					if (Accept_Language[0] != 0) {
+					if (*Accept_Language) {
+						nvram_set("preferred_lang", Accept_Language);
 						break;
 					}
-					p+=strlen(p)+1;
-				}
-
-				if (Accept_Language[0] != 0) {
-					nvram_set("preferred_lang", Accept_Language);
 				}
 
 				change_preferred_lang(1);
@@ -967,7 +947,6 @@ handle_request(void)
 			cp += strspn( cp, " \t" );
 			useragent = cp;
 			cur = cp + strlen(cp) + 1;
-			HTTPD_DBG("useragent: %s\n", useragent);
 		}
 		else if ( strncasecmp( cur, "Cookie:", 7 ) == 0 )
 		{
@@ -1112,14 +1091,16 @@ handle_request(void)
 	char scPath[128];
 	if ((strncmp(file, "Main_S", 6)==0) || (strncmp(file, "Module_", 7)==0))//jsp
 	{
-		snprintf(scPath, sizeof(scPath), "/jffs/softcenter/webs/");
-		strcat(scPath, file);
+		if(!check_if_file_exist(file)){
+			snprintf(scPath, sizeof(scPath), "/jffs/softcenter/webs/");
+			strcat(scPath, file);
 
-		if(check_if_file_exist(scPath)){
-			file = scPath;
+			if(check_if_file_exist(scPath)){
+				file = scPath;
+			}
 		}
 	}
-	if ((strstr(file, "res/")))//jpg,png,js,css,html
+	else if (strstr(file, "res/"))//jpg,png,js,css,html
 	{
 		if(!check_if_file_exist(file)){
 			snprintf(scPath, sizeof(scPath), "/jffs/softcenter/");
@@ -1344,8 +1325,6 @@ handle_request(void)
 					&& !strstr(file, "ss_conf")
 					&& !strstr(file, "ss_status")
 					&& !strstr(file, "dbconf")
-					&& !strstr(file, "Main_S")
-					&& !strstr(file, "Module_")
 #endif
 					){
 				send_error( 404, "Not Found", (char*) 0, "File not found." );

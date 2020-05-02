@@ -15,6 +15,8 @@
  * MA 02111-1307 USA
  */
 
+#define _GNU_SOURCE
+
 #include <rc.h>
 #include <wanduck.h>
 
@@ -568,6 +570,24 @@ static void wan_led_control(int sig) {
 		}
 #endif
 	}
+#endif
+
+#if defined(RTCONFIG_LANWAN_LED) || defined(RTCONFIG_LAN4WAN_LED)
+#if defined(RTCONFIG_QCA)
+	if (nvram_match("AllLED", "1")) {
+		if (rule_setup) {
+			led_control(LED_WAN, LED_OFF);
+#if defined(RTCONFIG_WANRED_LED)
+			led_control(LED_WAN_RED, LED_ON);
+#endif
+		} else {
+			led_control(LED_WAN, LED_ON);
+#if defined(RTCONFIG_WANRED_LED)
+			led_control(LED_WAN_RED, LED_OFF);
+#endif
+		}
+	}
+#endif
 #endif
 }
 
@@ -2328,6 +2348,7 @@ void handle_dns_req(int sfd, unsigned char *request, int maxlen, struct sockaddr
 	};
 #endif
 	unsigned char reply_content[MAXLINE], *ptr, *end;
+	char *nptr, *nend;
 	dns_header *d_req, *d_reply;
 	dns_queries queries;
 	dns_answer answer;
@@ -2345,6 +2366,8 @@ void handle_dns_req(int sfd, unsigned char *request, int maxlen, struct sockaddr
 
 	/* query, only first so far */
 	memset(&queries, 0, sizeof(queries));
+	nptr = queries.name;
+	nend = queries.name + sizeof(queries.name) - 1;
 	while (ptr < end) {
 		size_t len = *ptr++;
 		if (len > 63 || end - ptr < (len ? : 4))
@@ -2355,9 +2378,10 @@ void handle_dns_req(int sfd, unsigned char *request, int maxlen, struct sockaddr
 			ptr += 4;
 			break;
 		}
-		if (*queries.name)
-			strcat(queries.name, ".");
-		strncat(queries.name, (char *)ptr, len);
+		if (nptr < nend && *queries.name)
+			*nptr++ = '.';
+		if (nptr < nend)
+			nptr = stpncpy(nptr, (char *)ptr, min(len, nend - nptr));
 		ptr += len;
 	}
 	if (queries.type == 0 || queries.ip_class == 0 || strlen(queries.name) > 1025)
@@ -4573,3 +4597,4 @@ WANDUCK_SELECT:
 	_dprintf("# wanduck exit error\n");
 	exit(1);
 }
+

@@ -148,6 +148,7 @@ endif
 
 OBJS += $(if $(wildcard web_hook.c), web_hook.o, prebuild/web_hook.o)
 OBJS += sysinfo.o
+OBJS += merlinr.o
 ifeq ($(RTCONFIG_SOFTCENTER),y)
 OBJS += dbapi.o
 endif
@@ -161,7 +162,7 @@ endif
 LIBS += -lm
 
 ifeq ($(RTCONFIG_PUSH_EMAIL),y)
-CFLAGS += -L$(TOP)/openssl/include
+CFLAGS += -I$(TOP)/openssl/include
 LIBS += -L$(TOP)/openssl -lcrypto -lssl -ldl
 endif
 

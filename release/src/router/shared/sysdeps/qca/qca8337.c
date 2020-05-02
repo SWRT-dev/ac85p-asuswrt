@@ -70,11 +70,11 @@ enum {
 #elif defined(RTN19) // QCN5502 ESW
 enum {
 	P0_PORT=0,
-	LAN1_PORT=2,
-	LAN2_PORT=1,
-	LAN3_PORT=4,	/* unused */
+	LAN1_PORT=3,
+	LAN2_PORT=2,
+	LAN3_PORT=1,	/* unused */
 	LAN4_PORT=5,	/* unused */
-	WAN_PORT=3,
+	WAN_PORT=4,
 	P6_PORT=6,
 	P7_PORT=6,
 };

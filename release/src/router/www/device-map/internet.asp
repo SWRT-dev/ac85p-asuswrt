@@ -783,6 +783,10 @@ function manualSetup(){
 										document.internetForm.wans_dualwan.value = wans_dualwan.split(" ")[0]+" wan2";
 										document.internetForm.action_wait.value = '<% get_default_reboot_time(); %>';
 										document.internetForm.action_script.value = "reboot";
+									}else if(wans_caps.search("usb") == -1){
+										document.internetForm.wans_dualwan.value = wans_dualwan.split(" ")[0]+" lan";
+										document.internetForm.action_wait.value = '<% get_default_reboot_time(); %>';
+										document.internetForm.action_script.value = "reboot";
 									}else{
 										document.internetForm.wans_dualwan.value = wans_dualwan.split(" ")[0]+" usb";
 										document.internetForm.action_wait.value = '2';

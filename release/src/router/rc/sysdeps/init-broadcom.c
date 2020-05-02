@@ -3792,8 +3792,12 @@ void generate_wl_para(char *ifname, int unit, int subunit)
 
 #ifdef RTCONFIG_EMF
 		/* Wireless IGMP Snooping */
-		i = nvram_get_int(strcat_r(prefix, "igs", tmp)) || is_psta(unit) || is_psr(unit);
-		nvram_set_int(strcat_r(prefix, "wmf_bss_enable", tmp), i ? 1 : 0);
+		i = nvram_get_int(strcat_r(prefix, "igs", tmp));
+		nvram_set_int(strcat_r(prefix, "wmf_bss_enable", tmp), i
+#ifdef RTCONFIG_PROXYSTA
+				|| is_psta(unit) || is_psr(unit)
+#endif
+		       		? 1 : 0);
 #ifdef RTCONFIG_BCMWL6
 		nvram_set_int(strcat_r(prefix, "wmf_ucigmp_query", tmp), 1);
 		nvram_set_int(strcat_r(prefix, "wmf_mdata_sendup", tmp), 1);
@@ -3837,8 +3841,10 @@ void generate_wl_para(char *ifname, int unit, int subunit)
 #if defined(RTCONFIG_BCMWL6) && defined(RTCONFIG_PROXYSTA)
 			|| is_psta(unit) || is_psr(unit)
 #endif
-		)
-			nvram_set_int(strcat_r(prefix, "mfp", tmp), 1);
+		) {
+			if (!nvram_get_int(strcat_r(prefix, "mfp", tmp)))
+				nvram_set_int(strcat_r(prefix, "mfp", tmp), 1);
+		}
 #endif
 
 		dbG("bw: %s\n", nvram_safe_get(strcat_r(prefix, "bw", tmp)));
@@ -3920,8 +3926,10 @@ void generate_wl_para(char *ifname, int unit, int subunit)
 #if defined(RTCONFIG_BCMWL6) && defined(RTCONFIG_PROXYSTA)
 				|| is_psta(unit) || is_psr(unit)
 #endif
-			)
-				nvram_set_int(strcat_r(prefix, "mfp", tmp), 1);
+			) {
+				if (!nvram_get_int(strcat_r(prefix2, "mfp", tmp)))
+					nvram_set_int(strcat_r(prefix, "mfp", tmp), 1);
+			}
 #endif
 		}
 		else

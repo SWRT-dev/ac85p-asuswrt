@@ -720,3 +720,7 @@ endif
 ifneq ($(RTCONFIG_DBLOG),y)
 	rm -rf $(INSTALLDIR)/www/images/New_ui/dblog_diag.gif
 endif
+
+ifneq ($(RTCONFIG_UUPLUGIN), y)
+	rm -rf $(INSTALLDIR)/www/images/uu_accelerator.png
+endif
