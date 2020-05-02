@@ -174,7 +174,7 @@ int ej_show_sysinfo(int eid, webs_t wp, int argc, char_t ** argv)
 #if defined(RTCONFIG_LANTIQ)
 					strcpy(model, "GRX500 rev 1.2");
 #elif defined(RTCONFIG_RALINK)
-					strcpy(model, "MT7621");
+					strcpy(model, "mt7621a");
 #endif
 #endif
 				count = sysconf(_SC_NPROCESSORS_CONF);
