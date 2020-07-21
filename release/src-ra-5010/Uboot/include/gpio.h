@@ -113,6 +113,11 @@
 #define WIFI_2G_LED	10	/* I2C_SCLK */
 #define WIFI_5G_LED	8	/* TXD3 */
 
+#elif defined(ASUS_RMAC2100)
+#define RST_BTN		18
+#define WPS_BTN		6
+#define PWR_LED		8
+
 #elif defined(ASUS_RTN800HP)
 #define RST_BTN		16	/* JTCLK */
 #define WPS_BTN		18	/* WDT_RST_N */

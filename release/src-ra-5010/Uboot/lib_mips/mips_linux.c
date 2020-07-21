@@ -58,7 +58,7 @@ static int	linux_env_idx;
 static void linux_params_init (ulong start, char * commandline);
 static void linux_env_set (char * env_name, char * env_val);
 
-#if defined(ASUS_RTAC85U) || defined(ASUS_RTAC85P) || defined (ASUS_RTACRH26)
+#if defined(ASUS_RTAC85U) || defined(ASUS_RTAC85P) || defined (ASUS_RTACRH26) || defined (ASUS_RMAC2100)
 #define ROOT_MTD_DEV	"root=/dev/mtdblock5"
 #if defined(DUAL_TRX)
 #define ROOT_MTD_DEV2	"root=/dev/mtdblock7"

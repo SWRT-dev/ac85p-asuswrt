@@ -100,11 +100,7 @@ enum DstPort {
 	DP_GMAC2 = 61,
 	DP_PCI = 62,
 	DP_USB = 63,
-#ifdef ASUS_EXT
-	MAX_IF_NUM = 128
-#else
 	MAX_IF_NUM
-#endif
 };
 
 typedef struct {

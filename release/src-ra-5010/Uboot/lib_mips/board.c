@@ -174,7 +174,7 @@ void set_ver(void)
 {
 	int rc;
 
-#if defined(ASUS_RPAC87) || defined(ASUS_RTAC85U) || defined(ASUS_RTAC85P) || defined(ASUS_RTN800HP) || defined (ASUS_RTACRH26)
+#if defined(ASUS_RPAC87) || defined(ASUS_RTAC85U) || defined(ASUS_RTAC85P) || defined(ASUS_RTN800HP) || defined (ASUS_RTACRH26) || defined (ASUS_RMAC2100)
 	rc = replace(0xff7a, (unsigned char*)blver, 4);
 #else
 	rc = replace(0x18a, (unsigned char*)blver, 4);
@@ -224,7 +224,7 @@ void init_mac(void)
 	ptr[0] = 0x44;
 	ptr[1] = 0x42;
 
-#if defined(ASUS_RPAC87) || defined(ASUS_RTAC85U) || defined(ASUS_RTAC85P) || defined(ASUS_RTN800HP) || defined (ASUS_RTACRH26)
+#if defined(ASUS_RPAC87) || defined(ASUS_RTAC85U) || defined(ASUS_RTAC85P) || defined(ASUS_RTN800HP) || defined (ASUS_RTACRH26) || defined (ASUS_RMAC2100)
 	rc = replace(0xff78, ptr, 2);
 #else
 	rc = replace(0x188, ptr, 2);
@@ -244,7 +244,7 @@ void init_mac(void)
 	ptr[6] = 0x37;
 	ptr[7] = 0x30;
 
-#if defined(ASUS_RPAC87) || defined(ASUS_RTAC85U) || defined(ASUS_RTAC85P) || defined(ASUS_RTN800HP) || defined (ASUS_RTACRH26)
+#if defined(ASUS_RPAC87) || defined(ASUS_RTAC85U) || defined(ASUS_RTAC85P) || defined(ASUS_RTN800HP) || defined (ASUS_RTACRH26) || defined (ASUS_RMAC2100)
 	rc = replace(0xff70, ptr, 8);
 #else
 	rc = replace(0x180, ptr, 8);
@@ -897,7 +897,7 @@ __attribute__((nomips16)) void board_init_f(ulong bootflag)
 	flash_led_once();
 #endif	 
 	gpio_init();
-#if !defined(ASUS_RTN14U) && !defined(ASUS_RTAC52U) && !defined(ASUS_RTAC51U) && !defined(ASUS_RTAC51UP) && !defined(ASUS_RTN11P) && !defined(ASUS_RTN54U) && !defined(ASUS_RTAC1200HP) && !defined(ASUS_RTN56UB1) && !defined(ASUS_RTAC1200GA1) && !defined(ASUS_RTAC1200GU) && !defined(ASUS_RTAC54U) && !defined(ASUS_RTAC1200) && !defined(ASUS_RPAC56) && !defined(ASUS_RPAC87) && !defined(ASUS_RTAC85U) && !defined(ASUS_RTAC85P) && !defined(ASUS_RTN800HP) && !defined (ASUS_RTACRH26)
+#if !defined(ASUS_RTN14U) && !defined(ASUS_RTAC52U) && !defined(ASUS_RTAC51U) && !defined(ASUS_RTAC51UP) && !defined(ASUS_RTN11P) && !defined(ASUS_RTN54U) && !defined(ASUS_RTAC1200HP) && !defined(ASUS_RTN56UB1) && !defined(ASUS_RTAC1200GA1) && !defined(ASUS_RTAC1200GU) && !defined(ASUS_RTAC54U) && !defined(ASUS_RTAC1200) && !defined(ASUS_RPAC56) && !defined(ASUS_RPAC87) && !defined(ASUS_RTAC85U) && !defined(ASUS_RTAC85P) && !defined(ASUS_RTN800HP) && !defined (ASUS_RTACRH26) && !defined (ASUS_RMAC2100)
 	LEDOFF();
 #endif
 #endif	
@@ -1062,7 +1062,7 @@ __attribute__((nomips16)) void board_init_f(ulong bootflag)
 #define SEL_BOOT_FLASH                  3
 #define SEL_ENTER_CLI                   4
 
-#if defined(ASUS_RTN14U) || defined(ASUS_RTAC52U) || defined(ASUS_RTAC51U) || defined(ASUS_RTAC51UP) || defined(ASUS_RTN11P) || defined(ASUS_RTN54U) || defined(ASUS_RTAC1200HP) || defined(ASUS_RTN56UB1) || defined(ASUS_RTAC1200GA1) || defined(ASUS_RTAC1200GU) || defined(ASUS_RTAC54U) || defined(ASUS_RTAC1200) || defined(ASUS_RPAC56) || defined(ASUS_RPAC87) || defined(ASUS_RTAC85U) || defined(ASUS_RTAC85P) || defined(ASUS_RTN800HP) || defined (ASUS_RTACRH26)
+#if defined(ASUS_RTN14U) || defined(ASUS_RTAC52U) || defined(ASUS_RTAC51U) || defined(ASUS_RTAC51UP) || defined(ASUS_RTN11P) || defined(ASUS_RTN54U) || defined(ASUS_RTAC1200HP) || defined(ASUS_RTN56UB1) || defined(ASUS_RTAC1200GA1) || defined(ASUS_RTAC1200GU) || defined(ASUS_RTAC54U) || defined(ASUS_RTAC1200) || defined(ASUS_RPAC56) || defined(ASUS_RPAC87) || defined(ASUS_RTAC85U) || defined(ASUS_RTAC85P) || defined(ASUS_RTN800HP) || defined (ASUS_RTACRH26) || defined (ASUS_RMAC2100)
 #define SEL_LOAD_BOOT_SDRAM_VIA_SERIAL  5
 #endif
 
@@ -1089,7 +1089,7 @@ void OperationSelect(void)
 	printf("   %d: Entr boot command line interface.\n", SEL_ENTER_CLI);
 #endif // RALINK_CMDLINE //
 
-#if defined(ASUS_RTN14U) || defined(ASUS_RTAC52U) || defined(ASUS_RTAC51U) || defined(ASUS_RTAC51UP) || defined(ASUS_RTN11P)|| defined(ASUS_RTN54U) || defined(ASUS_RTAC1200HP) || defined(ASUS_RTN56UB1) || defined(ASUS_RTAC1200GA1) || defined(ASUS_RTAC1200GU) || defined(ASUS_RTAC54U) || defined(ASUS_RTAC1200)|| defined(ASUS_RPAC56) || defined(ASUS_RPAC87) || defined(ASUS_RTAC85U) || defined(ASUS_RTAC85P) || defined(ASUS_RTN800HP) || defined (ASUS_RTACRH26)
+#if defined(ASUS_RTN14U) || defined(ASUS_RTAC52U) || defined(ASUS_RTAC51U) || defined(ASUS_RTAC51UP) || defined(ASUS_RTN11P)|| defined(ASUS_RTN54U) || defined(ASUS_RTAC1200HP) || defined(ASUS_RTN56UB1) || defined(ASUS_RTAC1200GA1) || defined(ASUS_RTAC1200GU) || defined(ASUS_RTAC54U) || defined(ASUS_RTAC1200)|| defined(ASUS_RPAC56) || defined(ASUS_RPAC87) || defined(ASUS_RTAC85U) || defined(ASUS_RTAC85P) || defined(ASUS_RTN800HP) || defined (ASUS_RTACRH26) || defined (ASUS_RMAC2100)
 #if !defined(UBOOT_STAGE1)
 #if !defined(SHRINK_UBOOT)
 	printf("   %d: Load %s to SDRAM via Serial. \n", SEL_LOAD_BOOT_SDRAM_VIA_SERIAL, boot_image_name);
@@ -1102,7 +1102,7 @@ void OperationSelect(void)
 #endif //SHRINK_UBOOT
 #endif // RALINK_UPGRADE_BY_SERIAL //
 
-#if defined(ASUS_RTN14U) || defined(ASUS_RTAC52U) || defined(ASUS_RTAC51U) || defined(ASUS_RTAC51UP) || defined(ASUS_RTN11P)  || defined(ASUS_RTN54U) || defined(ASUS_RTAC1200HP) || defined(ASUS_RTN56UB1) || defined(ASUS_RTAC1200GA1) || defined(ASUS_RTAC1200GU) || defined(ASUS_RTAC54U) || defined(ASUS_RTAC1200)|| defined(ASUS_RPAC56) || defined(ASUS_RPAC87) || defined(ASUS_RTAC85U) || defined(ASUS_RTAC85P) || defined(ASUS_RTN800HP) || defined (ASUS_RTACRH26)
+#if defined(ASUS_RTN14U) || defined(ASUS_RTAC52U) || defined(ASUS_RTAC51U) || defined(ASUS_RTAC51UP) || defined(ASUS_RTN11P)  || defined(ASUS_RTN54U) || defined(ASUS_RTAC1200HP) || defined(ASUS_RTN56UB1) || defined(ASUS_RTAC1200GA1) || defined(ASUS_RTAC1200GU) || defined(ASUS_RTAC54U) || defined(ASUS_RTAC1200)|| defined(ASUS_RPAC56) || defined(ASUS_RPAC87) || defined(ASUS_RTAC85U) || defined(ASUS_RTAC85P) || defined(ASUS_RTN800HP) || defined (ASUS_RTACRH26) || defined (ASUS_RMAC2100)
 #if !defined(UBOOT_STAGE1)
 	printf("   %d: Load %s to SDRAM via TFTP. \n", SEL_LOAD_BOOT_SDRAM, boot_image_name);
 #endif
@@ -1110,7 +1110,7 @@ void OperationSelect(void)
 	printf("   %d: Load %s then write to Flash via TFTP. \n", SEL_LOAD_BOOT_WRITE_FLASH, boot_image_name);
 }
 
-#if defined(ASUS_RTN14U) || defined(ASUS_RTAC52U) || defined(ASUS_RTAC51U) || defined(ASUS_RTAC51UP) || defined(ASUS_RTN11P) || defined(ASUS_RTN54U) || defined(ASUS_RTAC1200HP) || defined(ASUS_RTN56UB1) || defined(ASUS_RTAC1200GA1) || defined(ASUS_RTAC1200GU) || defined(ASUS_RTAC54U) || defined(ASUS_RTAC1200)|| defined(ASUS_RPAC56) || defined(ASUS_RPAC87) || defined(ASUS_RTAC85U) || defined(ASUS_RTAC85P) || defined(ASUS_RTN800HP) || defined (ASUS_RTACRH26)
+#if defined(ASUS_RTN14U) || defined(ASUS_RTAC52U) || defined(ASUS_RTAC51U) || defined(ASUS_RTAC51UP) || defined(ASUS_RTN11P) || defined(ASUS_RTN54U) || defined(ASUS_RTAC1200HP) || defined(ASUS_RTN56UB1) || defined(ASUS_RTAC1200GA1) || defined(ASUS_RTAC1200GU) || defined(ASUS_RTAC54U) || defined(ASUS_RTAC1200)|| defined(ASUS_RPAC56) || defined(ASUS_RPAC87) || defined(ASUS_RTAC85U) || defined(ASUS_RTAC85P) || defined(ASUS_RTN800HP) || defined (ASUS_RTACRH26) || defined (ASUS_RMAC2100)
 void filename_copy (uchar *dst, uchar *src, int size)
 {
 	*dst = '"';
@@ -2222,7 +2222,7 @@ __attribute__((nomips16)) void board_init_r (gd_t *id, ulong dest_addr)
 	mtk7621_set_gpio_pin(WPS_LED, 1);
 	mtk7621_set_gpio_pin(WIFI_2G_LED, 1);
 	mtk7621_set_gpio_pin(WIFI_5G_LED, 1);
-#elif defined(ASUS_RTAC85P) || defined (ASUS_RTACRH26)
+#elif defined(ASUS_RTAC85P) || defined (ASUS_RTACRH26) || defined (ASUS_RMAC2100)
 	/* turn on PWR, turn off WAN, LAN, USB, WPS, 2G, 5G LED */
 	mtk7621_set_gpio_pin(PWR_LED, 0);
 	mtk7621_set_gpio_pin(WIFI_2G_LED, 1);
@@ -2338,7 +2338,7 @@ __attribute__((nomips16)) void board_init_r (gd_t *id, ulong dest_addr)
 		mtk7621_set_gpio_pin(WPS_LED, 1);
 		mtk7621_set_gpio_pin(WIFI_2G_LED, 1);
 		mtk7621_set_gpio_pin(WIFI_5G_LED, 1);
-#elif defined(ASUS_RTAC85P) || defined (ASUS_RTACRH26)
+#elif defined(ASUS_RTAC85P) || defined (ASUS_RTACRH26) || defined (ASUS_RMAC2100)
 		/* turn on PWR, turn off WAN, LAN, USB, WPS, 2G, 5G LED */
 		mtk7621_set_gpio_pin(PWR_LED, 0);
 		mtk7621_set_gpio_pin(WIFI_2G_LED, 1);
@@ -2475,7 +2475,7 @@ __attribute__((nomips16)) void board_init_r (gd_t *id, ulong dest_addr)
 			break;
 #endif // RALINK_CMDLINE //
 
-#if defined(ASUS_RTN14U) || defined(ASUS_RTAC52U) || defined(ASUS_RTAC51U) || defined(ASUS_RTAC51UP) || defined(ASUS_RTN11P) || defined(ASUS_RTN54U) || defined(ASUS_RTAC1200HP)  || defined(ASUS_RTN56UB1) || defined(ASUS_RTAC1200GA1) || defined(ASUS_RTAC1200GU) || defined(ASUS_RTAC54U) || defined(ASUS_RTAC1200) || defined(ASUS_RPAC56) || defined(ASUS_RPAC87) || defined(ASUS_RTAC85U) || defined(ASUS_RTAC85P) || defined(ASUS_RTN800HP) || defined (ASUS_RTACRH26)
+#if defined(ASUS_RTN14U) || defined(ASUS_RTAC52U) || defined(ASUS_RTAC51U) || defined(ASUS_RTAC51UP) || defined(ASUS_RTN11P) || defined(ASUS_RTN54U) || defined(ASUS_RTAC1200HP)  || defined(ASUS_RTN56UB1) || defined(ASUS_RTAC1200GA1) || defined(ASUS_RTAC1200GU) || defined(ASUS_RTAC54U) || defined(ASUS_RTAC1200) || defined(ASUS_RPAC56) || defined(ASUS_RPAC87) || defined(ASUS_RTAC85U) || defined(ASUS_RTAC85P) || defined(ASUS_RTN800HP) || defined (ASUS_RTACRH26) || defined (ASUS_RMAC2100)
 #if !defined(UBOOT_STAGE1)
 #if !defined(SHRINK_UBOOT)
 		case '5':
@@ -2502,7 +2502,7 @@ __attribute__((nomips16)) void board_init_r (gd_t *id, ulong dest_addr)
 		case '7':
 			printf("\n%d: System Load %s then write to Flash via Serial. \n", SEL_LOAD_BOOT_WRITE_FLASH_BY_SERIAL, boot_image_name);
 			
-#if defined(ASUS_RTN14U) || defined(ASUS_RTAC52U) || defined(ASUS_RTAC51U) || defined(ASUS_RTAC51UP) || defined(ASUS_RTN11P) || defined(ASUS_RTN54U) || defined(ASUS_RTAC1200HP) || defined(ASUS_RTN56UB1) || defined(ASUS_RTAC1200GA1) || defined(ASUS_RTAC1200GU) || defined(ASUS_RTAC54U) || defined(ASUS_RTAC1200) || defined(ASUS_RPAC56) || defined(ASUS_RPAC87) || defined(ASUS_RTAC85U) || defined(ASUS_RTAC85P) || defined(ASUS_RTN800HP) || defined (ASUS_RTACRH26)
+#if defined(ASUS_RTN14U) || defined(ASUS_RTAC52U) || defined(ASUS_RTAC51U) || defined(ASUS_RTAC51UP) || defined(ASUS_RTN11P) || defined(ASUS_RTN54U) || defined(ASUS_RTAC1200HP) || defined(ASUS_RTN56UB1) || defined(ASUS_RTAC1200GA1) || defined(ASUS_RTAC1200GU) || defined(ASUS_RTAC54U) || defined(ASUS_RTAC1200) || defined(ASUS_RPAC56) || defined(ASUS_RPAC87) || defined(ASUS_RTAC85U) || defined(ASUS_RTAC85P) || defined(ASUS_RTN800HP) || defined (ASUS_RTACRH26) || defined (ASUS_RMAC2100)
 			printf("**************************************************************\n");
 			printf("*** NOTICE: You MUST use the 'ROM Version' of uboot **********\n");
 			printf("**************************************************************\n");
@@ -2596,7 +2596,7 @@ __attribute__((nomips16)) void board_init_r (gd_t *id, ulong dest_addr)
 			printf("*** NOTICE: You MUST use the 'RAM Version' of uboot **********\n");
 			printf("**************************************************************\n");
 			tftp_config(SEL_LOAD_BOOT_SDRAM, argv);
-#if defined(ASUS_RTN14U) || defined(ASUS_RTAC52U) || defined(ASUS_RTAC51U) || defined(ASUS_RTAC51UP) || defined(ASUS_RTN11P) || defined(ASUS_RTN54U) || defined(ASUS_RTAC1200HP) || defined(ASUS_RTN56UB1) || defined(ASUS_RTAC1200GA1) || defined(ASUS_RTAC1200GU) || defined(ASUS_RTAC54U) || defined(ASUS_RTAC1200) || defined(ASUS_RPAC56) || defined(ASUS_RPAC87) || defined(ASUS_RTAC85U) || defined(ASUS_RTAC85P) || defined(ASUS_RTN800HP) || defined (ASUS_RTACRH26)
+#if defined(ASUS_RTN14U) || defined(ASUS_RTAC52U) || defined(ASUS_RTAC51U) || defined(ASUS_RTAC51UP) || defined(ASUS_RTN11P) || defined(ASUS_RTN54U) || defined(ASUS_RTAC1200HP) || defined(ASUS_RTN56UB1) || defined(ASUS_RTAC1200GA1) || defined(ASUS_RTAC1200GU) || defined(ASUS_RTAC54U) || defined(ASUS_RTAC1200) || defined(ASUS_RPAC56) || defined(ASUS_RPAC87) || defined(ASUS_RTAC85U) || defined(ASUS_RTAC85P) || defined(ASUS_RTN800HP) || defined (ASUS_RTACRH26) || defined (ASUS_RMAC2100)
 			argc= 5;
 #else			
 			argc= 3;

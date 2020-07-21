@@ -344,7 +344,7 @@ function initial(){
 			document.getElementById("wl_plcphdr_field").style.display = "none";
 		}
 
-		if(based_modelid == "RT-AC66U" || based_modelid == "RT-AC85U" || based_modelid == "RT-AC65U" || based_modelid == "RT-AC85P" || based_modelid == "RT-ACRH26"){
+		if(based_modelid == "RT-AC66U" || based_modelid == "RT-AC85U" || based_modelid == "RT-AC65U" || based_modelid == "RT-AC85P" || based_modelid == "RT-ACRH26" || based_modelid == "RM-AC2100"){
 			document.getElementById('wl_txbf_desc').innerHTML = "<#WLANConfig11b_x_acBeam#>";
 			inputCtrl(document.form.wl_txbf, 1);
 		}
@@ -477,7 +477,7 @@ function initial(){
 		document.form.wl_mumimo.disabled = false;
 
 		/* MODELDEP */
-		if((based_modelid == "RT-AC85U" || based_modelid == "RT-AC85P" || based_modelid == "RT-ACRH26" || based_modelid == "RT-AC65U") && wl_unit_value == '0'){
+		if((based_modelid == "RT-AC85U" || based_modelid == "RT-AC85P" || based_modelid == "RT-ACRH26" || based_modelid == "RT-AC65U" || based_modelid == "RM-AC2100") && wl_unit_value == '0'){
 			document.getElementById("wl_MU_MIMO_field").style.display = "none";
 		}
 	}

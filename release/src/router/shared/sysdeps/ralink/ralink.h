@@ -42,7 +42,8 @@ extern const char APCLI_2G[];
 #define BW_40			1
 #define BW_BOTH			2
 #define BW_80			2
-#define BW_10			3
+#define BW_160			3
+#define BW_10			4
 
 #define INIC_VLAN_ID_START	4 //first vlan id used for RT3352 iNIC MII
 #define INIC_VLAN_IDX_START	2 //first available index to set vlan id and its group.
@@ -82,12 +83,14 @@ typedef union  _MACHTTRANSMIT_SETTING {
 // MIMO Tx parameter, ShortGI, MCS, STBC, etc.  these are fields in TXWI. Don't change this definition!!!
 typedef union  _MACHTTRANSMIT_SETTING_2G {
 	struct  {
-	unsigned short	MCS:7;	// MCS
-	unsigned short	BW:1;	//channel bandwidth 20MHz or 40 MHz
-	unsigned short	ShortGI:1;
-	unsigned short	STBC:2;	//SPACE
-	unsigned short	rsv:3;
-	unsigned short	MODE:2;	// Use definition MODE_xxx.
+	unsigned short MCS:6;
+	unsigned short ldpc:1;
+	unsigned short BW:2;
+	unsigned short ShortGI:1;
+	unsigned short STBC:1;
+	unsigned short eTxBF:1;
+	unsigned short iTxBF:1;
+	unsigned short MODE:3;
 	} field;
 	unsigned short	word;
  } MACHTTRANSMIT_SETTING_2G, *PMACHTTRANSMIT_SETTING_2G;
@@ -227,21 +230,16 @@ typedef struct _SITE_SURVEY_RT3352_iNIC
 typedef struct _SITE_SURVEY
 {
 	char channel[4];
-//	unsigned char channel;
-//	unsigned char centralchannel;
-//	unsigned char unused;
 	unsigned char ssid[33];
-	char bssid[18];
+	char bssid[20];
 	char encryption[9];
 	char authmode[16];
 	char signal[9];
-	char wmode[8];
-#if 0//defined(RTN14U)
+	char wmode[7];
+	char extch[7];
+	char nt[3];
 	char wps[4];
 	char dpid[5];
-#endif
-//	char bsstype[3];
-//	char centralchannel[3];
 } SITE_SURVEY;
 
 typedef struct _SITE_SURVEY_ARRAY
@@ -339,7 +337,7 @@ typedef enum _RT_802_11_PHY_MODE {
 #define OFFSET_MTD_FACTORY	0x40000
 #define OFFSET_EEPROM_VER	0x40002
 
-#if defined(RTAC85U) || defined(RTAC85P) || defined(RPAC87) || defined(RTAC1200GU) || defined(RTN800HP) || defined(RTACRH26)
+#if defined(RTAC85U) || defined(RTAC85P) || defined(RPAC87) || defined(RTAC1200GU) || defined(RTN800HP) || defined(RTACRH26) || defined(RMAC2100)
 #define OFFSET_PIN_CODE		0x4ff70	// 8 bytes
 #define OFFSET_COUNTRY_CODE	0x4ff78	// 2 bytes
 #define OFFSET_BOOT_VER		0x4ff7a	// 4 bytes
@@ -354,7 +352,7 @@ typedef enum _RT_802_11_PHY_MODE {
 #define OFFSET_MAC_ADDR_2G	0x40004 //only one MAC
 #define OFFSET_MAC_GMAC2	0x4018E
 #define OFFSET_MAC_GMAC0	0x40194
-#elif defined(RTAC52U) || defined(RTAC51U) || defined(RTN54U) || defined(RTAC54U) || defined(RTAC1200HP) || defined(RTN56UB1) || defined(RTN56UB2) || defined(RTAC51UP) || defined(RTAC53) || defined(RTAC1200GA1) || defined(RTAC1200GU) || defined(RTAC1200)  || defined(RPAC87) || defined(RTAC85U) || defined(RTAC85P) || defined(RTN800HP) || defined(RTACRH26)
+#elif defined(RTAC52U) || defined(RTAC51U) || defined(RTN54U) || defined(RTAC54U) || defined(RTAC1200HP) || defined(RTN56UB1) || defined(RTN56UB2) || defined(RTAC51UP) || defined(RTAC53) || defined(RTAC1200GA1) || defined(RTAC1200GU) || defined(RTAC1200)  || defined(RPAC87) || defined(RTAC85U) || defined(RTAC85P) || defined(RTN800HP) || defined(RTACRH26) || defined(RMAC2100)
 #if defined(RTN800HP)
 #define OFFSET_MAC_ADDR_2G	0x40004
 #define OFFSET_MAC_ADDR		0x40004 //only one MAC
@@ -362,7 +360,7 @@ typedef enum _RT_802_11_PHY_MODE {
 #define OFFSET_MAC_ADDR_2G	0x40004
 #define OFFSET_MAC_ADDR		0x48004
 #endif
-#if defined(RTAC85U) || defined(RTAC85P) || defined(RPAC87) || defined(RTAC1200GU) || defined(RTACRH26)
+#if defined(RTAC85U) || defined(RTAC85P) || defined(RPAC87) || defined(RTAC1200GU) || defined(RTACRH26) || defined(RMAC2100)
 #define OFFSET_MAC_GMAC0	0x4E000
 #define OFFSET_MAC_GMAC2	0x4E006
 #elif defined(RTN800HP)
@@ -380,7 +378,7 @@ typedef enum _RT_802_11_PHY_MODE {
 #endif
 #if defined(RTAC1200HP) || defined(RTN56UB1) || defined(RTN56UB2) || defined(RTAC1200GA1) || defined(RTAC1200GU)
 #define OFFSET_FIX_CHANNEL      0x40170
-#elif defined(RTAC85U) || defined(RTAC85P) || defined(RTN800HP) || defined(RTACRH26)
+#elif defined(RTAC85U) || defined(RTAC85P) || defined(RTN800HP) || defined(RTACRH26) || defined(RMAC2100)
 #define OFFSET_BR_STP      0x4ff7e	// 1 bytes
 #endif
 
@@ -389,7 +387,7 @@ typedef enum _RT_802_11_PHY_MODE {
 #if defined(RTCONFIG_NEW_REGULATION_DOMAIN)
 #define	MAX_REGDOMAIN_LEN	10
 #define	MAX_REGSPEC_LEN		4
-#if defined(RTAC85U) || defined(RTAC85P) || defined(RPAC87) || defined(RTAC1200GU) || defined(RTN800HP) || defined(RTACRH26)
+#if defined(RTAC85U) || defined(RTAC85P) || defined(RPAC87) || defined(RTAC1200GU) || defined(RTN800HP) || defined(RTACRH26) || defined(RMAC2100)
 #define REG2G_EEPROM_ADDR	0x4ff40 //10 bytes
 #define REG5G_EEPROM_ADDR	0x4ff4a //10 bytes
 #define REGSPEC_ADDR		0x4ff54 // 4 bytes
@@ -493,3 +491,4 @@ int ra_gpio_write_bit(int idx, int value);
 extern int wl_ioctl(const char *ifname, int cmd, struct iwreq *pwrq);
 
 #endif
+

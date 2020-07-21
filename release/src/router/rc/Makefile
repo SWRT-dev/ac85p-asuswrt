@@ -199,7 +199,7 @@ ifeq ($(or $(RTAC68A),$(RT4GAC68U)),y)
 CFLAGS += -DRTAC68U
 endif
 
-ifeq ($(or $(RTAC85U),$(RTAC85P),$(RTACRH26)),y)
+ifeq ($(or $(RTAC85U),$(RTAC85P),$(RTACRH26),$(RMAC2100)),y)
 TARGET_MODEL = $(subst -,,$(subst +,P,$(BUILD_NAME)))
 CFLAGS += -D$(TARGET_MODEL)
 endif
@@ -381,7 +381,7 @@ OBJS += dsl_fb.o
 endif
 endif
 ifeq ($(RTCONFIG_FRS_LIVE_UPDATE),y)
-ifneq ($(MERLINR_NAME), $(filter $(MERLINR_NAME), K3 K3C R7900P SBRAC3200P RTAC85P))
+ifneq ($(MERLINR_NAME), $(filter $(MERLINR_NAME), K3 K3C R7900P SBRAC3200P RTAC85P RMAC2100))
 OBJS += frs_service.o
 endif
 endif
@@ -958,7 +958,7 @@ endif
 ifeq ($(RTCONFIG_TR069),y)
 	@cd $(INSTALLDIR)/sbin && ln -sf rc dhcpc_lease
 endif
-ifeq ($(MERLINR_NAME), $(filter $(MERLINR_NAME), SBRAC3200P RTAC85P))
+ifeq ($(MERLINR_NAME), $(filter $(MERLINR_NAME), SBRAC3200P RTAC85P RMAC2100))
 	@cd $(INSTALLDIR)/sbin && ln -sf rc dhcpc_lease
 endif
 

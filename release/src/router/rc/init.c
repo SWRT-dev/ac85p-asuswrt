@@ -1514,6 +1514,7 @@ misc_defaults(int restore_defaults)
 		case MODEL_RTAC85U:
 		case MODEL_RTAC85P:
 		case MODEL_RTACRH26:
+		case MODEL_RTRM2100:
 			nvram_set("reboot_time", "90");		// default is 70 sec
 			break;
 #endif
@@ -3920,6 +3921,50 @@ int init_nvram(void)
 		nvram_set("wl1_HT_RxStream", "4");
 		break;
 #endif /*  RTACRH26  */
+
+#if defined(RMAC2100)
+case MODEL_RMAC2100:
+		merlinr_init();
+		nvram_set("boardflags", "0x100"); // although it is not used in ralink driver, set for vlan
+		nvram_set("vlan1hwname", "et0");  // vlan. used to get "%smacaddr" for compare and find parent interface.
+		nvram_set("vlan2hwname", "et0");  // vlan. used to get "%smacaddr" for compare and find parent interface.
+		nvram_set("lan_ifname", "br0");
+		wl_ifaces[WL_2G_BAND] = "ra0";
+		wl_ifaces[WL_5G_BAND] = "rai0";
+		set_basic_ifname_vars("eth3", "vlan1", wl_ifaces, NULL, "vlan1", NULL, "vlan3", NULL, 0);
+
+		nvram_set_int("btn_rst_gpio",  18|GPIO_ACTIVE_LOW);
+		nvram_set_int("led_lan_gpio", 14|GPIO_ACTIVE_LOW);
+		nvram_set_int("led_wan_gpio", 12|GPIO_ACTIVE_LOW);
+		nvram_set_int("led_pwr_gpio",  8|GPIO_ACTIVE_LOW);
+		nvram_set_int("led_all_gpio", 6|GPIO_ACTIVE_LOW);
+
+		eval("rtkswitch", "11");
+
+		/* enable bled */
+		config_netdev_bled("led_2g_gpio", "ra0");
+		config_netdev_bled("led_5g_gpio", "rai0");
+
+		nvram_set("ehci_ports", "1-1");
+		nvram_set("ohci_ports", "2-1");
+		nvram_set("ct_max", "300000"); // force
+
+		if (nvram_get("wl_mssid") && nvram_match("wl_mssid", "1"))
+			add_rc_support("mssid");
+		add_rc_support("2.4G 5G noupdate");
+		add_rc_support("rawifi");
+		add_rc_support("switchctrl");
+		add_rc_support("manual_stb");
+		add_rc_support("11AC");
+		//add_rc_support("app");
+		//add_rc_support("pwrctrl");
+		// the following values is model dep. so move it from default.c to here
+		nvram_set("wl0_HT_TxStream", "2");
+		nvram_set("wl0_HT_RxStream", "2");
+		nvram_set("wl1_HT_TxStream", "4");
+		nvram_set("wl1_HT_RxStream", "4");
+		break;
+#endif
 
 #if defined(RTN11P_B1)
 	case MODEL_RTN11P_B1:
@@ -9020,7 +9065,7 @@ int init_nvram(void)
 	add_rc_support("vht80_80");
 #endif
 #if defined(RTCONFIG_VHT160)
-	// add_rc_support("vht160");
+	add_rc_support("vht160");
 #endif
 #ifdef RTCONFIG_BCMWL6
 	add_rc_support("wl6");
@@ -9228,13 +9273,14 @@ int init_nvram2(void)
 	macp = get_2g_hwaddr();
 	ether_atoe(macp, mac_binary);
 
-#if defined(RTAC85U) || defined(RTAC85P) || defined(RTACRH26)
+#if defined(RTAC85U) || defined(RTAC85P) || defined(RTACRH26) || defined(RMAC2100)
 	int model = get_model();
 	switch(model)
 	{
 	case MODEL_RTAC85U:
 	case MODEL_RTAC85P:
 	case MODEL_RTACRH26:
+	case MODEL_RMAC2100:
 #ifdef RTCONFIG_USB_SWAP
 		if(nvram_get_int("apps_swap_threshold") == 0) {
 			nvram_set("apps_swap_enable", "1");
@@ -11237,7 +11283,7 @@ int reboothalt_main(int argc, char *argv[])
 	_dprintf(reboot ? "Rebooting..." : "Shutting down...");
 	kill(1, reboot ? SIGTERM : SIGQUIT);
 
-#if defined(RTN14U) || defined(RTN65U) || defined(RTAC52U) || defined(RTAC51U) || defined(RTN11P) || defined(RTN300) || defined(RTN54U) || defined(RTCONFIG_QCA) || defined(RTAC1200HP) || defined(RTN56UB1) || defined(RTAC54U) || defined(RTN56UB2) || defined(RTAC85U) || defined(RTAC85P) || defined(RTN800HP) || defined(RTACRH26)
+#if defined(RTN14U) || defined(RTN65U) || defined(RTAC52U) || defined(RTAC51U) || defined(RTN11P) || defined(RTN300) || defined(RTN54U) || defined(RTCONFIG_QCA) || defined(RTAC1200HP) || defined(RTN56UB1) || defined(RTAC54U) || defined(RTN56UB2) || defined(RTAC85U) || defined(RTAC85P) || defined(RTN800HP) || defined(RTACRH26) || defined(RMAC2100)
 	def_reset_wait = 50;
 #endif
 

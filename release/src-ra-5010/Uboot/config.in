@@ -1556,15 +1556,16 @@ choice 'PRODUCT'	"RT-N14U CONFIG_RTN14U \
 			 RT-AC85U CONFIG_RTAC85U \
 			 RT-AC85P CONFIG_RTAC85P \
 			 RT-ACRH26 CONFIG_RTACRH26 \
+			 RM-AC2100 CONFIG_RMAC2100 \
 			 RT-N800HP CONFIG_RTN800HP
 	  		"  
 
-if [ $CONFIG_RTN14U = "y" ] || [ $CONFIG_RTAC52U = "y" ] || [ $CONFIG_RTAC51U = "y" ] || [ $CONFIG_RTAC51UP = "y" ] || [ $CONFIG_RTN11P = "y" ] || [ $CONFIG_RTN54U = "y" ] || [ $CONFIG_RTAC1200HP = "y" ] || [ $CONFIG_RTN56UB1 = "y" ] || [ $CONFIG_RTAC1200GA1 = "y" ] || [ $CONFIG_RTAC1200GU = "y" ] || [ $CONFIG_RTAC54U = "y" ] || [ $CONFIG_RTAC1200 = "y" ] || [ $CONFIG_RPAC56 = "y" ] || [ $CONFIG_RPAC87 = "y" ] || [ $CONFIG_RTAC85U = "y" ]  || [ $CONFIG_RTAC85P = "y" ] || [ $CONFIG_RTN800HP = "y" ] || [ $CONFIG_RTACRH26 = "y" ];then
+if [ $CONFIG_RTN14U = "y" ] || [ $CONFIG_RTAC52U = "y" ] || [ $CONFIG_RTAC51U = "y" ] || [ $CONFIG_RTAC51UP = "y" ] || [ $CONFIG_RTN11P = "y" ] || [ $CONFIG_RTN54U = "y" ] || [ $CONFIG_RTAC1200HP = "y" ] || [ $CONFIG_RTN56UB1 = "y" ] || [ $CONFIG_RTAC1200GA1 = "y" ] || [ $CONFIG_RTAC1200GU = "y" ] || [ $CONFIG_RTAC54U = "y" ] || [ $CONFIG_RTAC1200 = "y" ] || [ $CONFIG_RPAC56 = "y" ] || [ $CONFIG_RPAC87 = "y" ] || [ $CONFIG_RTAC85U = "y" ]  || [ $CONFIG_RTAC85P = "y" ] || [ $CONFIG_RTN800HP = "y" ] || [ $CONFIG_RTACRH26 = "y" ] || [ $CONFIG_RMAC2100 = "y" ];then
 
 choice 'Chip Type' "ASIC ASIC_BOARD \
 		  " ASIC
 
-if [ "$CONFIG_RTN56UB1" = "y" ] || [ $CONFIG_RPAC56 = "y" ] || [ $CONFIG_RTAC1200GA1 = "y" ] || [ $CONFIG_RTAC1200GU = "y" ] || [ $CONFIG_RPAC87 = "y" ] || [ $CONFIG_RTAC85U = "y" ] || [ $CONFIG_RTAC85P = "y" ] || [ $CONFIG_RTN800HP = "y" ] || [ $CONFIG_RTACRH26 = "y" ]; then
+if [ "$CONFIG_RTN56UB1" = "y" ] || [ $CONFIG_RPAC56 = "y" ] || [ $CONFIG_RTAC1200GA1 = "y" ] || [ $CONFIG_RTAC1200GU = "y" ] || [ $CONFIG_RPAC87 = "y" ] || [ $CONFIG_RTAC85U = "y" ] || [ $CONFIG_RTAC85P = "y" ] || [ $CONFIG_RTN800HP = "y" ] || [ $CONFIG_RTACRH26 = "y" ] || [ $CONFIG_RMAC2100 = "y" ]; then
 choice 'Chip ID'	" MT7621 MT7621_ASIC_BOARD \
 	  		" MT7621
 define_bool MT7621_MP y
@@ -1661,7 +1662,7 @@ fi
 #########################################################################################3
 # MT7620/MT7621
 #########################################################################################3
-if [ "$CONFIG_RTN56UB1" = "y" ] || [ $CONFIG_RTAC1200GA1 = "y" ] || [ $CONFIG_RTAC1200GU = "y" ] || [ $CONFIG_RPAC87 = "y" ] || [ $CONFIG_RTAC85U = "y" ] || [ $CONFIG_RTAC85P = "y" ] || [ $CONFIG_RTN800HP = "y" ] || [ $CONFIG_RTACRH26 = "y" ]; then
+if [ "$CONFIG_RTN56UB1" = "y" ] || [ $CONFIG_RTAC1200GA1 = "y" ] || [ $CONFIG_RTAC1200GU = "y" ] || [ $CONFIG_RPAC87 = "y" ] || [ $CONFIG_RTAC85U = "y" ] || [ $CONFIG_RTAC85P = "y" ] || [ $CONFIG_RTN800HP = "y" ] || [ $CONFIG_RTACRH26 = "y" ] || [ $CONFIG_RMAC2100 = "y" ]; then
 define_bool MT7621_MP y
 choice 'Use GE1 or GE2' "GMAC1 MT7621_USE_GE1  \
 	                 GMAC2 MT7621_USE_GE2
@@ -1788,11 +1789,11 @@ if [ "$CONFIG_RTAC52U" = "y" ]; then
 	fi
 fi
 
-if [ "$CONFIG_RTAC85U" = "y" ] || [ "$CONFIG_RTAC85P" = "y" ] || [ $CONFIG_RTACRH26 = "y" ]; then
+if [ "$CONFIG_RTAC85U" = "y" ] || [ "$CONFIG_RTAC85P" = "y" ] || [ $CONFIG_RTACRH26 = "y" ] || [ $CONFIG_RMAC2100 = "y" ]; then
 	define_bool DUAL_TRX y
 fi
 
-if [ "$CONFIG_RTN56UB1" == "y" ] || [ $CONFIG_RTAC1200GA1 = "y" ] || [ $CONFIG_RTAC1200GU = "y" ] || [ $CONFIG_RPAC87 = "y" ] || [ $CONFIG_RTAC85U = "y" ] || [ "$CONFIG_RTAC85P" = "y" ] || [ $CONFIG_RTN800HP = "y" ] || [ $CONFIG_RTACRH26 = "y" ]; then
+if [ "$CONFIG_RTN56UB1" == "y" ] || [ $CONFIG_RTAC1200GA1 = "y" ] || [ $CONFIG_RTAC1200GU = "y" ] || [ $CONFIG_RPAC87 = "y" ] || [ $CONFIG_RTAC85U = "y" ] || [ "$CONFIG_RTAC85P" = "y" ] || [ $CONFIG_RTN800HP = "y" ] || [ $CONFIG_RTACRH26 = "y" ] || [ $CONFIG_RMAC2100 = "y" ]; then
 #-----------------------
 # MT7621 DRAM
 #-----------------------
@@ -1867,7 +1868,7 @@ fi
 fi #DRAM
 
 
-if [ "$CONFIG_RTN56UB1" = "y" ] || [ $CONFIG_RTAC1200GA1 = "y" ] || [ $CONFIG_RTAC1200GU = "y" ] || [ $CONFIG_RPAC87 = "y" ] || [ $CONFIG_RTAC85U = "y" ] || [ "$CONFIG_RTAC85P" = "y" ]  || [ $CONFIG_RTN800HP = "y" ] || [ $CONFIG_RTACRH26 = "y" ]; then
+if [ "$CONFIG_RTN56UB1" = "y" ] || [ $CONFIG_RTAC1200GA1 = "y" ] || [ $CONFIG_RTAC1200GU = "y" ] || [ $CONFIG_RPAC87 = "y" ] || [ $CONFIG_RTAC85U = "y" ] || [ "$CONFIG_RTAC85P" = "y" ]  || [ $CONFIG_RTN800HP = "y" ] || [ $CONFIG_RTACRH26 = "y" ] || [ $CONFIG_RMAC2100 = "y" ]; then
 #-----------------------
 # MT7621 CPU Freq
 #-----------------------
@@ -1920,7 +1921,7 @@ fi
 
 if [ "$UBOOT_ROM" == "y" ]; then
 
-if [ "$CONFIG_RTN56UB1" != "y" ] && [ "$CONFIG_RTAC1200GA1" != "y" ] && [ "$CONFIG_RTAC1200GU" != "y" ] && [ "$CONFIG_RTAC1200" != "y" ]  && [ "$CONFIG_RPAC56" != "y" ] && [ "$CONFIG_RPAC87" != "y" ] && [ "$CONFIG_RTAC85U" != "y" ] && [ "$CONFIG_RTAC85P" != "y" ] && [ "$CONFIG_RTACRH26" != "y" ] || [ $CONFIG_RTN800HP = "y" ]; then
+if [ "$CONFIG_RTN56UB1" != "y" ] && [ "$CONFIG_RTAC1200GA1" != "y" ] && [ "$CONFIG_RTAC1200GU" != "y" ] && [ "$CONFIG_RTAC1200" != "y" ]  && [ "$CONFIG_RPAC56" != "y" ] && [ "$CONFIG_RPAC87" != "y" ] && [ "$CONFIG_RTAC85U" != "y" ] && [ "$CONFIG_RTAC85P" != "y" ] && [ "$CONFIG_RTACRH26" != "y" ] || [ $CONFIG_RTN800HP = "y" ] || [ $CONFIG_RMAC2100 != "y" ]; then
 choice 'CPU PLL source' "CONF CPLL_FROM_CONF
 			" CONF
 
@@ -1972,7 +1973,7 @@ fi
 fi
 comment ""
 
-if [ "$CONFIG_RTN56UB1" = "y" ] || [ "$CONFIG_RTAC1200GA1" = "y" ] || [ "$CONFIG_RTAC1200GU" = "y" ] || [ $CONFIG_RPAC87 = "y" ] || [ $CONFIG_RTAC85U = "y" ] || [ $CONFIG_RTAC85P = "y" ]  || [ $CONFIG_RTN800HP = "y" ] || [ "$CONFIG_RTACRH26" = "y" ]; then
+if [ "$CONFIG_RTN56UB1" = "y" ] || [ "$CONFIG_RTAC1200GA1" = "y" ] || [ "$CONFIG_RTAC1200GU" = "y" ] || [ $CONFIG_RPAC87 = "y" ] || [ $CONFIG_RTAC85U = "y" ] || [ $CONFIG_RTAC85P = "y" ]  || [ $CONFIG_RTN800HP = "y" ] || [ "$CONFIG_RTACRH26" = "y" ] || [ $CONFIG_RMAC2100 = "y" ]; then
 #-------------------------------------
 # MT7621 option
 #-------------------------------------
@@ -2064,7 +2065,7 @@ fi
 #-----------------------
 # Other Option
 #-----------------------
-if [ "$CONFIG_RTAC52U" = "y" ] || [ "$CONFIG_RTAC51U" = "y" ] || [ "$CONFIG_RTAC51UP" = "y" ] || [ "$CONFIG_RTN54U" = "y" ] || [ "$CONFIG_RTAC1200HP" = "y" ] || [ "$CONFIG_RTN56UB1" = "y" ]  || [ "$CONFIG_RTAC1200GA1" = "y" ] || [ "$CONFIG_RTAC1200GU" = "y" ] || [ "$CONFIG_RTAC54U" = "y" ]  || [ $CONFIG_RPAC87 = "y" ] || [ $CONFIG_RTAC85U = "y" ] || [ $CONFIG_RTAC85P = "y" ]  || [ "$CONFIG_RTACRH26" = "y" ] || [ $CONFIG_RTN800HP = "y" ]; then
+if [ "$CONFIG_RTAC52U" = "y" ] || [ "$CONFIG_RTAC51U" = "y" ] || [ "$CONFIG_RTAC51UP" = "y" ] || [ "$CONFIG_RTN54U" = "y" ] || [ "$CONFIG_RTAC1200HP" = "y" ] || [ "$CONFIG_RTN56UB1" = "y" ]  || [ "$CONFIG_RTAC1200GA1" = "y" ] || [ "$CONFIG_RTAC1200GU" = "y" ] || [ "$CONFIG_RTAC54U" = "y" ]  || [ $CONFIG_RPAC87 = "y" ] || [ $CONFIG_RTAC85U = "y" ] || [ $CONFIG_RTAC85P = "y" ]  || [ "$CONFIG_RTACRH26" = "y" ] || [ $CONFIG_RTN800HP = "y" ] || [ $CONFIG_RMAC2100 = "y" ]; then
 choice 'ALL_LED_OFF GPIO' "N/A ALL_LED_OFF_NONE \
 			   RXD(GPIO_NR_10) ALL_LED_OFF_RXD_GPIONR10 \
 			  "

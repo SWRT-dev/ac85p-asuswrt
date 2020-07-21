@@ -1,2 +1,2 @@
 obj-y += foe_hook.o
-foe_hook-objs := ../.objs/foe_hook.obj
+foe_hook-objs := hook.o

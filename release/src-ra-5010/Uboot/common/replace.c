@@ -106,7 +106,7 @@ extern const char *model, *blver, *bl_stage;
 int chkVer(void)
 {
 	uchar rfbuf[4];
-#if defined(ASUS_RPAC87) || defined(ASUS_RTAC85U) || defined(ASUS_RTAC85P) || defined(ASUS_RTN800HP) || defined (ASUS_RTACRH26)
+#if defined(ASUS_RPAC87) || defined(ASUS_RTAC85U) || defined(ASUS_RTAC85P) || defined(ASUS_RTN800HP) || defined (ASUS_RTACRH26) || defined (ASUS_RMAC2100)
 	ulong addr = 0xff7a;	// 4 bytes
 #else
 	ulong addr = 0x18a;

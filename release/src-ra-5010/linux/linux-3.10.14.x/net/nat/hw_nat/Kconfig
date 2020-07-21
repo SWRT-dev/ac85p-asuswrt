@@ -108,27 +108,6 @@ config  RA_HW_NAT_HASH_DBG
 endchoice
 
 choice
-        prompt "HW_NAT OP MODE"
-	depends on RA_HW_NAT && (RA_HW_NAT_HASH1 || RA_HW_NAT_HASH2)
-	default HW_NAT_AUTO_MODE
-	help
-	HW_NAT OPERATIONE MODE
-
-config  HW_NAT_AUTO_MODE
-        bool "AUTO_MODE"
-	depends on RA_HW_NAT
-
-config  HW_NAT_SEMI_AUTO_MODE
-        bool "SEMI_AUTO_MODE"
-	depends on RA_HW_NAT
-	
-config  HW_NAT_MANUAL_MODE
-        bool "MANUAL_MODE"
-	depends on RA_HW_NAT	
-
-endchoice
-
-choice
 	prompt "Hash DBG Mode"
 	depends on RA_HW_NAT_HASH_DBG
 	default RA_HW_NAT_HASH_DBG_SPORT

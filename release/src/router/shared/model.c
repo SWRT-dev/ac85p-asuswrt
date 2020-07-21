@@ -51,6 +51,9 @@ static const struct model_s model_list[] = {
 	{ "RT-AC85U", MODEL_RTAC85U},
 	{ "RT-AC85P", MODEL_RTAC85P},
 	{ "RT-ACRH26", MODEL_RTACRH26},
+#if defined(RMAC2100)
+	{ "RM-AC2100", MODEL_RMAC2100},
+#endif
 	{ "RT-AC65U", MODEL_RTAC85U},
 	{ "RT-N800HP",  MODEL_RTN800HP},
 #elif defined(RTCONFIG_QCA)

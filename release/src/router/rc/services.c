@@ -1630,7 +1630,7 @@ void start_dnsmasq(void)
 	if (nvram_match("dhcp_static_x","1")) {
 		write_static_leases(fp);
 	}
-#if defined(RTAC3200) || defined(RTAC85P)
+#if defined(RTAC3200) || defined(RTAC85P) || defined(RMAC2100)
 	if (!repeater_mode()) {
 		fprintf(fp, "dhcp-script=/sbin/dhcpc_lease\n");
 		fprintf(fp, "script-arp\n");
@@ -1680,7 +1680,7 @@ void reload_dnsmasq(void)
 	/* notify dnsmasq */
 	kill_pidfile_s("/var/run/dnsmasq.pid", SIGHUP);
 }
-#if defined(RTCONFIG_TR069) ||  defined(RTCONFIG_AMAS) || defined(RTAC3200) || defined(RTAC85P)
+#if defined(RTCONFIG_TR069) ||  defined(RTCONFIG_AMAS) || defined(RTAC3200) || defined(RTAC85P) || defined(RMAC2100)
 int dnsmasq_script_main(int argc, char **argv)
 {
 #if defined(RTCONFIG_SOFTCENTER)

@@ -4814,6 +4814,38 @@ int mtk_nand_probe()
     }
 #endif
 
+#if defined(CONFIG_MODEL_RMAC2100)
+#if defined (__KERNEL_NAND__)
+    // magic for newly flashed RM2100
+    part_num--;
+    for (i = 0; i < 2; i++) {
+        u_char data[4];
+        int offset = 0;
+        // check if there is a new trx image
+        if (ranand_read(data, 0x60003c - 0x400000 * i, 4) != 4)
+            continue; // something bad happened
+        if (data[0] != 169)
+            continue;
+        offset = data[3] + data[2] * 256 + data[1] * 65536;
+        if (offset < 1048576 || offset > 2097152)
+            continue;
+        offset += 0x600000 - 0x400000 * i;
+        if (ranand_read(data, offset, 4) != 4)
+            continue;
+        if (data[0] != 'h' || data[1] != 's' || data[2] != 'q' || data[3] != 's')
+            continue;
+        // new trx image
+        g_pasStatic_Partition[10].offset = offset;
+        part_num++;
+        if (!i) { // image flashed to 2nd partition, swap linux and linux2
+            g_pasStatic_Partition[6].offset -= 0x400000;
+            g_pasStatic_Partition[4].offset += 0x400000;
+        }
+        break;
+    }
+	err = add_mtd_partitions(mtd, g_pasStatic_Partition, part_num);
+#endif
+#else
 #ifdef PMT
     nand_chip->chipsize -= (PMT_POOL_SIZE) << nand_chip->phys_erase_shift;
     mtd->size = nand_chip->chipsize;	
@@ -5043,6 +5075,7 @@ int mtk_nand_probe()
 
 	err = add_mtd_partitions(mtd, g_pasStatic_Partition, part_num);
 	//err = mtd_device_register(mtd, g_pasStatic_Partition, part_num);
+#endif
 #endif
 #endif
 

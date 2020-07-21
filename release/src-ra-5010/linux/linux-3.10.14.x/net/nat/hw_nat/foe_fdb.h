@@ -102,12 +102,6 @@ enum FoeIPAct {
 	IPV6_6RD = 7,
 };
 
-enum FoeEntryFmt {
-    IPV4_NAPT=0,
-    IPV4_NAT=1,
-    IPV6_ROUTING=5
-};
-
 #define IS_IPV4_HNAPT(x)	(((x)->bfib1.pkt_type == IPV4_HNAPT) ? 1: 0)
 #define IS_IPV4_HNAT(x)		(((x)->bfib1.pkt_type == IPV4_HNAT) ? 1 : 0)
 #define IS_IPV6_1T_ROUTE(x)	(((x)->bfib1.pkt_type == IPV6_1T_ROUTE) ? 1 : 0)
@@ -353,7 +347,7 @@ struct _ipv4_dslite {
 
 	uint8_t flow_lbl[3];	/* in order to consist with Linux kernel (should be 20bits) */
 	uint16_t priority:4;	/* in order to consist with Linux kernel (should be 8bits) */
-	uint16_t resv1:4;
+	uint16_t resv:4;
 	uint32_t hop_limit:8;
 	uint32_t resv2:18;
 	uint32_t act_dp:6;	/* UDF */
@@ -584,17 +578,10 @@ struct FoePriKey {
 
 	/* IPv6 */
 	struct {
-		uint32_t sip0;
-		uint32_t sip1;
-		uint32_t sip2;
-		uint32_t sip3;
 		uint32_t dip0;
 		uint32_t dip1;
 		uint32_t dip2;
 		uint32_t dip3;
-		uint16_t sport;
-		uint16_t dport;
-		uint32_t is_udp:1;
 	} ipv6_routing;
 
 	struct {
@@ -692,16 +679,10 @@ struct FoePriKey {
 
 	/* IPv6 */
 	struct {
-		uint32_t sip0;
-		uint32_t sip1;
-		uint32_t sip2;
-		uint32_t sip3;
 		uint32_t dip0;
 		uint32_t dip1;
 		uint32_t dip2;
 		uint32_t dip3;
-		uint16_t sport;
-		uint16_t dport;
 	} ipv6;
 
 	uint32_t pkt_type;	/* entry format */
@@ -720,6 +701,5 @@ int FoeDropEntry(struct hwnat_args *opt);
 int FoeDelEntryByNum(uint32_t entry_num);
 void FoeTblClean(void);
 int FoeDumpCacheEntry(void);
-int FoeAddEntry(struct hwnat_tuple *opt);
-int FoeDelEntry(struct hwnat_tuple *opt);
+
 #endif

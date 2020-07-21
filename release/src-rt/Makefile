@@ -548,7 +548,7 @@ ifeq ($(CONFIG_RALINK),y)
 	PAD2=`expr $${ISIZE} - $${KSIZE} - $${RSIZE}` ; \
 	RFSOFFSET=`expr 64 + $${KSIZE} + $${PAD2}` ; \
 	echo "PAD2: $${PAD2}" ; \
-	if [ "$(BUILD_NAME)" = "RT-N56UB1" ] || [ "$(BUILD_NAME)" = "RT-N56UB2" ] || [ "$(BUILD_NAME)" = "RT-AC1200GA1" ] || [ "$(BUILD_NAME)" = "RT-AC1200GU" ] || [ "$(BUILD_NAME)" = "RP-AC56" ] || [ "$(BUILD_NAME)" = "RP-AC87" ] || [ "$(BUILD_NAME)" = "RT-AC85U" ] || [ "$(BUILD_NAME)" = "RT-AC85P" ] || [ "$(BUILD_NAME)" = "RT-AC65U" ] || [ "$(BUILD_NAME)" = "RT-N800HP" ] || [ "$(BUILD_NAME)" = "RT-ACRH26" ]; then \
+	if [ "$(BUILD_NAME)" = "RT-N56UB1" ] || [ "$(BUILD_NAME)" = "RT-N56UB2" ] || [ "$(BUILD_NAME)" = "RT-AC1200GA1" ] || [ "$(BUILD_NAME)" = "RT-AC1200GU" ] || [ "$(BUILD_NAME)" = "RP-AC56" ] || [ "$(BUILD_NAME)" = "RP-AC87" ] || [ "$(BUILD_NAME)" = "RT-AC85U" ] || [ "$(BUILD_NAME)" = "RT-AC85P" ] || [ "$(BUILD_NAME)" = "RT-AC65U" ] || [ "$(BUILD_NAME)" = "RT-N800HP" ] || [ "$(BUILD_NAME)" = "RT-ACRH26" ] || [ "$(BUILD_NAME)" = "RM-AC2100" ]; then \
 		asustools/mkimage -A mips -O linux -T kernel -C lzma -a 80001000 -e $${ENTRY} -r $${RFSOFFSET} \
 		-n $(BUILD_NAME) -V "$(KERNEL_VER)" "$(FS_VER)"  "$(SERIALNO)" "$(EXTENDNO)" "0" "0" "0" "0" "0" "0"  \
 		-d $(PLATFORMDIR)/zImage.img image/$(IMGNAME).trx ; \
@@ -2581,6 +2581,13 @@ define RouterOptions
 		sed -i "/RTCONFIG_NO_SELECT_CHANNEL/d" $(1); \
 		echo "# RTCONFIG_NO_SELECT_CHANNEL is not set" >>$(1); \
 	fi; \
+	if [ "$(VHT160)" = "y" ]; then \
+		sed -i "/RTCONFIG_VHT160/d" $(1); \
+		echo "RTCONFIG_VHT160=y" >>$(1); \
+	else \
+		sed -i "/RTCONFIG_VHT160/d" $(1); \
+		echo "# RTCONFIG_VHT160 is not set" >>$(1); \
+	fi; \
 	if [ "$(USB_SWAP)" = "y" ]; then \
 		sed -i "/RTCONFIG_USB_SWAP/d" $(1); \
 		echo "RTCONFIG_USB_SWAP=y" >>$(1); \
@@ -3994,6 +4001,8 @@ else
 		elif [ "$(BUILD_NAME)" = "RT-AC51U+" ] ||[ "$(BUILD_NAME)" = "RT-AC53" ]; then \
 			cp $(LINUXDIR)/ralink/Kconfig_$(lowercase_B) $(LINUXDIR)/ralink/Kconfig ; \
 			cp $(LINUXDIR)/config_base.MT7620 $(LINUXDIR)/config_$(lowercase_B) ; \
+		elif [ "$(BUILD_NAME)" = "RM-AC2100" ]; then \
+			cp $(LINUXDIR)/config_base_rmac2100 $(LINUXDIR)/config_$(lowercase_B) ; \
 		else \
 			cp $(LINUXDIR)/config_base $(LINUXDIR)/config_$(lowercase_B) ; \
 		fi ; \
@@ -4156,7 +4165,7 @@ endif
 		sed -i "/RTCONFIG_WLMODULE_RLT_WIFI/d" router/.config; \
 		echo "RTCONFIG_WLMODULE_RLT_WIFI=y" >> router/.config; \
 	fi
-	@if grep -q "CONFIG_WIFI_MT7603E=m" $(LINUXDIR)/.config ; then \
+	@if grep -q "CONFIG_RALINK_MT7603E=m" $(LINUXDIR)/.config ; then \
 		sed -i "/RTCONFIG_WLMODULE_MT7603E_AP/d" router/.config; \
 		echo "RTCONFIG_WLMODULE_MT7603E_AP=y" >> router/.config; \
 	fi

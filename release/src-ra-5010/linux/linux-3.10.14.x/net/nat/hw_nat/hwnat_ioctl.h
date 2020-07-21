@@ -14,8 +14,6 @@
 #ifndef	__HW_NAT_IOCTL_H__
 #define	__HW_NAT_IOCTL_H__
 
-#define HW_NAT_ADD_ENTRY    		(0x01)
-#define HW_NAT_DEL_ENTRY    		(0x02)
 #define HW_NAT_DUMP_CACHE_ENTRY    	(0x24)
 #define HW_NAT_DUMP_ENTRY    		(0x03)
 #define HW_NAT_GET_ALL_ENTRIES 		(0x04)
@@ -59,9 +57,6 @@
 #define HW_NAT_MCAST_DEL		(0x21)
 #define HW_NAT_MCAST_DUMP		(0x22)
 #endif
-#define HW_NAT_OPTIMIZE_TX              (0x25)
-#define HW_NAT_OPTIMIZE_RX              (0x26)
-
 
 #define HW_NAT_DEVNAME			"hwnat0"
 #define HW_NAT_MAJOR			(220)
@@ -76,9 +71,8 @@ enum hwnat_status {
 
 struct hwnat_tuple {
 	unsigned short hash_index;
-	unsigned int pkt_type;
-	unsigned int eth_type;
-	unsigned int   is_udp;
+	unsigned char pkt_type;
+
 	/* egress layer2 */
 	unsigned char dmac[6];
 	unsigned char smac[6];
@@ -125,17 +119,11 @@ struct hwnat_tuple {
 	unsigned short eg_dp;
 
 	unsigned char	ipv6_flowlabel;
-	unsigned char   pppoe_act;
-	unsigned int    vlan_layer;
-	unsigned char	dst_port;
-	unsigned int    dscp;
 	enum hwnat_status result;
 };
 
 struct hwnat_args {
 	unsigned int debug:3;
-	unsigned int optimize_tx:1;
-	unsigned int optimize_rx:1;
 	unsigned int entry_state:2;	/* invalid=0, unbind=1, bind=2, fin=3 */
 	enum hwnat_status result;
 	unsigned int entry_num:16;
@@ -203,6 +191,7 @@ struct hwnat_mcast_args {
 	unsigned char	dst_mac[6];
 };
 #endif
+
 
 int PpeRegIoctlHandler(void);
 void PpeUnRegIoctlHandler(void);
