@@ -1514,7 +1514,7 @@ misc_defaults(int restore_defaults)
 		case MODEL_RTAC85U:
 		case MODEL_RTAC85P:
 		case MODEL_RTACRH26:
-		case MODEL_RTRM2100:
+		case MODEL_RMAC2100:
 			nvram_set("reboot_time", "90");		// default is 70 sec
 			break;
 #endif
