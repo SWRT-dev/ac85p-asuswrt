@@ -161,6 +161,10 @@ void merlinr_init_done()
 	nvram_set("ping_target","www.taobao.com");
 #endif
 	nvram_commit();
+#if defined(RTAC85P)
+	led_control(LED_2G, LED_ON);
+	led_control(LED_5G, LED_ON);
+#endif
 }
 
 

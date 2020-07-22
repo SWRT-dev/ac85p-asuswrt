@@ -3854,8 +3854,9 @@ int init_nvram(void)
 		eval("rtkswitch", "11");
 
 		/* enable bled */
-		config_netdev_bled("led_2g_gpio", "ra0");
-		config_netdev_bled("led_5g_gpio", "rai0");
+		//config_netdev_bled("led_2g_gpio", "ra0");
+		//config_netdev_bled("led_5g_gpio", "rai0");
+
 
 		nvram_set("ehci_ports", "1-1");
 		nvram_set("ohci_ports", "2-1");
@@ -3942,8 +3943,8 @@ case MODEL_RMAC2100:
 		eval("rtkswitch", "11");
 
 		/* enable bled */
-		config_netdev_bled("led_2g_gpio", "ra0");
-		config_netdev_bled("led_5g_gpio", "rai0");
+		//config_netdev_bled("led_2g_gpio", "ra0");
+		//config_netdev_bled("led_5g_gpio", "rai0");
 
 		nvram_set("ehci_ports", "1-1");
 		nvram_set("ohci_ports", "2-1");

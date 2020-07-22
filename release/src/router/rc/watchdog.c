@@ -2893,6 +2893,17 @@ void btn_check(void)
 #ifdef RTCONFIG_LAN4WAN_LED
 				LanWanLedCtrl();
 #endif
+//#if defined(RTCONFIG_RALINK_MT7621)
+#if defined(RTAC85P)
+//enable all led
+//				setAllLedOn();
+//enable led and enable blink
+				eval("switch", "reg", "w", "7d00", "77777");
+				eval("switch", "reg", "w", "7d04", "77777");
+				eval("switch", "reg", "w", "7d10", "77777");
+				eval("switch", "reg", "w", "7d14", "0");
+				eval("switch", "reg", "w", "7d18", "76727");
+#endif
 			}
 			else {
 				TRACE_PT("LED turn off\n");

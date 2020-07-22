@@ -4007,7 +4007,7 @@ getSiteSurvey(int band,char* ofile)
 						memset(ssid_str, 0, sizeof(ssid_str));
 
 						strncpy(tmp,ssap->SiteSurvey[i].ssid,strlen(trim_r(ssap->SiteSurvey[i].ssid)));
-						char_to_ascii(ssid_str, tmp);
+						char_to_ascii_with_utf8(ssid_str, tmp);
 						//strncpy(ssid_str,ssap->SiteSurvey[i].ssid,strlen(trim_r(ssap->SiteSurvey[i].ssid)));
 						fprintf(fp, "\"%s\",", ssid_str);
 					}
