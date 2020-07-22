@@ -2,9 +2,6 @@
 #define __DBAPI_H_
 #include "httpd.h"
 #define offsetof2(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
-#define container_of(ptr, type, member) ({                      \
-        const typeof( ((type *)0)->member ) *__mptr = (const typeof( ((type *)0)->member )*)(ptr);    \
-        (type *)( (char *)__mptr - offsetof2(type,member) );})
 
 #define MAGIC "magicv1 "
 #define MAGIC_LEN 8
@@ -42,6 +39,7 @@ typedef struct _dbclient {
 typedef int (*fn_db_parse)(dbclient* client, webs_t wp, char* prefix, char* key, char* value);
 
 int dbclient_start(dbclient* client);
+int dbclient_rm(dbclient* client, const char* key, int nk);
 int dbclient_bulk(dbclient* client, const char* command, const char* key, int nk, const char* value, int nv);
 int dbclient_end(dbclient* client);
 int dbclient_list(dbclient* client, char* prefix, webs_t wp, fn_db_parse fn);

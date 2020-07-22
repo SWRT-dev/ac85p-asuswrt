@@ -14,9 +14,12 @@ resolveip:
 	$(CC) -static resolveip.c -o resolveip
 	$(STRIP) resolveip
 else
-all:
+all:demo
 endif
-
+CFLAGS	+= -I$(TOP)/shared -I$(SRCBASE)/include -I$(SRCBASE)/common/include -I$(TOP)/shared/sysdeps/ralink -I$(TOP)/wireless_tools
+LDFLAGS += -L$(TOP)/nvram${BCMEX}$(EX7) -lnvram -L$(TOP)/shared -lshared
+demo:
+	$(CC) $(CFLAGS) $(LDFLAGS) demo.c -o demo
 install:
 	install -d $(INSTALLDIR)/sbin
 	install -d $(INSTALLDIR)/usr/sbin

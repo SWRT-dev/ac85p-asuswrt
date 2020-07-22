@@ -16480,6 +16480,43 @@ INT RTMP_AP_IoctlHandle(
 		DiagGetProcessInfo(pAd, wrq);
 		break;
 #endif
+	case CMD_RTPRIV_IOCTL_ASUSCMD:
+		//RTMPIoctlAsusHandle(pAd, wrq, subcmd, pData, Data);
+		if ( subcmd == ASUS_SUBCMD_CHLIST) {
+			UINT32 i;
+			UCHAR BandIdx;
+			CHANNEL_CTRL *pChCtrl;
+			RTMP_STRING pChannel[256], pTmp[4];
+			POS_COOKIE pObj = (POS_COOKIE)pAd->OS_Cookie;
+			struct wifi_dev *wdev = get_wdev_by_ioctl_idx_and_iftype(pAd, pObj->ioctl_if, pObj->ioctl_if_type);
+			memset(pChannel, 0, 256);
+			if (wdev)
+			BandIdx = HcGetBandByWdev(wdev);
+			else {
+				BandIdx = BAND0;
+				MTWF_LOG(DBG_CAT_CFG, DBG_SUBCAT_ALL, DBG_LVL_ERROR, ("CMD_RTPRIV_IOCTL_CHAN_LIST_GET, wdev = NULL\n"));
+			}
+			pChCtrl = hc_get_channel_ctrl(pAd->hdev_ctrl, BandIdx);
+
+			for (i = 1; i <= pChCtrl->ChListNum; i++) {
+				if(i > 1)
+					strcat(pChannel,",");
+				snprintf(pTmp, sizeof(pTmp), "%d", pChCtrl->ChList[i - 1].Channel);
+				strcat(pChannel,pTmp);
+				
+			}
+			pChannel[256] = '\0';
+			if (copy_to_user(wrq->u.data.pointer, pChannel, strlen(pChannel)))
+				Status = 0;
+		} else if ( subcmd == ASUS_SUBCMD_DRIVERVER ) {
+			RTMP_STRING driverVersion[16];
+			wrq->u.data.length = strlen(AP_DRIVER_VERSION);
+			snprintf(&driverVersion[0], sizeof(driverVersion), "%s", AP_DRIVER_VERSION);
+			driverVersion[wrq->u.data.length] = '\0';
+			if (copy_to_user(wrq->u.data.pointer, driverVersion, wrq->u.data.length))
+				Status = 0;
+		}
+		break;
 
 	default:
 		Status = RTMP_COM_IoctlHandle(pAd, wrq, cmd, subcmd, pData, Data);

@@ -33,8 +33,8 @@ $(function () {
 	}
 });
 
-wl_channel_list_2g = '<% channel_list_2g(); %>';
-wl_channel_list_5g = '<% channel_list_5g(); %>';
+var wl_channel_list_2g = '<% channel_list_2g(); %>';
+var wl_channel_list_5g = '<% channel_list_5g(); %>';
 var wl_unit_value = '<% nvram_get("wl_unit"); %>';
 var wl_subunit_value = '<% nvram_get("wl_subunit"); %>';
 var wlc_band_value = '<% nvram_get("wlc_band"); %>';

@@ -407,7 +407,12 @@ int ej_show_sysinfo(int eid, webs_t wp, int argc, char_t ** argv)
 #elif defined(RTCONFIG_QCA)
 			strcpy(result,"Unknow");
 #elif defined(RTCONFIG_RALINK)
-			strcpy(result,"5.0.4.0");
+			char buffer[16];
+			if(get_mtk_wifi_driver_version(buffer, strlen(buffer))>0){
+				if(*buffer)
+					strcpy(result,buffer);
+			} else
+				strcpy(result,"5.0.4.0");
 #endif
 #ifdef RTCONFIG_QTN
                 } else if(strcmp(type,"qtn_version") == 0 ) {
