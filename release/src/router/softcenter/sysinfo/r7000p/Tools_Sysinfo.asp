@@ -233,19 +233,14 @@ function show_etherstate(){
 				}
 			}
 			port = line[1].replace(":","");
-			if (modelname == "K3") {
-			if (port > 3) {	//int ports[SWPORT_COUNT] = { 3, 1, 0, 2, 5 };
+			if (modelname == "R7000P") {
+			if (port > 4) {	//int ports[SWPORT_COUNT] = { 3, 1, 0, 2, 5 };
 				continue;
-			} else if (port == "3") {
+			} else if (port == "0") {
 				wan_array = [ "WAN", (line[7] & 0xFFF), state2, devicename];
 				continue;
 			} else {
-				if (port == "0")
-					port_array.push(["LAN2 ", (line[7] & 0xFFF), state2, devicename]);
-				else if (port == "1")
-					port_array.unshift(["LAN1 ", (line[7] & 0xFFF), state2, devicename]);
-				else if (port == "2")
-					port_array.push(["LAN3 ", (line[7] & 0xFFF), state2, devicename]);
+				port_array.push(["LAN "+ port, (line[7] & 0xFFF), state2, devicename]);
 			}
 			} else {
 			if (port == "8") {		// CPU Port

@@ -4,6 +4,7 @@ IS_BCMHND=`nvram get rc_support|grep -i bcmhnd`
 
 wget_options="-q -t 2 -T 30 --no-check-certificate"
 
+dl_path_MR="https://dlcdnets.asus.com/pub/ASUS/LiveUpdate/Release/Wireless_SQ/MR"
 dl_path_SQ="https://dlcdnets.asus.com/pub/ASUS/LiveUpdate/Release/Wireless_SQ"
 dl_path_SQ_beta="https://dlcdnets.asus.com/pub/ASUS/LiveUpdate/Release/Wireless_SQ/app"
 dl_path_file="https://update.paldier.com"
@@ -50,6 +51,9 @@ update_url=`cat /tmp/update_url`
 
 # current firmware information
 productid=`nvram get productid`
+if [ "$productid" == "BLUECAVE" ]; then
+       rc rc_service stop_wrs_force
+fi
 
 modelname=`nvram get modelname`
 get_productid=`echo $productid | sed s/+/plus/;`    #replace 'plus' to '+' for one time
