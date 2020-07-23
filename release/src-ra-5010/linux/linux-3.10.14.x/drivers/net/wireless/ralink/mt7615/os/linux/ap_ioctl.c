@@ -305,7 +305,7 @@ INT rt28xx_ap_ioctl(struct net_device *net_dev, struct ifreq *rq, int cmd)
 
 		pIoctlRate->priv_flags = RT_DEV_PRIV_FLAGS_GET(net_dev);
 		RTMP_DRIVER_BITRATE_GET(pAd, pIoctlRate);
-		wrqin->u.bitrate.value = pIoctlRate->BitRate;
+		wrqin->u.bitrate.value = (pIoctlRate->BitRate/1000);
 		wrqin->u.bitrate.disabled = 0;
 	}
 	break;

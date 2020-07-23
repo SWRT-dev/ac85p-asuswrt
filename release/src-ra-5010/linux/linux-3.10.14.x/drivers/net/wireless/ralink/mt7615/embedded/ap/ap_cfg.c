@@ -16494,7 +16494,7 @@ INT RTMP_AP_IoctlHandle(
 			BandIdx = HcGetBandByWdev(wdev);
 			else {
 				BandIdx = BAND0;
-				MTWF_LOG(DBG_CAT_CFG, DBG_SUBCAT_ALL, DBG_LVL_ERROR, ("CMD_RTPRIV_IOCTL_CHAN_LIST_GET, wdev = NULL\n"));
+				MTWF_LOG(DBG_CAT_CFG, DBG_SUBCAT_ALL, DBG_LVL_ERROR, ("ASUS_SUBCMD_CHLIST, wdev = NULL\n"));
 			}
 			pChCtrl = hc_get_channel_ctrl(pAd->hdev_ctrl, BandIdx);
 
@@ -16503,18 +16503,26 @@ INT RTMP_AP_IoctlHandle(
 					strcat(pChannel,",");
 				snprintf(pTmp, sizeof(pTmp), "%d", pChCtrl->ChList[i - 1].Channel);
 				strcat(pChannel,pTmp);
-				
 			}
-			pChannel[256] = '\0';
-			if (copy_to_user(wrq->u.data.pointer, pChannel, strlen(pChannel)))
-				Status = 0;
+			wrq->u.data.length = strlen(pChannel);
+			pChannel[wrq->u.data.length] = '\0';
+			if (copy_to_user(wrq->u.data.pointer, pChannel, wrq->u.data.length))
+				Status = -EFAULT;
 		} else if ( subcmd == ASUS_SUBCMD_DRIVERVER ) {
 			RTMP_STRING driverVersion[16];
 			wrq->u.data.length = strlen(AP_DRIVER_VERSION);
 			snprintf(&driverVersion[0], sizeof(driverVersion), "%s", AP_DRIVER_VERSION);
 			driverVersion[wrq->u.data.length] = '\0';
 			if (copy_to_user(wrq->u.data.pointer, driverVersion, wrq->u.data.length))
-				Status = 0;
+				Status = -EFAULT;
+		} else if ( subcmd == ASUS_SUBCMD_RADIO_STATUS ) {
+			UINT Enable = 0;
+			POS_COOKIE pObj = (POS_COOKIE) pAd->OS_Cookie;
+			struct wifi_dev *wdev = get_wdev_by_ioctl_idx_and_iftype(pAd, pObj->ioctl_if, pObj->ioctl_if_type);
+			Enable = !IsHcRadioCurStatOffByChannel(pAd, wdev->channel);
+			wrq->u.data.length = 1;
+			if (copy_to_user(wrq->u.data.pointer, &Enable, wrq->u.data.length))
+				Status = -EFAULT;
 		}
 		break;
 

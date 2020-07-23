@@ -1135,7 +1135,7 @@ iw_print_bitrate(char *	buffer,
   char		scale;
   int		divisor;
 
-#ifdef QCA_NEW_DRIVER
+#if defined(QCA_NEW_DRIVER) || defined(RTCONFIG_RALINK)
   /* Due to overrun, driver sends in Kbps, Convert in to bps */
   rate = (double) bitrate * 1000;
 #endif
