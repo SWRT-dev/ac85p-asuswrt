@@ -3937,7 +3937,7 @@ case MODEL_RMAC2100:
 		nvram_set_int("btn_rst_gpio",  18|GPIO_ACTIVE_LOW);
 		nvram_set_int("led_lan_gpio", 14|GPIO_ACTIVE_LOW);
 		nvram_set_int("led_wan_gpio", 12|GPIO_ACTIVE_LOW);
-		nvram_set_int("led_pwr_gpio",  8|GPIO_ACTIVE_LOW);
+		nvram_set_int("led_pwr_gpio",  8|GPIO_ACTIVE_LOW);//6: red, 10: yellow, 8: blue 
 		nvram_set_int("led_all_gpio", 6|GPIO_ACTIVE_LOW);
 
 		eval("rtkswitch", "11");

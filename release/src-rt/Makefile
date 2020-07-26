@@ -69,7 +69,7 @@ export PATH := $(RELEASEDIR)/tools:$(SRCBASE)/ctools:$(PATH)
 
 #K3C/K3/SBRAC1900P/SBRAC3200P/R7000/R8000/R7900P/R8000P/RTACRH17/RTAC85P/GTAC2900/GTAC5300/RTAC86U/RTAC68U/RTAC3100/RTAC3200/RTAC68P/BLUECAVE/EA6700
 #aimesh:R(384 and 385),non-aimesh:B(382 and 384),special:X(382/384/385/386)
-export MERLINR_NAME := RTAC85P
+export MERLINR_NAME := RMAC2100
 export MERLINR_VER_MAJOR :=B
 export MERLINR_VER_MINOR :=5.1.1
 export MERLINR_VER := $(MERLINR_VER_MAJOR)$(MERLINR_VER_MINOR)
@@ -4165,7 +4165,7 @@ endif
 		sed -i "/RTCONFIG_WLMODULE_RLT_WIFI/d" router/.config; \
 		echo "RTCONFIG_WLMODULE_RLT_WIFI=y" >> router/.config; \
 	fi
-	@if grep -q "CONFIG_RALINK_MT7603E=m" $(LINUXDIR)/.config ; then \
+	@if grep -q "CONFIG_RALINK_MT7603E=y" $(LINUXDIR)/.config ; then \
 		sed -i "/RTCONFIG_WLMODULE_MT7603E_AP/d" router/.config; \
 		echo "RTCONFIG_WLMODULE_MT7603E_AP=y" >> router/.config; \
 	fi

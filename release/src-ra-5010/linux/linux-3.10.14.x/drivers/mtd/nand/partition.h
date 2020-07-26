@@ -11,10 +11,10 @@
 extern unsigned int  CFG_BLOCKSIZE;
 #if defined(CONFIG_DUAL_TRX)	/* ASUS_EXT */
 #if defined(CONFIG_MODEL_RMAC2100)
-#define LARGE_MTD_BOOT_PART_SIZE	(0x80000)
+#define LARGE_MTD_BOOT_PART_SIZE	(0x100000)
 #define LARGE_MTD_CONFIG_PART_SIZE	(0x40000)
 #define LARGE_MTD_FACTORY_PART_SIZE	(0x40000)
-#define TRX_FIRMWARE_SIZE		(50 * 1024 * 1024) 	//50 MB
+#define TRX_FIRMWARE_SIZE		(34 * 1024 * 1024) 	//50 MB
 #define TRX_FW_NUM			2
 #else
 #define LARGE_MTD_BOOT_PART_SIZE	(CFG_BLOCKSIZE * 7)
@@ -83,7 +83,7 @@ static struct mtd_partition g_pasStatic_Partition[] = {
                 name:           "nvram",
 #if defined(CONFIG_MODEL_RMAC2100)
                 size:           0x40000,
-                offset:         0x7800000,
+                offset:         0x140000,
 #else
                 size:           MTD_CONFIG_PART_SIZE,
                 offset:         MTDPART_OFS_APPEND
@@ -189,16 +189,17 @@ static struct mtd_partition g_pasStatic_Partition[] = {
                 offset:         MTDPART_OFS_APPEND,
 #endif
         } ,{
-#if defined(CONFIG_MODEL_RMAC2100)
-                name:           "RootFS-default",
-                size:           0x1E00000,
-                offset:         0,
-#else
                 name:           "ALL",
                 size:           MTDPART_SIZ_FULL,
                 offset:         0,
+		}
+#if defined(CONFIG_MODEL_RMAC2100)
+        , {
+                name:           "RootFS-default",
+                size:           0x1E00000,
+                offset:         0,
+		}
 #endif
-        }
 
 };
 

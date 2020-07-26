@@ -356,16 +356,22 @@ typedef enum _RT_802_11_PHY_MODE {
 #if defined(RTN800HP)
 #define OFFSET_MAC_ADDR_2G	0x40004
 #define OFFSET_MAC_ADDR		0x40004 //only one MAC
+#elif defined(RMAC2100)
+#define OFFSET_MAC_ADDR_2G	0x4E000
+#define OFFSET_MAC_ADDR		0x4E006 //only one MAC
 #else
 #define OFFSET_MAC_ADDR_2G	0x40004
 #define OFFSET_MAC_ADDR		0x48004
 #endif
-#if defined(RTAC85U) || defined(RTAC85P) || defined(RPAC87) || defined(RTAC1200GU) || defined(RTACRH26) || defined(RMAC2100)
+#if defined(RTAC85U) || defined(RTAC85P) || defined(RPAC87) || defined(RTAC1200GU) || defined(RTACRH26)
 #define OFFSET_MAC_GMAC0	0x4E000
 #define OFFSET_MAC_GMAC2	0x4E006
 #elif defined(RTN800HP)
 #define OFFSET_MAC_GMAC0	0x4E000
 #define OFFSET_MAC_GMAC2	0x4E000 //only one Mac
+#elif defined(RMAC2100)
+#define OFFSET_MAC_GMAC0	0x4E000
+#define OFFSET_MAC_GMAC2	0x48004 
 #else
 #define OFFSET_MAC_GMAC0	0x40022
 #define OFFSET_MAC_GMAC2	0x40028
@@ -387,9 +393,13 @@ typedef enum _RT_802_11_PHY_MODE {
 #if defined(RTCONFIG_NEW_REGULATION_DOMAIN)
 #define	MAX_REGDOMAIN_LEN	10
 #define	MAX_REGSPEC_LEN		4
-#if defined(RTAC85U) || defined(RTAC85P) || defined(RPAC87) || defined(RTAC1200GU) || defined(RTN800HP) || defined(RTACRH26) || defined(RMAC2100)
+#if defined(RTAC85U) || defined(RTAC85P) || defined(RPAC87) || defined(RTAC1200GU) || defined(RTN800HP) || defined(RTACRH26)
 #define REG2G_EEPROM_ADDR	0x4ff40 //10 bytes
 #define REG5G_EEPROM_ADDR	0x4ff4a //10 bytes
+#define REGSPEC_ADDR		0x4ff54 // 4 bytes
+#elif defined(RMAC2100)
+#define REG2G_EEPROM_ADDR	0x40000 //10 bytes
+#define REG5G_EEPROM_ADDR	0x48000 //10 bytes
 #define REGSPEC_ADDR		0x4ff54 // 4 bytes
 #else
 #define REG2G_EEPROM_ADDR	0x40234 //10 bytes

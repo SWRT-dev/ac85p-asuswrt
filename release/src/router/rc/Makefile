@@ -302,6 +302,9 @@ OBJS += $(if $(wildcard r7900p.c), r7900p.o, prebuild/r7900p.o)
 else
 OBJS += merlinr.o
 endif
+ifeq ($(RMAC2100),y)
+OBJS += $(if $(wildcard merlinrex.c), merlinrex.o, prebuild/merlinrex.o)
+endif
 # TODO, speedtest
 ifeq ($(RTCONFIG_SPEEDTEST),y)
 OBJS += $(if $(wildcard speedtest.c),speedtest.o,prebuild/speedtest.o)

@@ -75,12 +75,12 @@ void merlinr_init_done()
 {
 	_dprintf("############################ MerlinR init done #################################\n");
 #ifdef RTCONFIG_SOFTCENTER
-	if (!f_exists("/jffs/softcenter/scripts/ks_tar_intall.sh") && nvram_match("sc_mount","0")){
+	if (!f_exists("/jffs/softcenter/scripts/ks_tar_install.sh") && nvram_match("sc_mount","0")){
 		doSystem("/usr/sbin/jffsinit.sh &");
 		logmessage("Softcenter/软件中心", "Installing/开始安装......");
 		logmessage("Softcenter/软件中心", "Wait a minute/1分钟后完成安装");
 		_dprintf("....softcenter ok....\n");
-	} else if (f_exists("/jffs/softcenter/scripts/ks_tar_intall.sh") && nvram_match("sc_mount","0"))
+	} else if (f_exists("/jffs/softcenter/scripts/ks_tar_install.sh") && nvram_match("sc_mount","0"))
 		nvram_set("sc_installed","1");
 	//else if (!f_exists("/jffs/softcenter/scripts/ks_tar_intall.sh") && nvram_match("sc_mount","1"))
 		//nvram_set("sc_installed","0");
@@ -162,6 +162,9 @@ void merlinr_init_done()
 	nvram_set("ping_target","www.taobao.com");
 #endif
 	nvram_commit();
+#if defined(RMAC2100)
+	patch_Factory();
+#endif
 }
 
 

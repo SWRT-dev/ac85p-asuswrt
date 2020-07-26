@@ -953,7 +953,7 @@ void init_wl(void)
 	}
 #endif
 #if defined (RTCONFIG_WLMODULE_MT7603E_AP)
-#if defined(RTAC1200GA1) || defined(RTAC1200GU) || defined(RMAC2100)
+#if defined(RTAC1200GA1) || defined(RTAC1200GU)
 	if (!module_loaded("mt_wifi"))
 		modprobe("mt_wifi");
 #else
