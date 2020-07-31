@@ -9274,14 +9274,13 @@ int init_nvram2(void)
 	macp = get_2g_hwaddr();
 	ether_atoe(macp, mac_binary);
 
-#if defined(RTAC85U) || defined(RTAC85P) || defined(RTACRH26) || defined(RMAC2100)
+#if defined(RTAC85U) || defined(RTAC85P) || defined(RTACRH26)
 	int model = get_model();
 	switch(model)
 	{
 	case MODEL_RTAC85U:
 	case MODEL_RTAC85P:
 	case MODEL_RTACRH26:
-	case MODEL_RMAC2100:
 #ifdef RTCONFIG_USB_SWAP
 		if(nvram_get_int("apps_swap_threshold") == 0) {
 			nvram_set("apps_swap_enable", "1");
