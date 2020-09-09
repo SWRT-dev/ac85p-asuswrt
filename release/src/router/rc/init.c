@@ -1514,7 +1514,9 @@ misc_defaults(int restore_defaults)
 		case MODEL_RTAC85U:
 		case MODEL_RTAC85P:
 		case MODEL_RTACRH26:
+#if defined(RMAC2100)
 		case MODEL_RMAC2100:
+#endif
 			nvram_set("reboot_time", "90");		// default is 70 sec
 			break;
 #endif
@@ -3924,7 +3926,7 @@ int init_nvram(void)
 #endif /*  RTACRH26  */
 
 #if defined(RMAC2100)
-case MODEL_RMAC2100:
+	case MODEL_RMAC2100:
 		merlinr_init();
 		nvram_set("boardflags", "0x100"); // although it is not used in ralink driver, set for vlan
 		nvram_set("vlan1hwname", "et0");  // vlan. used to get "%smacaddr" for compare and find parent interface.

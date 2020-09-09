@@ -158,7 +158,9 @@ void generate_switch_para(void)
 		case MODEL_RTAC85U:
 		case MODEL_RTAC85P:
 		case MODEL_RTACRH26:
+#if defined(RMAC2100)
 		case MODEL_RMAC2100:
+#endif
 			nvram_unset("vlan3hwname");
 			if ((wans_cap && wanslan_cap) ||
 			    (wanslan_cap && (!nvram_match("switch_wantag", "none") && !nvram_match("switch_wantag", "")))
@@ -355,7 +357,9 @@ void config_switch()
 	case MODEL_RTAC85U:
 	case MODEL_RTAC85P:
 	case MODEL_RTACRH26:
+#if defined(RMAC2100)
 	case MODEL_RMAC2100:
+#endif
 	case MODEL_RPAC87:
 	case MODEL_RTN800HP:
 		merge_wan_port_into_lan_ports = 1;
@@ -1877,7 +1881,9 @@ set_wan_tag(char *interface) {
 	case MODEL_RTAC85U:
 	case MODEL_RTAC85P:
 	case MODEL_RTACRH26:
+#if defined(RMAC2100)
 	case MODEL_RMAC2100:
+#endif
 	case MODEL_RTN800HP:
 		ifconfig(interface, IFUP, 0, 0);
 		if(wan_vid) { /* config wan port */
