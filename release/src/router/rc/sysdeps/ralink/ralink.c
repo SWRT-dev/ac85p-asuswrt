@@ -376,6 +376,7 @@ int getCountryRegion5G(const char *countryCode, int *warning, int IEEE80211H)
 			(!strcasecmp(countryCode, "YE")) ||
 			(!strcasecmp(countryCode, "ZW")) ||
 			(!strcasecmp(countryCode, "AA")) ||
+			(!strcasecmp(countryCode, "CN")) ||//unlock bw160
 #if defined(RTN65U)
 			//for specific power
 			(!strcasecmp(countryCode, "Z1"))
@@ -520,7 +521,7 @@ int getCountryRegion5G(const char *countryCode, int *warning, int IEEE80211H)
 			(!strcasecmp(countryCode, "BZ")) ||
 			(!strcasecmp(countryCode, "BO")) ||
 			(!strcasecmp(countryCode, "BN")) ||
-			(!strcasecmp(countryCode, "CN")) ||
+//			(!strcasecmp(countryCode, "CN")) ||
 			(!strcasecmp(countryCode, "ID")) ||
 			(!strcasecmp(countryCode, "IR")) ||
 #ifdef RTCONFIG_LOCALE2012

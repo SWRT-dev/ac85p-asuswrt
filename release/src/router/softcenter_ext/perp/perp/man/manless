@@ -1,7 +1,0 @@
-#!/bin/sh
-# manless: display a -man page file
-# wcm, 2008.02.26 - 2008.02.26
-# ===
-groff -Tascii -man ${1} | less
-
-### EOF

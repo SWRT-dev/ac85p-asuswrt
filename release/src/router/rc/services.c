@@ -4149,15 +4149,9 @@ start_smartdns(void)
 		fprintf(fp, "server 223.5.5.5\n");
 #if !defined(K3C) && !defined(K3) && !defined(SBRAC1900P) && !defined(SBRAC3200P) && !defined(R8000P) && !defined(R7000P) && !defined(XWR3100)
 	} else {
-		if(nvram_get("smartdns_dns1") && nvram_get("smartdns_dns2") && nvram_get("smartdns_dns3")){
-			fprintf(fp, "server %s\n", nvram_get("smartdns_dns1"));
-			fprintf(fp, "server %s\n", nvram_get("smartdns_dns2"));
-			fprintf(fp, "server %s\n", nvram_get("smartdns_dns3"));
-		} else {
-			fprintf(fp, "server 8.8.8.8\n");
-			fprintf(fp, "server 208.67.222.222\n");
-			fprintf(fp, "server 1.1.1.1\n");
-		}
+		fprintf(fp, "server 8.8.8.8\n");
+		fprintf(fp, "server 208.67.222.222\n");
+		fprintf(fp, "server 1.1.1.1\n");
 	}
 #endif
 	for (unit = WAN_UNIT_FIRST; unit < WAN_UNIT_MAX; unit++) {
@@ -9522,8 +9516,10 @@ again:
 					_dprintf(" Write FW to the 2nd partition.\n");
 					if (nvram_contains_word("rc_support", "nandflash"))	/* RT-AC56S,U/RT-AC68U/RT-N16UHP */
 						eval("mtd-write2", upgrade_file, "linux2");
+#if !defined(RMAC2100)
 					else
 						eval("mtd-write", "-i", upgrade_file, "-d", "linux2");
+#endif
 				}
 #endif
 				if (nvram_contains_word("rc_support", "nandflash")) {	/* RT-AC56S,U/RT-AC68U/RT-N16UHP */
@@ -10942,6 +10938,20 @@ check_ddr_done:
 	else if(strcmp(script, "wtfast_rule") == 0){
 		//_dprintf("send SIGHUP to wtfast_rule SIGHUP = %d\n", SIGHUP);
 		killall("wtfslhd", SIGHUP);
+	}
+#endif
+#ifdef RTCONFIG_TCPLUGIN
+	else if (strcmp(script, "qmacc") == 0)
+	{
+		if(action & RC_SERVICE_STOP) stop_qmacc();
+		if(action & RC_SERVICE_START) start_qmacc();
+	}
+#endif
+#ifdef RTCONFIG_UUPLUGIN
+	else if (strcmp(script, "uuacc") == 0)
+	{
+		if(action & RC_SERVICE_STOP) stop_uu();
+		if(action & RC_SERVICE_START) start_uu();
 	}
 #endif
 #if defined(RTCONFIG_USB) && defined(RTCONFIG_USB_PRINTER)

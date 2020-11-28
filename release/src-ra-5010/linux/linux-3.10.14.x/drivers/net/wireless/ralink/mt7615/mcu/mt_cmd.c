@@ -4554,7 +4554,7 @@ INT32 MtCmdGetThermalSensorResult(RTMP_ADAPTER *pAd, UINT8 ActionIdx,
 	MtAndesAppendCmdMsg(msg, (char *)&Cmdmsg, sizeof(Cmdmsg));
 	ret = chip_cmd_tx(pAd, msg);
 error:
-	MTWF_LOG(DBG_CAT_FW, DBG_SUBCAT_ALL, DBG_LVL_OFF,
+	MTWF_LOG(DBG_CAT_FW, DBG_SUBCAT_ALL, DBG_LVL_TRACE,
 			 ("%s:(ret = %d)\n", __func__, ret));
 	return ret;
 }

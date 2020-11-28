@@ -320,7 +320,7 @@ endif
 all: libshared.so libshared.a
 
 libshared.so: $(OBJS)
-	@echo " [shared] LD $@"
+	@echo " [shared] LD $@$(CFLAGS)"
 ifeq ($(HND_ROUTER),y)
 	@$(CC) $(LDFLAGS) $(EXTRA_LD_FLAGS) -shared -o $@ $^
 else

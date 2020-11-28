@@ -15119,6 +15119,43 @@ INT RTMP_AP_IoctlHandle(
 			DiagGetProcessInfo(pAd, wrq);
 			break;
 #endif
+		case CMD_RTPRIV_IOCTL_ASUSCMD:
+			//RTMPIoctlAsusHandle(pAd, wrq, subcmd, pData, Data);
+			if ( subcmd == ASUS_SUBCMD_CHLIST) {
+				INT i;
+				RTMP_STRING pChannel[256], pTmp[4];
+				memset(pChannel, 0, 256);
+				for (i = 0; i < pAd->ChannelListNum; i++) {
+					if(i > 0)
+						strcat(pChannel,",");
+					snprintf(pTmp, sizeof(pTmp), "%d", pAd->ChannelList[i].Channel);
+					strcat(pChannel,pTmp);
+				}
+				wrq->u.data.length = strlen(pChannel);
+				pChannel[wrq->u.data.length] = '\0';
+				Status = copy_to_user(wrq->u.data.pointer, pChannel, wrq->u.data.length);
+			} else if ( subcmd == ASUS_SUBCMD_DRIVERVER ) {
+				RTMP_STRING driverVersion[16];
+				wrq->u.data.length = strlen(AP_DRIVER_VERSION);
+				snprintf(driverVersion, sizeof(driverVersion), "%s", AP_DRIVER_VERSION);
+				driverVersion[wrq->u.data.length] = '\0';
+				Status = copy_to_user(wrq->u.data.pointer, driverVersion, wrq->u.data.length);
+			} else if ( subcmd == ASUS_SUBCMD_RADIO_STATUS ) {
+				UINT Enable = 0;
+				if(pAd->Flags & fRTMP_ADAPTER_RADIO_OFF)
+					Enable = 0;
+				else
+					Enable = 1;
+				wrq->u.data.length = 1;
+				Status = copy_to_user(wrq->u.data.pointer, &Enable, wrq->u.data.length);
+			} else if ( subcmd == ASUS_SUBCMD_RADIO_TEMPERATURE ) {
+				UINT32 temperature = 0;
+				temperature = MtAsicGetThemalSensor(pAd, 0);
+				wrq->u.data.length = sizeof(UINT32);
+				Status = copy_to_user(wrq->u.data.pointer, &temperature, wrq->u.data.length);
+			}
+			break;
+
 		default:
 			Status = RTMP_COM_IoctlHandle(pAd, wrq, cmd, subcmd, pData, Data);
 			break;

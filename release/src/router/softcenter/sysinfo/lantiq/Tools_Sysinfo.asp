@@ -112,9 +112,10 @@ function update_temperatures(){
 			if (band5g_support)
 				code += "&nbsp;&nbsp;-&nbsp;&nbsp;<b>5 GHz:</b> <span>" + curr_coreTmp_5_raw + "</span>";
 
-			if (curr_coreTmp_cpu != "")
-				code +="&nbsp;&nbsp;-&nbsp;&nbsp;<b>CPU:</b> <span>" + curr_coreTmp_cpu_raw + "</span>";
-
+			if (curr_coreTmp_cpu != "" && curr_coreTmp_cpu != "0")
+				code +="&nbsp;&nbsp;-&nbsp;&nbsp;<b>CPU:</b> <span>" + parseInt(curr_coreTmp_cpu) +"&deg;C</span>";
+			else
+				code +="&nbsp;&nbsp;-&nbsp;&nbsp;<b>CPU:</b> <span><i>disabled</i></span>";
 			document.getElementById("temp_td").innerHTML = code;
 			setTimeout("update_temperatures();", 3000);
 		}
