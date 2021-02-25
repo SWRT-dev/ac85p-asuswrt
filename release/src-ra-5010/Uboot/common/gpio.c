@@ -40,7 +40,7 @@
 
 
 #elif defined (MT7621_MP)
-#if defined (ASUS_RPAC56) || defined(ASUS_RTAC1200GA1) || defined(ASUS_RTAC1200GU) || defined (ASUS_RPAC87) || defined (ASUS_RTAC85U) || defined (ASUS_RTAC85P) || defined (ASUS_RTN800HP) || defined (ASUS_RTACRH26)
+#if defined (ASUS_RPAC56) || defined(ASUS_RTAC1200GA1) || defined(ASUS_RTAC1200GU) || defined (ASUS_RPAC87) || defined (ASUS_RTAC85U) || defined (ASUS_RTAC85P) || defined (ASUS_RTN800HP) || defined (ASUS_RTACRH26) || defined (ASUS_RMAC2100)
 //MT7621
 //asm/rt2880/rt_mmap.h
 #define SYSCTR_ADDR	0xBE000000   //RALINK_SYSCTL_BASE
@@ -687,6 +687,9 @@ void led_init(void)
 		mtk7621_set_gpio_dir(led[i], 0);	/* Set LED as output */
 		mtk7621_set_gpio_pin(led[i], 1);
 	}
+#elif defined (ASUS_RMAC2100)
+	mtk7621_set_gpio_dir(PWR_LED, 0);	/* Set LED as output */
+	mtk7621_set_gpio_pin(PWR_LED, 1);
 #elif defined(ASUS_RTN800HP)
 	int i, led[] = { PWR_LED, WIFI_2G_LED, WAN_LED };
 
@@ -833,9 +836,11 @@ extern const char *model;
 	printf("ASUS %s gpio init : wps / reset pin\n", model);
 	mtk7621_set_gpio_dir(WPS_BTN, 1);
 	mtk7621_set_gpio_dir(RST_BTN, 1);
-#elif defined(ASUS_RTAC85P) || defined (ASUS_RTACRH26)
+#elif defined(ASUS_RTAC85P) || defined (ASUS_RTACRH26) || defined (ASUS_RMAC2100)
 	printf("ASUS %s gpio init : wps / reset pin\n", model);
+#if !defined (ASUS_RMAC2100)
 	mtk7621_set_gpio_dir(WPS_BTN, 1);
+#endif
 	mtk7621_set_gpio_dir(RST_BTN, 1);
 #elif defined(ASUS_RTN800HP)
 	printf("ASUS %s gpio init : wps / reset pin\n", model);
@@ -978,10 +983,12 @@ void LEDON(void)
 	mtk7621_set_gpio_pin(WIFI_2G_LED, 0);
 	mtk7621_set_gpio_pin(WIFI_5G_LED, 0);
 	mtk7621_set_gpio_pin(WPS_LED, 0);
-#elif defined(ASUS_RTAC85P)  || defined (ASUS_RTACRH26)
+#elif defined(ASUS_RTAC85P)  || defined (ASUS_RTACRH26) || defined (ASUS_RMAC2100)
 	mtk7621_set_gpio_pin(PWR_LED, 0);
+#if !defined (ASUS_RMAC2100)
 	mtk7621_set_gpio_pin(WIFI_2G_LED, 0);
 	mtk7621_set_gpio_pin(WIFI_5G_LED, 0);
+#endif
 #elif defined(ASUS_RTN800HP)
 	mtk7621_set_gpio_pin(PWR_LED, 0);
 	mtk7621_set_gpio_pin(WAN_LED, 0);
@@ -1060,10 +1067,12 @@ void LEDOFF(void)
 	mtk7621_set_gpio_pin(WIFI_2G_LED, 1);
 	mtk7621_set_gpio_pin(WIFI_5G_LED, 1);
 	mtk7621_set_gpio_pin(WPS_LED, 1);
-#elif defined(ASUS_RTAC85P) || defined (ASUS_RTACRH26)
+#elif defined(ASUS_RTAC85P) || defined (ASUS_RTACRH26) || defined (ASUS_RMAC2100)
 	mtk7621_set_gpio_pin(PWR_LED, 1);
+#if !defined (ASUS_RMAC2100)
 	mtk7621_set_gpio_pin(WIFI_2G_LED, 1);
 	mtk7621_set_gpio_pin(WIFI_5G_LED, 1);
+#endif
 #elif defined(ASUS_RTN800HP)
 	mtk7621_set_gpio_pin(PWR_LED, 1);
 	mtk7621_set_gpio_pin(WAN_LED, 1);

@@ -238,7 +238,7 @@ const char *blver =
 	"1000";
 #elif defined(ASUS_RTACRH26)
 	"1000";
-#elif defined(CONFIG_RMAC2100)
+#elif defined(ASUS_RMAC2100)
 	"1000";
 #elif defined(CONFIG_RTN800HP)
 	"1000";
