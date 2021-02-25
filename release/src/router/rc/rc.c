@@ -751,6 +751,7 @@ static const applets_t applets[] = {
 #ifdef RTCONFIG_OPENVPN
 	{ "ovpn-up",			ovpn_up_main				},
 	{ "ovpn-down",			ovpn_down_main			},
+	{ "ovpn-route-up",		ovpn_route_up_main				},
 #endif
 #ifdef RTCONFIG_EAPOL
 	{ "wpa_cli",			wpacli_main			},
@@ -923,6 +924,7 @@ static const applets_t applets[] = {
 #ifdef RTCONFIG_ADTBW
 	{ "adtbw",			adtbw_main		},
 #endif
+	{ "toolbox",			merlinr_toolbox		},
 	{NULL, NULL}
 };
 

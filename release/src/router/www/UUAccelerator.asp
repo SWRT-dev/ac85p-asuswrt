@@ -7,7 +7,7 @@
 <meta HTTP-EQUIV="Pragma" CONTENT="no-cache">
 <meta HTTP-EQUIV="Expires" CONTENT="-1">
 <link rel="shortcut icon" href="images/favicon.png">
-<link rel="icon" href="images/favicon.png"><title><#Web_Title#> - <#Menu_usb_application#></title>
+<link rel="icon" href="images/favicon.png"><title><#Web_Title#> - <#UU_Accelerator#></title>
 <link rel="stylesheet" type="text/css" href="index_style.css">
 <link rel="stylesheet" type="text/css" href="form_style.css">
 <link rel="stylesheet" type="text/css" href="usp_style.css">
@@ -25,10 +25,10 @@ function initial(){
 }
 function uuRegister(mac){
 	var _mac = mac.toLowerCase();
-	if(modelname == "K3" || modelname == "EA6700" || modelname == "SBRAC1900P" || modelname == "SBRAC3200P" || modelname == "R8000P" || modelname == "R7900P" || modelname == "RTAC3100" || modelname == "RTAC3200" || modelname == "RTACRH17" || modelname == "RAX20" )
-	window.open('https://router.uu.163.com/asus/pc.html#/acce?gwSn=' + _mac + '&type=asuswrt-merlin', '_blank');
+	if(modelname.indexOf("RTAC") != -1 || modelname.indexOf("RTAX") != -1 || modelname.indexOf("GTAC") != -1 || modelname.indexOf("GTAX") != -1 || modelname.indexOf("BLUE") != -1 || modelname.indexOf("ZEN") != -1 || modelname.indexOf("XT") != -1 || modelname.indexOf("TUF") != -1)
+		window.open('https://router.uu.163.com/asus/pc.html#/acce?gwSn=' + _mac + '&type=asuswrt', '_blank');
 	else
-	window.open('https://router.uu.163.com/asus/pc.html#/acce?gwSn=' + _mac + '&type=asuswrt', '_blank');
+		window.open('https://router.uu.163.com/asus/pc.html#/acce?gwSn=' + _mac + '&type=asuswrt-merlin', '_blank');
 }
 function enableuu(){
 	window.open("http://"+window.location.hostname+"/Advanced_System_Content.asp");

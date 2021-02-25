@@ -164,32 +164,22 @@ ifeq ($(RTCONFIG_HTTPS),y)
 endif
 else
 ifeq ($(RTCONFIG_HTTPS),y)
-ifeq ($(MERLINR_NAME), $(filter $(MERLINR_NAME), K3 K3C R7900P SBRAC1900P SBRAC3200P RTAC85P RMAC2100))
 	cp -f webs_scripts/merlinr_webs_upgrade.sh $(INSTALLDIR)/usr/sbin/webs_upgrade.sh
-else
-	cp -f webs_scripts/ssl_webs_upgrade.sh $(INSTALLDIR)/usr/sbin/webs_upgrade.sh
-endif
-ifeq ($(RTCONFIG_CFGSYNC),y)
-ifeq ($(MERLINR_NAME), $(filter $(MERLINR_NAME), K3 K3C R7900P SBRAC1900P SBRAC3200P RTAC85P RMAC2100))
-	cp -f webs_scripts/merlinr_webs_download.sh $(INSTALLDIR)/usr/sbin/webs_download.sh
-	cp -f webs_scripts/merlinr_webs_note.sh $(INSTALLDIR)/usr/sbin/webs_note.sh
-else
-	cp -f webs_scripts/ssl_webs_download.sh $(INSTALLDIR)/usr/sbin/webs_download.sh
-	cp -f webs_scripts/ssl_webs_note.sh $(INSTALLDIR)/usr/sbin/webs_note.sh
-endif
-endif
-else
-	cp -f webs_scripts/nozip_webs_upgrade.sh $(INSTALLDIR)/usr/sbin/webs_upgrade.sh
-endif
 ifeq ($(RTCONFIG_FBWIFI),y)
 	cp -f webs_scripts/fbwifi_webs_update.sh $(INSTALLDIR)/usr/sbin/webs_update.sh
+else ifeq ($(RTAC68A),y)
+	cp -f webs_scripts/force_webs_update.sh $(INSTALLDIR)/usr/sbin/webs_update.sh
 else ifeq ($(RTCONFIG_FRS_LIVE_UPDATE),y)
 	cp -f webs_scripts/frs_live_update.sh $(INSTALLDIR)/usr/sbin/webs_update.sh
 else
 	cp -f webs_scripts/ssl_webs_update.sh $(INSTALLDIR)/usr/sbin/webs_update.sh
 endif
-ifeq ($(RTAC68A),y)
-	cp -f webs_scripts/force_webs_update.sh $(INSTALLDIR)/usr/sbin/webs_update.sh
+ifeq ($(RTCONFIG_CFGSYNC),y)
+	cp -f webs_scripts/merlinr_webs_download.sh $(INSTALLDIR)/usr/sbin/webs_download.sh
+	cp -f webs_scripts/merlinr_webs_note.sh $(INSTALLDIR)/usr/sbin/webs_note.sh
+endif
+else
+	cp -f webs_scripts/nozip_webs_upgrade.sh $(INSTALLDIR)/usr/sbin/webs_upgrade.sh
 endif
 ifeq ($(AC2900),y)
 	cp -f webs_scripts/verizon_webs_update.sh $(INSTALLDIR)/usr/sbin/webs_update.sh
@@ -223,21 +213,18 @@ endif
 
 ifeq ($(RTAC68U),y)
 	mkdir -p $(INSTALLDIR)/rom/cfe
-	#cp -rf cfe/cfe_tmo_2.1.2.6.bin $(INSTALLDIR)/rom/cfe/
-	#cp -rf cfe/cfe_1.0.2.0.bin $(INSTALLDIR)/rom/cfe
-	#cp -rf cfe/cfe_1.0.2.0_esmt.bin $(INSTALLDIR)/rom/cfe
-	#cp -rf cfe/cfe_ac66u_b1_1.1.2.0.bin $(INSTALLDIR)/rom/cfe
-	#cp -rf cfe/cfe_rt-ac68u_5636_c0_1.3.0.7.bin $(INSTALLDIR)/rom/cfe
+	cp -rf cfe/cfe_tmo_2.1.2.6.bin $(INSTALLDIR)/rom/cfe/
+	cp -rf cfe/cfe_1.0.2.0.bin $(INSTALLDIR)/rom/cfe
+	cp -rf cfe/cfe_1.0.2.0_esmt.bin $(INSTALLDIR)/rom/cfe
+	cp -rf cfe/cfe_ac66u_b1_1.1.2.0.bin $(INSTALLDIR)/rom/cfe
+	cp -rf cfe/cfe_rt-ac68u_5636_c0_1.3.0.7.bin $(INSTALLDIR)/rom/cfe
 	cp -rf cfe/mtd-write $(INSTALLDIR)/rom/cfe/
 endif
 
 ifeq ($(RTAC3200),y)
 	mkdir -p $(INSTALLDIR)/rom/cfe
-	#cp -rf cfe/cfe_rt-ac3200_1.0.1.7_128k.bin $(INSTALLDIR)/rom/cfe
-	#cp -rf cfe/cfe_rt-ac3200_2.0.0.4_128k.bin $(INSTALLDIR)/rom/cfe
-ifeq ($(SBRAC3200P),y)
-	cp -rf cfe/sbrac3200.bin $(INSTALLDIR)/rom/cfe
-endif
+	cp -rf cfe/cfe_rt-ac3200_1.0.1.7_128k.bin $(INSTALLDIR)/rom/cfe
+	cp -rf cfe/cfe_rt-ac3200_2.0.0.4_128k.bin $(INSTALLDIR)/rom/cfe
 	cp -rf cfe/mtd-write $(INSTALLDIR)/rom/cfe/
 endif
 

@@ -1178,3 +1178,21 @@ char *get_staifname(int band)
 	return (char*) sta[band];
 }
 #endif
+#ifdef RTCONFIG_AMAS
+void add_beacon_vsie(char *hexdata)
+{
+}
+
+void del_beacon_vsie(char *hexdata)
+{
+}
+
+void add_obd_probe_req_vsie(char *hexdata)
+{
+}
+
+void del_obd_probe_req_vsie(char *hexdata)
+{
+}
+#endif /* RTCONFIG_AMAS */
+

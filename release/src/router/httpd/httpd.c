@@ -64,6 +64,7 @@
 typedef unsigned int __u32;   // 1225 ham
 
 #include <httpd.h>
+#include <common.h>
 //2008.08 magic{
 #include <bcmnvram.h>	//2008.08 magic
 #include <arpa/inet.h>	//2008.08 magic
@@ -261,6 +262,7 @@ time_t login_timestamp=0; // the timestamp of the logined ip
 time_t login_timestamp_tmp=0; // the timestamp of the current session.
 time_t last_login_timestamp=0; // the timestamp of the current session.
 unsigned int login_ip_tmp=0; // the ip of the current session.
+usockaddr login_usa_tmp = {0};
 unsigned int login_try=0;
 unsigned int last_login_ip = 0;	// the last logined ip 2008.08 magic
 //Add by Andy for handle the login block mechanism by LAN/WAN
@@ -290,6 +292,49 @@ static int check_if_inviteCode(const char *dirpath){
 	return 1;
 }
 #endif
+
+#ifndef RTCONFIG_LIBASUSLOG
+static int
+log_pass_handler(char *url)
+{
+	struct log_pass_url_list *lp_handler;
+	for (lp_handler = &log_pass_handlers[0]; lp_handler->pattern; lp_handler++) {
+		if (match(lp_handler->pattern, url)){
+			return 1;
+		}
+	}
+	return 0;
+}
+
+void Debug2File(const char *path, const char *fmt, ...)
+{
+	FILE *fp;
+	va_list args;
+	time_t now;
+	struct tm tm;
+	char timebuf[100];
+
+	if (nvram_get_int("HTTPD_DBG") <= 1) {
+		if (log_pass_handler(url))
+			return;
+	}
+
+	fp = fopen(path, "a+");
+	if (fp) {
+		setenv("TZ", nvram_safe_get_x("", "time_zone_x"), 1);
+		now = time(NULL);
+		localtime_r(&now, &tm);
+		strftime(timebuf, sizeof(timebuf), "%b %d %H:%M:%S", &tm);
+		fprintf(fp, "%s ", timebuf);
+		va_start(args, fmt);
+		vfprintf(fp, fmt, args);
+		va_end(args);
+		fclose(fp);
+	} else
+		fprintf(stderr, "Open %s Error!\n", path);
+}
+#endif
+
 void sethost(char *host)
 {
 	char *cp;
@@ -388,11 +433,12 @@ page_default_redirect(int fromapp_flag, char* url)
 void
 send_login_page(int fromapp_flag, int error_status, char* url, char* file, int lock_time, int logintry)
 {
-	HTTPD_DBG("error_status = %d\n", error_status);
 	char inviteCode[256]={0};
 	char buf[128] = {0};
 	//char url_tmp[64]={0};
 	char *cp, *file_var=NULL;
+
+	HTTPD_DBG("error_status = %d\n", error_status);
 
 	if(logintry){
 		if(!cur_login_ip_type)
@@ -1339,8 +1385,9 @@ handle_request(void)
 					&& !strstr(file, "asustitle.png")
 #endif
 					&& !strstr(file,"cert_key.tar")
-#ifdef RTCONFIG_OPENVPN
-					&& !strstr(file, "server_ovpn.cert")
+					&& !strstr(file,"cert.tar")
+#ifdef RTCONFIG_CAPTCHA
+					&& !strstr(file, "captcha.gif")
 #endif
 #ifdef RTCONFIG_SOFTCENTER
 					&& !strstr(file, "ss_conf")
@@ -1390,6 +1437,7 @@ handle_request(void)
 //2008 magic{
 void http_login_cache(usockaddr *u) {
 	login_ip_tmp = (unsigned int)(u->sa_in.sin_addr.s_addr);
+	login_usa_tmp = *u;
 	cur_login_ip_type = check_current_ip_is_lan_or_wan();
 	if(cur_login_ip_type == -1)
 		_dprintf("[%s, %d]ERROR! Can not check the remote ip!\n", __FUNCTION__, __LINE__);
@@ -1507,8 +1555,9 @@ int is_auth(void)
 
 int is_firsttime(void)
 {
-#if defined(RTAC58U)
-	if (!strncmp(nvram_safe_get("territory_code"), "CX", 2))
+#if defined(RTAC58U) || defined(RTAC59U)
+	if (!strncmp(nvram_safe_get("territory_code"), "CX/01", 5)
+	 || !strncmp(nvram_safe_get("territory_code"), "CX/05", 5))
 		return 0;
 	else
 #endif
@@ -1951,9 +2000,17 @@ int main(int argc, char **argv)
 	do_ssl = 0; // default
 	char log_filename[128] = {0};
 
-#if defined(RTCONFIG_UIDEBUG)
-	eval("touch", HTTPD_DEBUG);
+	/* set initial TZ to avoid mem leaks
+	 * it suppose to be convert after applying
+	 * time_zone_x_mapping(); */
+	setenv("TZ", nvram_safe_get_x("", "time_zone_x"), 1);
+
+#ifdef RTCONFIG_LETSENCRYPT
+	nvram_unset("le_restart_httpd");
 #endif
+
+	if (nvram_get_int("HTTPD_DBG") > 0)
+		eval("touch", HTTPD_DEBUG);
 
 #if defined(RTCONFIG_SW_HW_AUTH)
 	//if(!httpd_sw_hw_check()) return 0;
@@ -2017,33 +2074,33 @@ int main(int argc, char **argv)
 
 #ifdef RTCONFIG_HTTPS
 	//if (do_ssl)
-		start_ssl();
+		start_ssl(http_port);
 #endif
 
 	/* Initialize listen socket */
 	for (i = 0; i < ARRAY_SIZE(listen_fd); i++)
 		listen_fd[i] = -1;
 #ifdef RTCONFIG_AIHOME_TUNNEL
-	if (nvram_get_int("http_enable") == 1 && http_port == SERVER_PORT){
+	if (nvram_get_int("http_enable") == 1 && http_port == SERVER_PORT) {
 		//httpd listen lo 80 port for tunnel but unused ifname in https only
-	}else
+	} else
 #endif
-	if ((listen_fd[0] = initialize_listen_socket(&usa, http_ifname)) < 2){
+	if ((listen_fd[0] = initialize_listen_socket(&usa, http_ifname)) < 0) {
 		fprintf(stderr, "can't bind to %s address\n", http_ifname ? : "any");
-		exit(errno);
+		return errno;
 	}
 	if ((http_ifname && strcmp(http_ifname, "lo") != 0) &&
-	    (listen_fd[1] = initialize_listen_socket(&usa, "lo")) < 2) {
+	    (listen_fd[1] = initialize_listen_socket(&usa, "lo")) < 0) {
 		fprintf(stderr, "can't bind to %s address\n", "loopback");
 		/* allow fail if previous bind to interface was ok */
-		/* exit(errno); */
+		/* return errno; */
 	}
 
 	FILE *pid_fp;
-	if (http_port==SERVER_PORT)
+	if (http_port == SERVER_PORT)
 		strcpy(pidfile, "/var/run/httpd.pid");
-	else sprintf(pidfile, "/var/run/httpd-%d.pid", http_port);
-
+	else
+		sprintf(pidfile, "/var/run/httpd-%d.pid", http_port);
 	if (!(pid_fp = fopen(pidfile, "w"))) {
 		perror(pidfile);
 		return errno;
@@ -2058,10 +2115,11 @@ int main(int argc, char **argv)
 
 	/* Loop forever handling requests */
 	for (;;) {
-		int max_fd, count;
+		const static struct timeval timeout = { .tv_sec = MAX_CONN_TIMEOUT, .tv_usec = 0 };
 		struct timeval tv;
 		fd_set rfds;
 		conn_item_t *item, *next;
+		int max_fd, count;
 
 		memcpy(&rfds, &active_rfds, sizeof(rfds));
 		max_fd = -1;
@@ -2077,12 +2135,12 @@ int main(int argc, char **argv)
 			max_fd = max(item->fd, max_fd);
 
 		/* Wait for new connection or incoming request */
-		tv.tv_sec = MAX_CONN_TIMEOUT;
-		tv.tv_usec = 0;
+		tv = timeout;
 		while ((count = select(max_fd + 1, &rfds, NULL, NULL, &tv)) < 0 && errno == EINTR)
 			continue;
 		if (count < 0) {
 			perror("select");
+			HTTPD_DBG("count = %d : return\n", count);
 			return errno;
 		}
 
@@ -2095,6 +2153,7 @@ int main(int argc, char **argv)
 			item = malloc(sizeof(*item));
 			if (item == NULL) {
 				perror("malloc");
+				HTTPD_DBG("malloc fail\n");
 				return errno;
 			}
 			sz = sizeof(item->usa);
@@ -2102,9 +2161,14 @@ int main(int argc, char **argv)
 				continue;
 			if (item->fd < 0) {
 				perror("accept");
+				HTTPD_DBG("item->fd = %d (<0): continue\n", item->fd);
 				free(item);
 				continue;
 			}
+
+			/* Set receive/send timeouts */
+			setsockopt(item->fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
+			setsockopt(item->fd, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout));
 
 			/* Set the KEEPALIVE option to cull dead connections */
 			setsockopt(item->fd, SOL_SOCKET, SO_KEEPALIVE, &int_1, sizeof(int_1));
@@ -2134,22 +2198,20 @@ int main(int argc, char **argv)
 				if (do_ssl) {
 					ssl_stream_fd = item->fd;
 					if (!(conn_fp = ssl_server_fopen(item->fd))) {
+						HTTPD_DBG("fdopen(ssl): skip\n");
 						perror("fdopen(ssl)");
 						goto skip;
 					}
 				} else
 #endif
 				if (!(conn_fp = fdopen(item->fd, "r+"))) {
+					HTTPD_DBG("fdopen: skip\n");
 					perror("fdopen");
 					goto skip;
 				}
 
 				http_login_cache(&item->usa);
-#if defined(RTCONFIG_UIDEBUG)
-				struct in_addr req_ip;
-				req_ip.s_addr = login_ip_tmp;
-				HTTPD_DBG("Log ip address: %s\n", inet_ntoa(req_ip));
-#endif
+
 				handle_request();
 				fflush(conn_fp);
 #ifdef RTCONFIG_HTTPS
@@ -2201,20 +2263,30 @@ void erase_cert(void)
 	unlink("/etc/cert.pem");
 	unlink("/etc/key.pem");
 	nvram_unset("https_crt_file");
-	//nvram_unset("https_crt_gen");
 	nvram_set("https_crt_gen", "0");
 }
 
-void start_ssl(void)
+void start_ssl(int http_port)
 {
+	int lock;
 	int ok;
 	int save;
+	int i;
 	int retry;
 	unsigned long long sn;
 	char t[32];
 
-	//fprintf(stderr,"[httpd] start_ssl running!!\n");
-	//nvram_set("https_crt_gen", "1");
+	lock = file_lock("httpd");
+
+	// Avoid collisions if another httpd instance is initializing SSL cert
+	for (i = 1; i < 5; i++) {
+		if (lock < 0) {
+			//logmessage("httpd", "Conflict, waiting %d", i);
+			sleep(i*i);
+		} else {
+			i = 5;
+		}
+	}
 
 	if (nvram_match("https_crt_gen", "1")) {
 		erase_cert();
@@ -2227,10 +2299,11 @@ void start_ssl(void)
 		if ((!f_exists("/etc/cert.pem")) || (!f_exists("/etc/key.pem"))) {
 			ok = 0;
 			if (save) {
-				fprintf(stderr, "Save SSL certificate...\n"); // tmp test
+				logmessage("httpd", "Save SSL certificate...%d", http_port);
 				if (nvram_get_file("https_crt_file", "/tmp/cert.tgz", 8192)) {
 					if (eval("tar", "-xzf", "/tmp/cert.tgz", "-C", "/", "etc/cert.pem", "etc/key.pem") == 0){
 						system("cat /etc/key.pem /etc/cert.pem > /etc/server.pem");
+						system("cp /etc/cert.pem /etc/cert.crt"); // openssl self-signed certificate for router.asus.com LAN access
 						ok = 1;
 					}
 
@@ -2244,8 +2317,7 @@ void start_ssl(void)
 			}
 			if (!ok) {
 				erase_cert();
-				syslog(LOG_NOTICE, "Generating SSL certificate...");
-				fprintf(stderr, "Generating SSL certificate...\n"); // tmp test
+				logmessage("httpd", "Generating SSL certificate...%d", http_port);
 				// browsers seems to like this when the ip address moves...	-- zzz
 				f_read("/dev/urandom", &sn, sizeof(sn));
 
@@ -2258,11 +2330,20 @@ void start_ssl(void)
 			save_cert();
 		}
 
-		if (mssl_init("/etc/cert.pem", "/etc/key.pem")) return;
+		if (mssl_init("/etc/cert.pem", "/etc/key.pem")) {
+			logmessage("httpd", "Succeed to init SSL certificate...%d", http_port);
+			file_unlock(lock);
+			return;
+		}
 
+		logmessage("httpd", "Failed to initialize SSL, generating new key/cert...%d", http_port);
 		erase_cert();
 
-		if (!retry) exit(1);
+		if (!retry) {
+			logmessage("httpd", "Unable to start in SSL mode, exiting! %d", http_port);
+			file_unlock(lock);
+			exit(1);
+		}
 		retry = 0;
 	}
 }

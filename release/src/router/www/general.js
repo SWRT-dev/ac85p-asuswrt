@@ -315,6 +315,7 @@ function show_cert_settings(show){
 
 function change_ddns_setting(v){
 		var hostname_x = '<% nvram_get("ddns_hostname_x"); %>';
+		document.getElementById("ddns_result_tr").style.display = "none";
 		if (v == "WWW.ASUS.COM"){
 				document.getElementById("ddns_hostname_info_tr").style.display = "none";
 				document.getElementById("ddns_hostname_tr").style.display="";
@@ -459,7 +460,7 @@ function change_common_radio(o, s, v, r){
 			document.form.ddns_regular_check.value = 0;
 			showhide("check_ddns_field", 0);
 			inputCtrl(document.form.ddns_regular_period, 0);
-			
+			document.getElementById("ddns_result_tr").style.display = "none";
 			if(letsencrypt_support)
 				show_cert_settings(0);
 		}	
@@ -856,14 +857,33 @@ function insertExtChannelOption_5g(){
 					inputCtrl(document.form.wl_nctrlsb, 0);
 				}
 			}
-		
-				if(country == 'RU'){
+
+				if(is_RU_sku){
+					var RU_band4 = (function(){
+						for(i=0;i<wl_channel_list_5g.length;i++){
+							if(wl_channel_list_5g[i] >= '149'){
+								return true;
+							}
+						}
+	
+						return false;
+					})();
 					if(document.form.wl_nmode_x.value == 0 || document.form.wl_nmode_x.value == 8){    // Auto or N/AC mixed
 						if(document.form.wl_bw.value == 3){    // 80 MHz
-							wl_channel_list_5g = ['42', '58', '138', '155'];
+							if(RU_band4){
+								wl_channel_list_5g = ['42', '58', '138', '155'];
+							}
+							else{
+								wl_channel_list_5g = ['42', '58', '138'];
+							}	
 						}
 						else if(document.form.wl_bw.value == 2){    // 40 MHz
-							wl_channel_list_5g = ['38', '46', '54', '62', '134', '142', '151', '159'];
+							if(RU_band4){
+								wl_channel_list_5g = ['38', '46', '54', '62', '134', '142', '151', '159'];
+							}
+							else{
+								wl_channel_list_5g = ['38', '46', '54', '62', '134', '142'];
+							}
 						}			
 					}
 				}
@@ -1299,19 +1319,38 @@ function insertExtChannelOption_5g(){
 				}
 				
         if(ch_v[0] == "0"){
-					channels[0] = "<#Auto#>";
-				}	
-
-				if(country == 'RU'){
-					if(document.form.wl_nmode_x.value == 0 || document.form.wl_nmode_x.value == 8){    // Auto or N/AC mixed
-						if(document.form.wl_bw.value == 3){    // 80 MHz
-							ch_v = ['0', '36', '52', '136', '149'];
-						}
-						else if(document.form.wl_bw.value == 2){    // 40 MHz
-							ch_v = ['0', '36', '44', '52', '60', '132', '136', '149', '157'];
-						}			
+			channels[0] = "<#Auto#>";
+		}	
+	
+		if(is_RU_sku){
+			var RU_band4 = (function(){
+				for(i=0;i<wl_channel_list_5g.length;i++){
+					if(wl_channel_list_5g[i] >= '149'){
+						return true;
 					}
 				}
+
+				return false;
+			})();
+			if(document.form.wl_nmode_x.value == 0 || document.form.wl_nmode_x.value == 8){    // Auto or N/AC mixed
+				if(document.form.wl_bw.value == 3){    // 80 MHz
+					if(RU_band4){
+						ch_v = ['0', '36', '52', '132', '149'];
+					}
+					else{
+						ch_v = ['0', '36', '52', '132'];
+					}
+				}
+				else if(document.form.wl_bw.value == 2){    // 40 MHz
+					if(RU_band4){
+						ch_v = ['0', '36', '44', '52', '60', '132', '140', '149', '157'];
+					}
+					else{
+						ch_v = ['0', '36', '44', '52', '60', '132', '140'];
+					}
+				}			
+			}
+		}
 
         add_options_x2(document.form.wl_channel, channels, ch_v, orig);
 				var x = document.form.wl_nctrlsb;

@@ -386,11 +386,12 @@ OBJS += pc_block.o
 OBJS += pc_tmp.o
 endif
 
-ifeq ($(RTCONFIG_HTTPS),y)
-ifeq ($(RTCONFIG_FRS_FEEDBACK),y)
+ifeq ($(or $(RTCONFIG_FRS_LIVE_UPDATE),$(RTCONFIG_FRS_FEEDBACK)),y)
+CFLAGS += -I$(TOP)/curl-7.21.7/include
+LDFLAGS += -L$(TOP)/curl-7.21.7/lib/.libs -lcurl
 OBJS += dsl_fb.o
 endif
-endif
+
 ifeq ($(RTCONFIG_FRS_LIVE_UPDATE),y)
 ifneq ($(MERLINR_NAME), $(filter $(MERLINR_NAME), K3 K3C R7900P SBRAC3200P RTAC85P RMAC2100))
 OBJS += frs_service.o
@@ -522,10 +523,12 @@ ifeq ($(RTCONFIG_IPERF),y)
 OBJS += monitor.o
 endif
 
-
-ifeq ($(RTCONFIG_HTTPS),y)
+ifeq ($(or $(RTCONFIG_FRS_LIVE_UPDATE),$(RTCONFIG_FRS_FEEDBACK)),y)
 CFLAGS += -I$(TOP)/curl-7.21.7/include
 LDFLAGS += -L$(TOP)/curl-7.21.7/lib/.libs -lcurl
+endif
+
+ifeq ($(RTCONFIG_HTTPS),y)
 ifeq ($(or $(RTCONFIG_PUSH_EMAIL),$(RTCONFIG_NOTIFICATION_CENTER)),y)
 OBJS += pwdec.o
 CFLAGS += -I$(TOP)/json-c
@@ -935,11 +938,10 @@ endif
 ifeq ($(RTCONFIG_HTTPS),y)
 	@cd $(INSTALLDIR)/sbin && ln -sf rc rsasign_check
 	@cd $(INSTALLDIR)/sbin && ln -sf rc rsarootca_check
-ifeq ($(RTCONFIG_FRS_FEEDBACK),y)
+endif
+ifeq ($(RTCONFIG_FRS_LIVE_UPDATE),y)
 	@cd $(INSTALLDIR)/sbin && ln -sf rc firmware_check_update
 endif
-endif
-
 	@cd $(INSTALLDIR)/sbin && ln -sf rc test_endian
 ifeq ($(RTCONFIG_BWDPI),y)
 	@cd $(INSTALLDIR)/sbin && ln -sf rc rsasign_sig_check
@@ -1020,9 +1022,7 @@ ifeq ($(RTCONFIG_ADTBW),y)
 	@cd $(INSTALLDIR)/sbin && ln -sf rc adtbw
 endif
 
-ifeq ($(strip $(MERLINR_NAME)),$(filter $(MERLINR_NAME), SBRAC1900P SBRAC3200P RTAC68U R8000P))
 	@cd $(INSTALLDIR)/sbin && ln -sf rc toolbox
-endif
 
 clean:
 	rm -f rc *.o .*.depend *.prep
@@ -1053,6 +1053,11 @@ dsl_fb.o:dsl_fb.c
 #	./dsl_fb_dec.sh
 endif
 endif
+endif
+
+ifneq ($(wildcard ./prebuild/frs_service.o),)
+frs_service.o:
+	@-cp -f ./prebuild/frs_service.o .
 endif
 
 ifneq ($(wildcard ./prebuild/bwdpi*.o),)

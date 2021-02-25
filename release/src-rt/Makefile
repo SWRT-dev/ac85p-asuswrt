@@ -71,7 +71,7 @@ export PATH := $(RELEASEDIR)/tools:$(SRCBASE)/ctools:$(PATH)
 #aimesh:R(384 and 385),non-aimesh:B(382 and 384),special:X(382/384/385/386)
 export MERLINR_NAME := RTAC85P
 export MERLINR_VER_MAJOR :=B
-export MERLINR_VER_MINOR :=5.1.3
+export MERLINR_VER_MINOR :=5.1.4b
 export MERLINR_VER := $(MERLINR_VER_MAJOR)$(MERLINR_VER_MINOR)
 export MERLINRVER := $(MERLINR_NAME)_$(MERLINR_VER)
 
@@ -1369,9 +1369,27 @@ define RouterOptions
 		sed -i "/RTCONFIG_PUSH_EMAIL/d" $(1); \
 		echo "RTCONFIG_PUSH_EMAIL=y" >>$(1); \
 	fi; \
+	if [ "$(AHS)" = "y" ]; then \
+		sed -i "/RTCONFIG_AHS/d" $(1); \
+		echo "RTCONFIG_AHS=y" >>$(1); \
+		sed -i "/RTCONFIG_HTTPS/d" $(1); \
+		echo "RTCONFIG_HTTPS=y" >>$(1); \
+		sed -i "/RTCONFIG_LIBASC/d" $(1); \
+		echo "RTCONFIG_LIBASC=y" >>$(1); \
+	fi; \
+	if [ "$(ASD)" = "y" ]; then \
+		sed -i "/RTCONFIG_ASD/d" $(1); \
+		echo "RTCONFIG_ASD=y" >>$(1); \
+		sed -i "/RTCONFIG_LIBASC/d" $(1); \
+		echo "RTCONFIG_LIBASC=y" >>$(1); \
+	fi; \
 	if [ "$(DBLOG)" = "y" ]; then \
 		sed -i "/RTCONFIG_DBLOG/d" $(1); \
 		echo "RTCONFIG_DBLOG=y" >>$(1); \
+	fi; \
+	if [ "$(FRS_LIVE_UPDATE)" = "y" ]; then \
+		sed -i "/RTCONFIG_FRS_LIVE_UPDATE/d" $(1); \
+		echo "RTCONFIG_FRS_LIVE_UPDATE=y" >>$(1); \
 	fi; \
 	if [ "$(SYSSTATE)" = "y" ]; then \
 		sed -i "/RTCONFIG_SYSSTATE/d" $(1); \
@@ -2636,13 +2654,13 @@ define RouterOptions
 		sed -i "/RTCONFIG_WTF_REDEEM/d" $(1); \
 		echo "RTCONFIG_WTF_REDEEM=y" >>$(1); \
 	fi; \
-	if [ "$(FRS_LIVE_UPDATE)" = "y" ]; then \
-		sed -i "/RTCONFIG_FRS_LIVE_UPDATE/d" $(1); \
-		echo "RTCONFIG_FRS_LIVE_UPDATE=y" >>$(1); \
-	fi; \
 	if [ "$(UUPLUGIN)" = "y" ]; then \
 		sed -i "/RTCONFIG_UUPLUGIN/d" $(1); \
 		echo "RTCONFIG_UUPLUGIN=y" >>$(1); \
+	fi; \
+	if [ -n "$(CAPTCHA)" ]; then \
+		sed -i "/RTCONFIG_CAPTCHA/d" $(1); \
+		echo "RTCONFIG_CAPTCHA=y" >>$(1); \
 	fi; \
 	if [ "$(SOFTCENTER)" = "y" ]; then \
 	sed -i "/RTCONFIG_SOFTCENTER/d" $(1); \
@@ -4300,3 +4318,4 @@ get_extendno:
 .PHONY: a b c d m Makefile allversions
 .PHONY: tags
 .PHONY: dummy
+

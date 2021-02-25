@@ -217,7 +217,7 @@ extern struct ethtool_ops	ra_virt_ethtool_ops;
 #endif // CONFIG_PSEUDO_SUPPORT //
 #endif // (CONFIG_ETHTOOL //
 
-#if defined(CONFIG_MODEL_RTAC85U) || defined(CONFIG_MODEL_RTAC85P) || defined(CONFIG_MODEL_RTAC65U) || defined(CONFIG_MODEL_RTN800HP)	|| defined(CONFIG_MODEL_RTACRH26) || defined(CONFIG_MODEL_RMAC2100)//ASUS_EXT
+#if defined(CONFIG_MODEL_RTAC85U) || defined(CONFIG_MODEL_RTAC85P) || defined(CONFIG_MODEL_RTAC65U) || defined(CONFIG_MODEL_RTN800HP)	|| defined(CONFIG_MODEL_RTACRH26) //ASUS_EXT
 int first_gsw_init=0;
 #endif
 
@@ -1985,7 +1985,7 @@ static irqreturn_t ei_interrupt(int irq, void *dev_id, struct pt_regs * regs)
 	{
 		gsw_delay_setting();
 #if defined (CONFIG_RALINK_MT7621)
-#if defined(CONFIG_MODEL_RTAC85U) || defined(CONFIG_MODEL_RTAC85P) || defined(CONFIG_MODEL_RTAC65U) || defined(CONFIG_MODEL_RTN800HP)	|| defined(CONFIG_MODEL_RTACRH26) || defined(CONFIG_MODEL_RMAC2100) //ASUS_EXT
+#if defined(CONFIG_MODEL_RTAC85U) || defined(CONFIG_MODEL_RTAC85P) || defined(CONFIG_MODEL_RTAC65U) || defined(CONFIG_MODEL_RTN800HP)	|| defined(CONFIG_MODEL_RTACRH26) //ASUS_EXT
 	    	esw_link_status_changed(4, dev_id);
 #else
 //#error "Define WAN Port Check"	    
@@ -3220,6 +3220,21 @@ void RAETH_Init_PSEUDO(pEND_DEVICE pAd, struct net_device *net_dev)
         dev->features |= NETIF_F_IPV6_CSUM; /* Can checksum TCP/UDP over IPv6 */
 #endif 
 #endif // CONFIG_RALINK_MT7620 //
+
+#ifdef CONFIG_RAETH_HW_VLAN_TX
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,10,0)
+    dev->features |= NETIF_F_HW_VLAN_TX;
+#else
+    dev->features |= NETIF_F_HW_VLAN_CTAG_TX;
+#endif
+#endif
+#ifdef CONFIG_RAETH_HW_VLAN_RX
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,10,0)
+    dev->features |= NETIF_F_HW_VLAN_RX;
+#else
+    dev->features |= NETIF_F_HW_VLAN_CTAG_RX;
+#endif
+#endif
 
 #if LINUX_VERSION_CODE > KERNEL_VERSION(3,10,0)
 	dev->vlan_features = dev->features;
@@ -6177,7 +6192,7 @@ int __init ra2882eth_init(void)
 
 void fe_sw_init(void)
 {
-#if defined (CONFIG_MODEL_RTAC85U) || defined(CONFIG_MODEL_RTAC85P) || defined(CONFIG_MODEL_RTAC65U) || defined(CONFIG_MODEL_RTN800HP) || defined(CONFIG_MODEL_RTACRH26) || defined(CONFIG_MODEL_RMAC2100) 	//only initialize at boot time.
+#if defined (CONFIG_MODEL_RTAC85U) || defined(CONFIG_MODEL_RTAC85P) || defined(CONFIG_MODEL_RTAC65U) || defined(CONFIG_MODEL_RTN800HP) || defined(CONFIG_MODEL_RTACRH26)  	//only initialize at boot time.
  	   if(!first_gsw_init) 
 		first_gsw_init=1;
 	   else  //prevent from resetting vlan 

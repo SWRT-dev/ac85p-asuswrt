@@ -416,9 +416,6 @@ static int build_temp_rootfs(const char *newroot)
 	const char *bin = "ash busybox cat cp dd df echo grep iwpriv kill ls ps mkdir mount nvram ping sh tar umount uname rm";
 	const char *sbin = "init rc hotplug2 insmod lsmod modprobe reboot rmmod rtkswitch";
 	const char *lib = "librt*.so* libnsl* libdl* libm* ld-* libiw* libgcc* libpthread* libdisk* libc*"
-#if defined(RTCONFIG_PUSH_EMAIL)
-			     " libws* libpush_log*"
-#endif
 		;
 	const char *usrbin = "killall";
 #ifdef RTCONFIG_BCMARM
@@ -690,7 +687,7 @@ void create_passwd(void)
 #ifdef RTCONFIG_NVRAM_ENCRYPT
 	else{
 		memset(dec_passwd, 0, sizeof(dec_passwd));
-		pw_dec(p, dec_passwd);
+		pw_dec(p, dec_passwd, sizeof(dec_passwd));
 		p = dec_passwd;
 	}
 #endif
@@ -938,7 +935,6 @@ static void link_down(void)
 	eval("rtkswitch", "15");
 #endif
 
-#ifdef RTCONFIG_CONCURRENTREPEATER
 #ifdef RTCONFIG_REALTEK
 	if(access_point_mode()) {
 #else
@@ -949,33 +945,22 @@ static void link_down(void)
 		foreach (word, ifnames, next) {
 			SKIP_ABSENT_FAKE_IFACE(word);
 #ifdef RTCONFIG_REALTEK
-				eval("iwpriv", word, "set_mib", "func_off=1");
-				eval("iwpriv", word, "del_sta", "all");
-#else
-				eval("iwpriv",word,"set", "RadioOn=0");
-#endif
-		}
-	}
-	else
-#endif
-	{
-		/* ifconfig down wireless */
-		strcpy(ifnames, nvram_safe_get("wl_ifnames"));
-		foreach (word, ifnames, next) {
-			SKIP_ABSENT_FAKE_IFACE(word);
+			eval("iwpriv", word, "set_mib", "func_off=1");
+			eval("iwpriv", word, "del_sta", "all");
+#elif defined(RTCONFIG_RALINK)
+			eval("iwpriv",word,"set", "RadioOn=0");
+#else /* RTCONFIG_QCA */
 			ifconfig(word, 0, NULL, NULL);
+#endif
 		}
 	}
-
 }
 
 static void link_up(void)
 {
 	char word[256], *next, ifnames[128];
-#ifdef RTCONFIG_CONCURRENTREPEATER
 	char  tmp[100], prefix[]="wlXXXXXXX_";
 	int  band = 0;
-#endif
 	/* link up LAN ports */
 #ifdef RTCONFIG_REALTEK
 	lanport_ctrl(1);
@@ -983,7 +968,6 @@ static void link_up(void)
 	eval("rtkswitch", "14");
 #endif
 
-#ifdef RTCONFIG_CONCURRENTREPEATER
 #ifdef RTCONFIG_REALTEK
 	if(access_point_mode()) {
 #else
@@ -997,20 +981,12 @@ static void link_up(void)
 			if (nvram_match(strcat_r(prefix, "radio", tmp), "1"))
 #ifdef RTCONFIG_REALTEK
 				eval("iwpriv",word,"set_mib", "func_off=0");
-#else
+#elif defined(RTCONFIG_RALINK)
 				eval("iwpriv",word,"set", "RadioOn=1");
+#else /* RTCONFIG_QCA */
+				ifconfig(word, IFUP, NULL, NULL);
 #endif
 			band++;
-		}
-	}
-	else
-#endif
-	{
-		/* ifconfig up wireless */
-		strcpy(ifnames, nvram_safe_get("wl_ifnames"));
-		foreach (word, ifnames, next) {
-			SKIP_ABSENT_FAKE_IFACE(word);
-			ifconfig(word, IFUP, NULL, NULL);
 		}
 	}
 }
@@ -3840,6 +3816,38 @@ void start_sysstate(void)
 }
 #endif
 
+#ifdef RTCONFIG_AHS
+#define AHS_PIDFILE "/var/run/ahs.pid"
+void stop_ahs(void)
+{
+	if (pids("ahs"))
+	{
+		killall_tk("ahs");
+	}
+}
+
+void start_ahs(void)
+{
+	stop_ahs();
+	xstart("ahs");
+}
+#endif /* RTCONFIG_AHS */
+
+#ifdef RTCONFIG_ASD
+void stop_asd(void)
+{
+	if (pids("asd"))
+	{
+		killall("asd", SIGTERM);
+	}
+}
+
+void start_asd(void)
+{
+	stop_asd();
+	xstart("asd");
+}
+#endif /* RTCONFIG_ASD */
 void
 stop_misc(void)
 {
@@ -3967,6 +3975,9 @@ stop_misc(void)
 #ifdef RTCONFIG_SYSSTATE
 	stop_sysstate();
 #endif
+#ifdef RTCONFIG_AHS
+	stop_ahs();
+#endif /* RTCONFIG_AHS */
 	stop_logger();
 #ifdef RTCONFIG_DISK_MONITOR
 	stop_diskmon();
@@ -4124,7 +4135,7 @@ start_smartdns(void)
 	fprintf(fp, "conf-file /etc/blacklist-ip.conf\n");
 	fprintf(fp, "conf-file /etc/whitelist-ip.conf\n");
 	//fprintf(fp, "conf-file /etc/seconddns.conf\n");
-	fprintf(fp, "bind [::]:9053\n");
+	fprintf(fp, "bind [::]:9053 -group master\n");
 	//fprintf(fp, "bind-tcp [::]:5353\n");
 	fprintf(fp, "cache-size 9999\n");
 	//fprintf(fp, "prefetch-domain yes\n");
@@ -4144,14 +4155,14 @@ start_smartdns(void)
 #if !defined(K3C) && !defined(K3) && !defined(SBRAC1900P) && !defined(SBRAC3200P) && !defined(R8000P) && !defined(R7000P) && !defined(XWR3100)
 	if(!strncmp(nvram_get("territory_code"), "CN",2)){
 #endif
-		fprintf(fp, "server 114.114.114.114\n");
-		fprintf(fp, "server 119.29.29.29\n");
-		fprintf(fp, "server 223.5.5.5\n");
+		fprintf(fp, "server 114.114.114.114 -group master\n");
+		fprintf(fp, "server 119.29.29.29 -group master\n");
+		fprintf(fp, "server 223.5.5.5 -group master\n");
 #if !defined(K3C) && !defined(K3) && !defined(SBRAC1900P) && !defined(SBRAC3200P) && !defined(R8000P) && !defined(R7000P) && !defined(XWR3100)
 	} else {
-		fprintf(fp, "server 8.8.8.8\n");
-		fprintf(fp, "server 208.67.222.222\n");
-		fprintf(fp, "server 1.1.1.1\n");
+		fprintf(fp, "server 8.8.8.8 -group master\n");
+		fprintf(fp, "server 208.67.222.222 -group master\n");
+		fprintf(fp, "server 1.1.1.1 -group master\n");
 	}
 #endif
 	for (unit = WAN_UNIT_FIRST; unit < WAN_UNIT_MAX; unit++) {
@@ -4169,7 +4180,7 @@ start_smartdns(void)
 		if (!*wan_dns && !*wan_xdns)
 			continue;
 		foreach(tmp, (*wan_dns ? wan_dns : wan_xdns), next)
-			fprintf(fp, "server %s\n", tmp);
+			fprintf(fp, "server %s -group master\n", tmp);
 	}
 	//fprintf(fp, "server %s\n", nvram_get("wan_dns1_x"));
 	//fprintf(fp, "server %s\n", nvram_get("wan_dns2_x"));
@@ -6039,12 +6050,12 @@ void chilli_config(void)
 
 	fprintf(fp, "dns1 %s\n", nvram_safe_get("lan_ipaddr"));
 
-	char *chilli_uamsecret =  nvram_get("chilli_uamsecret");
+	char *chilli_uamsecret =  nvram_safe_get("chilli_uamsecret");
 #ifdef RTCONFIG_NVRAM_ENCRYPT
-	int declen = pw_dec_len(chilli_uamsecret);
+	int declen = strlen(chilli_uamsecret);
 	char dec_passwd[declen];
 	memset(dec_passwd, 0, sizeof(dec_passwd));
-	pw_dec(chilli_uamsecret, dec_passwd);
+	pw_dec(chilli_uamsecret, dec_passwd, sizeof(dec_passwd));
 	chilli_uamsecret = dec_passwd;
 #endif
 	if (nvram_invmatch("chilli_uamsecret", ""))
@@ -6065,10 +6076,10 @@ void chilli_config(void)
 		fprintf(fp, "macauth\n");
 		char *chilli_macpasswd = nvram_safe_get("chilli_macpasswd");
 #ifdef RTCONFIG_NVRAM_ENCRYPT
-		int declen2 = pw_dec_len(chilli_macpasswd);
+		int declen2 = strlen(chilli_macpasswd);
 		char dec_passwd2[declen2];
 		memset(dec_passwd2, 0, sizeof(dec_passwd2));
-		pw_dec(chilli_macpasswd, dec_passwd2);
+		pw_dec(chilli_macpasswd, dec_passwd2, sizeof(dec_passwd2));
 		chilli_macpasswd = dec_passwd2;
 #endif
 		if (strlen(chilli_macpasswd) > 0)
@@ -6213,12 +6224,12 @@ void chilli_config_CP(void)
 
 	fprintf(fp, "dns1 %s\n", nvram_safe_get("lan_ipaddr"));
 
-	char *enc_value =  nvram_get("cp_uamsecret");
+	char *enc_value =  nvram_safe_get("cp_uamsecret");
 #ifdef RTCONFIG_NVRAM_ENCRYPT
-	int declen = pw_dec_len(enc_value);
+	int declen = strlen(enc_value);
 	char dec_passwd[declen];
 	memset(dec_passwd, 0, sizeof(dec_passwd));
-	pw_dec(enc_value, dec_passwd);
+	pw_dec(enc_value, dec_passwd, sizeof(dec_passwd));
 	enc_value = dec_passwd;
 #endif
 	if (nvram_invmatch("cp_uamsecret", ""))
@@ -7475,6 +7486,9 @@ start_services(void)
 #ifdef RTCONFIG_SOFTCENTER
 	start_skipd();
 #endif
+#ifdef RTCONFIG_ASD
+	start_asd();
+#endif
 #ifdef RTCONFIG_LANTIQ
 	start_wave_monitor();
 #endif
@@ -7578,6 +7592,9 @@ start_services(void)
 #ifdef RTCONFIG_SYSSTATE
 	start_sysstate();
 #endif
+#ifdef RTCONFIG_AHS
+	start_ahs();
+#endif /* RTCONFIG_AHS */
 #ifdef RTCONFIG_TRAFFIC_LIMITER
 	init_traffic_limiter();
 #endif
@@ -7982,6 +7999,9 @@ stop_services(void)
 #ifdef RTCONFIG_SYSSTATE
 	stop_sysstate();
 #endif
+#ifdef RTCONFIG_AHS
+	stop_ahs();
+#endif /* RTCONFIG_AHS */
 #ifdef RTCONFIG_CFGSYNC
 	stop_cfgsync();
 #endif
@@ -8160,6 +8180,9 @@ stop_services_mfg(void)
 #ifdef RTCONFIG_SYSSTATE
 	stop_sysstate();
 #endif
+#ifdef RTCONFIG_AHS
+	stop_ahs();
+#endif /* RTCONFIG_AHS */
 #ifdef RTCONFIG_PROTECTION_SERVER
 	stop_ptcsrv();
 #endif
@@ -8678,22 +8701,22 @@ int start_quagga(void)
 	zebra_hostname = nvram_safe_get("productid");
 	rip_hostname = nvram_safe_get("productid");
 #ifdef RTCONFIG_NVRAM_ENCRYPT
-	int declen = pw_dec_len(zebra_passwd);
+	int declen = strlen(zebra_passwd);
 	char dec_passwd[declen];
 	memset(dec_passwd, 0, sizeof(dec_passwd));
-	pw_dec(zebra_passwd, dec_passwd);
+	pw_dec(zebra_passwd, dec_passwd, sizeof(dec_passwd));
 	zebra_passwd = dec_passwd;
 
-	int declen2 = pw_dec_len(zebra_enpasswd);
+	int declen2 = strlen(zebra_enpasswd);
 	char dec_passwd2[declen2];
 	memset(dec_passwd2, 0, sizeof(dec_passwd2));
-	pw_dec(zebra_enpasswd, dec_passwd2);
+	pw_dec(zebra_enpasswd, dec_passwd2, sizeof(dec_passwd2));
 	zebra_enpasswd = dec_passwd2;
 
-	int declen3 = pw_dec_len(rip_passwd);
+	int declen3 = strlen(rip_passwd);
 	char dec_passwd3[declen3];
 	memset(dec_passwd3, 0, sizeof(dec_passwd3));
-	pw_dec(rip_passwd, dec_passwd3);
+	pw_dec(rip_passwd, dec_passwd3, sizeof(dec_passwd3));
 	rip_passwd = dec_passwd3;
 #endif
 	if (pids("zebra")){
@@ -9276,12 +9299,9 @@ again:
 #else /* !RTCONFIG_REALTEK */
 #if defined(RTCONFIG_QCA) && defined(RTCONFIG_FITFDT)
 					{
-						char *upgrade_file2 = "/tmp/linux2.trx";
-						char command_buf[256];
-						sprintf(command_buf,"dd if=%s of=%s bs=%d skip=1", upgrade_file, upgrade_file2, get_imageheader_size());
-						system(command_buf);
-						unlink(upgrade_file);
-						eval("mtd-write", "-i", upgrade_file2, "-d", "linux");
+						char header_size[20];
+						snprintf(header_size, sizeof(header_size)-1, "%d", get_imageheader_size());
+						eval("mtd-write", "-i", upgrade_file, "-d", "linux", "-s", header_size);
 					}
 #else
 					eval("mtd-write", "-i", upgrade_file, "-d", "linux");
@@ -9550,12 +9570,9 @@ again:
 #else /* !RTCONFIG_REALTEK */
 #if defined(RTCONFIG_QCA) && defined(RTCONFIG_FITFDT)
 					{
-						char *upgrade_file2 = "/tmp/linux2.trx";
-						char command_buf[256];
-						sprintf(command_buf,"dd if=%s of=%s bs=%d skip=1", upgrade_file, upgrade_file2, get_imageheader_size());
-						system(command_buf);
-						unlink(upgrade_file);
-						eval("mtd-write", "-i", upgrade_file2, "-d", "linux");
+						char header_size[20];
+						snprintf(header_size, sizeof(header_size)-1, "%d", get_imageheader_size());
+						eval("mtd-write", "-i", upgrade_file, "-d", "linux", "-s", header_size);
 					}
 #else
 					eval("mtd-write", "-i", upgrade_file, "-d", "linux");
@@ -10659,6 +10676,12 @@ check_ddr_done:
 	}
 #endif /* RTCONFIG_DBLOG */
 #endif /* RTCONFIG_FRS_FEEDBACK */
+#ifdef RTCONFIG_AHS
+	else if (strcmp(script, "ahs") == 0) {
+		if(action & RC_SERVICE_STOP) stop_ahs();
+		if(action & RC_SERVICE_START) start_ahs();
+	}
+#endif /* RTCONFIG_AHS */
 	else if (strcmp(script, "wan_line") == 0) {
 		_dprintf("%s: restart_wan_line: %s.\n", __FUNCTION__, cmd[1]);
 		if(cmd[1]) {
@@ -11666,12 +11689,16 @@ check_ddr_done:
 	{
 		eval("AiProtectionMonitor", "-z", "-t", "3");
 	}
-#endif
 	else if (strcmp(script, "traffic_analyzer") == 0)
 	{
 		// only stop service need to save database
 		if(action & RC_SERVICE_STOP) hm_traffic_analyzer_save();
 	}
+	else if (strcmp(script, "wrs_wbl") == 0)
+	{
+		start_wrs_wbl_service();
+	}
+#endif
 #ifdef RTCONFIG_TRAFFIC_LIMITER
 	else if (strcmp(script, "reset_traffic_limiter") == 0)
 	{
@@ -11709,6 +11736,30 @@ check_ddr_done:
 	else if (strcmp(script, "update_nc_setting_conf") == 0)
 	{
 		update_nc_setting_conf();
+	}
+	else if (strcmp(script, "oauth_google_gen_token_email") == 0)
+	{
+		oauth_google_gen_token_email();
+#ifdef RTCONFIG_CFGSYNC
+		// trigger cfg_server do sync
+		const char config[] =
+		{
+			"{"\
+			"\"oauth_google_refresh_token\":\"\","\
+			"\"oauth_google_user_email\":\"\","\
+			"\"fb_email_provider\":\"\""\
+			"}\0"
+		};
+		char event_msg[133] = {0};
+		memset(event_msg, 0, sizeof(event_msg));
+		snprintf(event_msg, sizeof(event_msg)-1, RC_CONFIG_CHANGED_MSG, EID_RC_CONFIG_CHANGED, config);
+		(void)send_cfgmnt_event(event_msg);
+		//  WEVENT_GENERIC_MSG	 "{\""WEVENT_PREFIX"\":{\""EVENT_ID"\":\"%d\"}}"
+#endif	// RTCONFIG_CFGSYNC
+	}
+	else if (strcmp(script, "oauth_google_check_token_status") == 0)
+	{
+		oauth_google_check_token_status();
 	}
 #endif
 	else if (strcmp(script, "logger") == 0)
@@ -11784,6 +11835,9 @@ check_ddr_done:
 		}
 		if(action & RC_SERVICE_START) {
 			setup_timezone();
+
+			nvram_set("reload_svc_radio", "1");
+
 			refresh_ntpc();
 			start_logger();
 			start_telnetd();
@@ -12094,10 +12148,10 @@ retry_wps_enr:
 	}
 #endif
 
-#ifdef RTCONFIG_PUSH_EMAIL
-	else if (strcmp(script, "sendmail") == 0)
+#ifdef RTCONFIG_FRS_FEEDBACK
+	else if (strcmp(script, "sendfeedback") == 0)
 	{
-		start_DSLsendmail();
+		start_sendfeedback();
 	}
 #ifdef RTCONFIG_DBLOG
 	else if (strcmp(script, "senddblog") == 0)
@@ -12115,7 +12169,7 @@ retry_wps_enr:
 #ifdef RTCONFIG_DSL_TCLINUX
 	else if (strcmp(script, "DSLsenddiagmail") == 0)
 	{
-		start_DSLsenddiagmail();
+		start_sendDSLdiag();
 	}
 #endif
 #endif
@@ -12649,7 +12703,7 @@ _dprintf("test 2. turn off the USB power during %d seconds.\n", reset_seconds[re
 	}
 
 skip:
-	if(nvptr){
+	if(nvptr && strlen(nvptr)){
 _dprintf("goto again(%d)...\n", getpid());
 		goto again;
 	}
@@ -13115,8 +13169,9 @@ int start_nat_rules(void)
 	int ret, retry, nat_state;
 
 	// all rules applied directly according to currently status, wanduck help to triger those not cover by normal flow
-#if defined(RTAC58U)
-	if (!strncmp(nvram_safe_get("territory_code"), "CX", 2))
+#if defined(RTAC58U) || defined(RTAC59U)
+	if (!strncmp(nvram_safe_get("territory_code"), "CX/01", 5)
+	 || !strncmp(nvram_safe_get("territory_code"), "CX/05", 5))
 		;
 	else
 #endif

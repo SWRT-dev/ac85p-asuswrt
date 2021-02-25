@@ -4,6 +4,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta HTTP-EQUIV="Pragma" CONTENT="no-cache">
 <meta HTTP-EQUIV="Expires" CONTENT="-1">
+<meta name="format-detection" content="telephone=no,email=no,address=no">
 <link rel="shortcut icon" href="images/favicon.png">
 <link rel="icon" href="images/favicon.png">
 <title></title>
@@ -187,7 +188,7 @@ function initial(){
 				document.getElementById("goDualWANSetting").style.display = "none";
 				document.getElementById("dualwan_enable_button").style.display = "none";
 			}			
-			else if(parent.document.form.dual_wan_flag.value == 0){
+			else if(parent.document.form.dual_wan_flag.value == 0 && wans_caps != "wan lan"){
 				document.getElementById("goDualWANSetting").style.display = "none";
 				document.getElementById("dualwan_enable_button").style.display = "";
 			}
@@ -781,10 +782,6 @@ function manualSetup(){
 								else{
 									if(wans_caps.search("wan2") >= 0) {
 										document.internetForm.wans_dualwan.value = wans_dualwan.split(" ")[0]+" wan2";
-										document.internetForm.action_wait.value = '<% get_default_reboot_time(); %>';
-										document.internetForm.action_script.value = "reboot";
-									}else if(wans_caps.search("usb") == -1){
-										document.internetForm.wans_dualwan.value = wans_dualwan.split(" ")[0]+" lan";
 										document.internetForm.action_wait.value = '<% get_default_reboot_time(); %>';
 										document.internetForm.action_script.value = "reboot";
 									}else{

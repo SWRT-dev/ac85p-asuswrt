@@ -5053,7 +5053,10 @@ _dprintf("*** Multicast IPTV: config Singtel TR069 on wan port ***\n");
 				if (switch_stb <= 6) {
 					/* Add wan bridge */
 					eval("brctl", "addbr", "br1");
-					eval("brctl", "stp", "br1", "on");
+					eval("bcmmcastctl", "mode", "-i",  "br1",  "-p", "1",  "-m", "0");
+					eval("bcmmcastctl", "mode", "-i",  "br1",  "-p", "2",  "-m", "0");
+					if (!nvram_match("switch_wantag", "unifi_home"))
+						eval("brctl", "stp", "br1", "on");
 					eval("ifconfig", "br1", "up");
 					eval("brctl", "addif", "br1", "eth0.v0");
 					set_wan_phy("");
@@ -5239,6 +5242,8 @@ _dprintf("*** Multicast IPTV: config Singtel TR069 on wan port ***\n");
 				eval("vlanctl", "--if", ethPort1, "--tx", "--tags", "1", "--filter-vid", vlan_entry, "0", "--filter-txif", vlanDev1, "--pop-tag", "--rule-append");
 				eval("ifconfig", vlanDev1, "allmulti", "up");
 				eval("brctl", "addif", "br1", vlanDev1);
+				if (nvram_match("switch_wantag", "unifi_home"))
+					eval("ethswctl", "-c", "hwstp",  "-i",  vlanDev1, "-o",  "disable");
 			}
 		}
 		else if (nvram_match("switch_stb_x", "5") && nvram_match("switch_wantag", "none")) {
@@ -6980,9 +6985,9 @@ void set_acs_ifnames()
 #endif
 
 	nvram_set_int("wl0_acs_dfs", 0);
-	nvram_set_int("wl1_acs_dfs", nvram_match("wl1_reg_mode", "h") ? 2 : 0);
+	nvram_set_int("wl1_acs_dfs", nvram_match("wl1_reg_mode", "h") ? 1 : 0);
 #if defined(RTAC3200) || defined(RTAC5300) || defined(GTAC5300)
-	nvram_set_int("wl2_acs_dfs", nvram_match("wl2_reg_mode", "h") ? 2 : 0);
+	nvram_set_int("wl2_acs_dfs", nvram_match("wl2_reg_mode", "h") ? 1 : 0);
 #endif
 }
 #endif

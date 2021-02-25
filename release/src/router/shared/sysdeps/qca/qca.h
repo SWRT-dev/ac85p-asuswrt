@@ -408,7 +408,8 @@ enum ASUS_IOCTL_SUBCMD {
  * disable DHCP client and DHCP override during ATE
  */
 #ifdef RTCONFIG_DEFAULT_AP_MODE
-#define OFFSET_FORCE_DISABLE_DHCP	(MTD_FACTORY_BASE_ADDRESS + 0x0D1AA)	// 1
+//#define OFFSET_FORCE_DISABLE_DHCP	(MTD_FACTORY_BASE_ADDRESS + 0x0D1AA)	// 1
+#define OFFSET_FORCE_DISABLE_DHCP	(MTD_FACTORY_BASE_ADDRESS + 0x0D1AB)	// 1
 #endif
 
 #ifdef RTCONFIG_CFGSYNC
@@ -484,6 +485,9 @@ extern void switch_fini(void);
 extern int wl_ioctl(const char *ifname, int cmd, struct iwreq *pwrq);
 extern int qc98xx_verify_checksum(void *eeprom);
 extern int calc_qca_eeprom_csum(void *ptr, unsigned int eeprom_size);
+#if defined(RTAC58U)
+extern int check_mid(char *mid);
+#endif
 /* for ATE Get_WanLanStatus command */
 #if defined(RTCONFIG_SWITCH_RTL8370M_PHY_QCA8033_X2) || \
     defined(RTCONFIG_SWITCH_RTL8370MB_PHY_QCA8033_X2)
