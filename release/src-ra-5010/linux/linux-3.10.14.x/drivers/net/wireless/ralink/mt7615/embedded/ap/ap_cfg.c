@@ -16483,24 +16483,28 @@ INT RTMP_AP_IoctlHandle(
 	case CMD_RTPRIV_IOCTL_ASUSCMD:
 		//RTMPIoctlAsusHandle(pAd, wrq, subcmd, pData, Data);
 		if ( subcmd == ASUS_SUBCMD_CHLIST) {
-			UINT32 i;
-			RTMP_STRING pChannel[256], pTmp[4];
-			memset(pChannel, 0, 256);
-			for (i = 0; i < pAd->ChannelListNum; i++) {
-				if(i > 0)
-					strcat(pChannel,",");
-				snprintf(pTmp, sizeof(pTmp), "%d", pAd->ChannelList[i].Channel);
-				strcat(pChannel,pTmp);
+			UCHAR BandIdx = 0, ChIdx;
+			CHANNEL_CTRL *pChCtrl;
+			RTMP_STRING Channel[256], Tmp[4];
+			memset(Channel, 0, 256);
+			pChCtrl = hc_get_channel_ctrl(pAd->hdev_ctrl, BandIdx);
+			if (pChCtrl->ChListNum > 0) {
+				for (ChIdx = 0; ChIdx < pChCtrl->ChListNum; ChIdx++) {
+					if(ChIdx > 0)
+						strcat(Channel,",");
+					snprintf(Tmp, sizeof(Tmp), "%d", pChCtrl->ChList[ChIdx].Channel);
+					strcat(Channel,Tmp);
+				}
 			}
-			wrq->u.data.length = strlen(pChannel);
-			pChannel[wrq->u.data.length] = '\0';
-			if (copy_to_user(wrq->u.data.pointer, pChannel, wrq->u.data.length))
+			wrq->u.data.length = strlen(Channel);
+			//Channel[wrq->u.data.length] = '\0';
+			if (copy_to_user(wrq->u.data.pointer, Channel, wrq->u.data.length))
 				Status = -EFAULT;
 		} else if ( subcmd == ASUS_SUBCMD_DRIVERVER ) {
 			RTMP_STRING driverVersion[16];
 			wrq->u.data.length = strlen(AP_DRIVER_VERSION);
 			snprintf(driverVersion, sizeof(driverVersion), "%s", AP_DRIVER_VERSION);
-			driverVersion[wrq->u.data.length] = '\0';
+			//driverVersion[wrq->u.data.length] = '\0';
 			if (copy_to_user(wrq->u.data.pointer, driverVersion, wrq->u.data.length))
 				Status = -EFAULT;
 		} else if ( subcmd == ASUS_SUBCMD_RADIO_STATUS ) {

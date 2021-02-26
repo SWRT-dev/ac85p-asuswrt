@@ -175,7 +175,7 @@ char *get_modelnameid(int model)
 	char *pid = "unknown";
 	const struct model_s *p;
 
-	for (p = &model_list[0]; p->pid; ++p) {
+	for (p = &modelname_list[0]; p->pid; ++p) {
 		if (model == p->model) {
 			pid = p->pid;
 			break;
