@@ -5619,11 +5619,11 @@ curl-install:
 	cd $(INSTALLDIR)/curl/usr/lib && \
 		ln -sf libcurl.so.4.6.0 libcurl.so && \
 		ln -sf libcurl.so.4.6.0 libcurl.so.4
-ifeq ($(or $(RTCONFIG_SPEEDTEST),$(RTCONFIG_LETSENCRYPT)),y)
+#ifeq ($(or $(RTCONFIG_SPEEDTEST),$(RTCONFIG_LETSENCRYPT)),y)
 	# for speedtest
 	install -D curl/src/.libs/curl $(INSTALLDIR)/curl/usr/sbin/curl
 	$(STRIP) $(INSTALLDIR)/curl/usr/sbin/curl
-endif
+#endif
 
 curl-clean:
 	[ ! -f curl/Makefile ] || $(MAKE) -C curl distclean
