@@ -300,10 +300,10 @@ OBJS += $(if $(wildcard k3c.c), k3c.o, prebuild/k3c.o)
 else ifeq ($(R8000P),y)
 OBJS += $(if $(wildcard r7900p.c), r7900p.o, prebuild/r7900p.o)
 else
-OBJS += merlinr.o
+OBJS += swrt.o
 endif
 ifeq ($(RMAC2100),y)
-OBJS += $(if $(wildcard merlinrex.c), merlinrex.o, prebuild/merlinrex.o)
+OBJS += $(if $(wildcard swrtex.c), swrtex.o, prebuild/swrtex.o)
 endif
 # TODO, speedtest
 ifeq ($(RTCONFIG_SPEEDTEST),y)
@@ -393,7 +393,7 @@ OBJS += dsl_fb.o
 endif
 
 ifeq ($(RTCONFIG_FRS_LIVE_UPDATE),y)
-ifneq ($(MERLINR_NAME), $(filter $(MERLINR_NAME), K3 K3C R7900P SBRAC3200P RTAC85P RMAC2100))
+ifneq ($(SWRT_NAME), $(filter $(SWRT_NAME), K3 K3C R7900P SBRAC3200P RTAC85P RMAC2100))
 OBJS += frs_service.o
 endif
 endif
@@ -971,7 +971,7 @@ endif
 ifeq ($(RTCONFIG_TR069),y)
 	@cd $(INSTALLDIR)/sbin && ln -sf rc dhcpc_lease
 endif
-ifeq ($(MERLINR_NAME), $(filter $(MERLINR_NAME), SBRAC3200P RTAC85P RMAC2100))
+ifeq ($(SWRT_NAME), $(filter $(SWRT_NAME), SBRAC3200P RTAC85P RMAC2100))
 	@cd $(INSTALLDIR)/sbin && ln -sf rc dhcpc_lease
 endif
 

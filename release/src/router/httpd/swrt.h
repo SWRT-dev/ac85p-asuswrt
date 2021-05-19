@@ -14,35 +14,14 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
  * MA 02111-1307 USA
  *
- * Copyright 2019-2020, paldier <paldier@hotmail.com>.
+ * Copyright 2018-2021, paldier <paldier@hotmail.com>.
  * All Rights Reserved.
  * 
- *
  */
 
-#ifndef __MERLINR_H__
-#define __MERLINR_H__
-extern void merlinr_init(void);
-extern void merlinr_init_done(void);
-extern int merlinr_toolbox(int argc, char **argv);
-#ifdef RTCONFIG_UUPLUGIN
-extern void exec_uu_merlinr(void);
+#ifndef _swrt_h_
+#define _swrt_h_
+extern int get_lang_num_swrt();
+extern int check_lang_support_swrt(char *lang);
+extern int change_preferred_lang_swrt(int finish);
 #endif
-#ifdef RTCONFIG_FRS_LIVE_UPDATE
-extern int merlinr_firmware_check_update_main(int argc, char *argv[]);
-#endif
-#if defined(RTCONFIG_SOFTCENTER)
-enum {
-	SOFTCENTER_WAN=1,
-	SOFTCENTER_NAT,
-	SOFTCENTER_MOUNT,
-	SOFTCENTER_SERVICES,
-	SOFTCENTER_UNMOUNT
-};
-extern void softcenter_eval(int sig);
-#endif
-#if defined(RMAC2100)
-extern void patch_Factory(void);
-#endif
-#endif
-

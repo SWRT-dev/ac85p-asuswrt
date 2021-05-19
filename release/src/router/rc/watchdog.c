@@ -88,7 +88,7 @@
 #elif defined(SBRAC3200P)
 #include "ac3200p.h"
 #else
-#include "merlinr.h"
+#include "swrt.h"
 #endif
 
 #define BCM47XX_SOFTWARE_RESET	0x40		/* GPIO 6 */

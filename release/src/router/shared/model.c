@@ -153,11 +153,11 @@ static const struct model_s modelname_list[] = {
 
 int get_modelname(void)
 {
-	static int model = MODEL_MERLINRMIN;
+	static int model = MODEL_SWRTMIN;
 	char *pid;
 	const struct model_s *p;
 
-	if (model != MODEL_MERLINRMIN)
+	if (model != MODEL_SWRTMIN)
 		return model;
 
 	pid = nvram_safe_get("modelname");

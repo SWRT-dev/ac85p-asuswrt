@@ -29,15 +29,25 @@
 #include <sys/types.h>
 #include "rc.h"
 #include <shared.h>
+#include <version.h>
 #include <shutils.h>
 #if defined(RTCONFIG_LANTIQ)
 #include <lantiq.h>
 #endif
-#include "merlinr.h"
+#include "swrt.h"
 #include <curl/curl.h>
 #include <auth_common.h>
 
-void merlinr_insmod(){
+#if defined(RTCONFIG_SOFTCENTER)
+static void firmware_ver(void)
+{
+    char tmp[6];
+    strncpy(tmp, RT_FWVER, 5);//5.x.x[beta]
+	doSystem("dbus set softcenter_firmware_version='%s'",tmp);
+}
+#endif
+
+void swrt_insmod(){
 	eval("insmod", "nfnetlink");
 	eval("insmod", "ip_set");
 	eval("insmod", "ip_set_bitmap_ip");
@@ -60,9 +70,9 @@ void merlinr_insmod(){
 	eval("insmod", "xt_TPROXY");
 	eval("insmod", "xt_set");
 }
-void merlinr_init()
+void swrt_init()
 {
-	_dprintf("############################ MerlinR init #################################\n");
+	_dprintf("############################ SWRT init #################################\n");
 #if defined(RTCONFIG_SOFTCENTER)
 	nvram_set("sc_wan_sig", "0");
 	nvram_set("sc_nat_sig", "0");
@@ -70,11 +80,11 @@ void merlinr_init()
 	nvram_set("sc_unmount_sig", "0");
 	nvram_set("sc_services_sig", "0");	
 #endif
-	merlinr_insmod();
+	swrt_insmod();
 }
-void merlinr_init_done()
+void swrt_init_done()
 {
-	_dprintf("############################ MerlinR init done #################################\n");
+	_dprintf("############################ SWRT init done #################################\n");
 #ifdef RTCONFIG_SOFTCENTER
 	if (!f_exists("/jffs/softcenter/scripts/ks_tar_install.sh") && nvram_match("sc_mount","0")){
 		doSystem("/usr/sbin/jffsinit.sh &");
@@ -91,7 +101,7 @@ void merlinr_init_done()
 		doSystem("sed -i '/softcenter-net.sh/d' /jffs/scripts/nat-start");
 		doSystem("sed -i '/softcenter-mount.sh/d' /jffs/scripts/post-mount");
 	}
-	doSystem("dbus set softcenter_firmware_version=`nvram get extendno|cut -d \"_\" -f2|cut -d \"-\" -f1|cut -c2-6`");
+	firmware_ver();
 #endif
 #if defined(RTCONFIG_QCA) || defined(RTCONFIG_RALINK)
 	if(!nvram_get("bl_ver"))
@@ -327,7 +337,7 @@ int curl_download_file(CURL *curlhandle, const char * remotepath, const char * l
 	}
 }
 
-int merlinr_firmware_check_update_main(int argc, char *argv[])
+int swrt_firmware_check_update_main(int argc, char *argv[])
 {
 	//char notetxt[]="/tmp/release_note.txt";
 	//char downloadphp[]="download.php";
@@ -462,7 +472,7 @@ GODONE:
 	return 0;
 }
 #if defined(RTCONFIG_BCMARM) || defined(RTCONFIG_HND_ROUTER) || defined(RTCONFIG_RALINK)
-void exec_uu_merlinr()
+void exec_uu_swrt()
 {
 	FILE *fp;
 	char buf[128];
@@ -588,10 +598,11 @@ reset_sc(int all)
 		printf("Software Center reset is complete, Please clear your browser cache and reopen the website page of the software center!\n");
 	else
 		printf("软件中心重置完成，请清空浏览器缓存后重新进入软件中心！\n");
+	return 0;
 }
 
 int
-merlinr_toolbox(int argc, char **argv)
+swrt_toolbox(int argc, char **argv)
 {
 	if (argv[1] && !strcmp(argv[1], "reset")) {
 		if(argv[2] && !strcmp(argv[2], "all"))

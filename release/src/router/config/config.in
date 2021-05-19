@@ -1799,3 +1799,7 @@ config RTCONFIG_SOFTCENTER
 config RTCONFIG_SMARTDNS
 	bool "smart dns"
 	default n
+
+config RTCONFIG_SWRT
+	bool "RTCONFIG_SWRT"
+	default n
