@@ -286,9 +286,13 @@ char* GetBW(int BW)
 		case BW_40:
 			return "40M";
 
-#if defined(RTAC52U) || defined(RTAC51U) || defined(RTN54U) || defined(RTAC1200HP) || defined(RTAC54U) || defined(RTAC1200) || defined(RTAC1200GA1) || defined(RTAC1200GU)
+#if defined(RTAC52U) || defined(RTAC51U) || defined(RTN54U) || defined(RTAC1200HP) || defined(RTAC54U) || defined(RTAC1200) || defined(RTAC1200GA1) || defined(RTAC1200GU) || defined(RTAC85P) || defined(RMAC2100)
 		case BW_80:
 			return "80M";
+#endif
+#if defined(RTAC85P) || defined(RMAC2100)
+		case BW_160:
+			return "160M";
 #endif
 
 		default:
@@ -311,7 +315,7 @@ char* GetPhyMode(int Mode)
 		case MODE_HTGREENFIELD:
 			return "GREEN";
 
-#if defined(RTAC52U) || defined(RTAC51U)  || defined(RTN54U) || defined(RTAC1200HP) || defined(RTAC54U) || defined(RTAC1200)  || defined(RTAC1200GA1) || defined(RTAC1200GU)
+#if defined(RTAC52U) || defined(RTAC51U)  || defined(RTN54U) || defined(RTAC1200HP) || defined(RTAC54U) || defined(RTAC1200)  || defined(RTAC1200GA1) || defined(RTAC1200GU) || defined(RTAC85P) || defined(RMAC2100)
 		case MODE_VHT:
 			return "VHT";
 #endif
@@ -321,8 +325,67 @@ char* GetPhyMode(int Mode)
 	}
 }
 
-int MCSMappingRateTable[] =
-	{2,  4,   11,  22, // CCK
+int MCSMappingRateTable[] ={
+#if defined(RTAC85P) || defined(RMAC2100)
+	2,  4, 11, 22, 12,  18,  24,  36, 48,  72,  96, 108, 109, 110, 111, 112,/* CCK and OFDM */
+	13, 26, 39, 52, 78, 104, 117, 130, 26,  52,  78, 104, 156, 208, 234, 260,
+	39, 78, 117, 156, 234, 312, 351, 390, /* BW 20, 800ns GI, MCS 0~23 */
+	27, 54, 81, 108, 162, 216, 243, 270, 54, 108, 162, 216, 324, 432, 486, 540,
+	81, 162, 243, 324, 486, 648, 729, 810, /* BW 40, 800ns GI, MCS 0~23 */
+	14, 29, 43, 57, 87, 115, 130, 144, 29, 59,   87, 115, 173, 230, 260, 288,
+	43, 87, 130, 173, 260, 317, 390, 433, /* BW 20, 400ns GI, MCS 0~23 */
+	30, 60, 90, 120, 180, 240, 270, 300, 60, 120, 180, 240, 360, 480, 540, 600,
+	90, 180, 270, 360, 540, 720, 810, 900, /* BW 40, 400ns GI, MCS 0~23 */
+
+	/*for 11ac:20 Mhz 800ns GI*/
+	6,  13, 19, 26,  39,  52,  58,  65,  78,  0,     /*1ss mcs 0~8*/
+	13, 26, 39, 52,  78,  104, 117, 130, 156, 0,     /*2ss mcs 0~8*/
+	19, 39, 58, 78,  117, 156, 175, 195, 234, 260,   /*3ss mcs 0~9*/
+	26, 52, 78, 104, 156, 208, 234, 260, 312, 0,     /*4ss mcs 0~8*/
+
+	/*for 11ac:40 Mhz 800ns GI*/
+	13,	27,	40,	54,	 81,  108, 121, 135, 162, 180,   /*1ss mcs 0~9*/
+	27,	54,	81,	108, 162, 216, 243, 270, 324, 360,   /*2ss mcs 0~9*/
+	40,	81,	121, 162, 243, 324, 364, 405, 486, 540,  /*3ss mcs 0~9*/
+	54,	108, 162, 216, 324, 432, 486, 540, 648, 720, /*4ss mcs 0~9*/
+
+	/*for 11ac:80 Mhz 800ns GI*/
+	29,	58,	87,	117, 175, 234, 263, 292, 351, 390,   /*1ss mcs 0~9*/
+	58,	117, 175, 243, 351, 468, 526, 585, 702, 780, /*2ss mcs 0~9*/
+	87,	175, 263, 351, 526, 702, 0,	877, 1053, 1170, /*3ss mcs 0~9*/
+	117, 234, 351, 468, 702, 936, 1053, 1170, 1404, 1560, /*4ss mcs 0~9*/
+
+	/*for 11ac:160 Mhz 800ns GI*/
+	58,	117, 175, 234, 351, 468, 526, 585, 702, 780, /*1ss mcs 0~9*/
+	117, 234, 351, 468, 702, 936, 1053, 1170, 1404, 1560, /*2ss mcs 0~9*/
+	175, 351, 526, 702, 1053, 1404, 1579, 1755, 2160, 0, /*3ss mcs 0~8*/
+	234, 468, 702, 936, 1404, 1872, 2106, 2340, 2808, 3120, /*4ss mcs 0~9*/
+
+	/*for 11ac:20 Mhz 400ns GI*/
+	7,	14,	21,	28,  43,  57,   65,	 72,  86,  0,    /*1ss mcs 0~8*/
+	14,	28,	43,	57,	 86,  115,  130, 144, 173, 0,    /*2ss mcs 0~8*/
+	21,	43,	65,	86,	 130, 173,  195, 216, 260, 288,  /*3ss mcs 0~9*/
+	28,	57,	86,	115, 173, 231,  260, 288, 346, 0,    /*4ss mcs 0~8*/
+
+	/*for 11ac:40 Mhz 400ns GI*/
+	15,	30,	45,	60,	 90,  120,  135, 150, 180, 200,  /*1ss mcs 0~9*/
+	30,	60,	90,	120, 180, 240,  270, 300, 360, 400,  /*2ss mcs 0~9*/
+	45,	90,	135, 180, 270, 360,  405, 450, 540, 600, /*3ss mcs 0~9*/
+	60,	120, 180, 240, 360, 480,  540, 600, 720, 800, /*4ss mcs 0~9*/
+
+	/*for 11ac:80 Mhz 400ns GI*/
+	32,	65,	97,	130, 195, 260,  292, 325, 390, 433,  /*1ss mcs 0~9*/
+	65,	130, 195, 260, 390, 520,  585, 650, 780, 866, /*2ss mcs 0~9*/
+	97,	195, 292, 390, 585, 780,  0,	 975, 1170, 1300, /*3ss mcs 0~9*/
+	130, 260, 390, 520, 780, 1040,	1170, 1300, 1560, 1733, /*4ss mcs 0~9*/
+
+	/*for 11ac:160 Mhz 400ns GI*/
+	65,	130, 195, 260, 390, 520,  585, 650, 780, 866, /*1ss mcs 0~9*/
+	130, 260, 390, 520, 780, 1040,	1170, 1300, 1560, 1733, /*2ss mcs 0~9*/
+	195, 390, 585, 780, 1170, 1560,	1755, 1950, 2340, 0, /*3ss mcs 0~8*/
+	260, 520, 780, 1040, 1560, 2080,	2340, 2600, 3120, 3466, /*4ss mcs 0~9*/
+#else
+	2,  4,   11,  22, // CCK
 	12, 18,   24,  36, 48, 72, 96, 108, // OFDM
 	13, 26,   39,  52,  78, 104, 117, 130, 26,  52,  78, 104, 156, 208, 234, 260, // 20MHz, 800ns GI, MCS: 0 ~ 15
 	39, 78,  117, 156, 234, 312, 351, 390,										  // 20MHz, 800ns GI, MCS: 16 ~ 23
@@ -338,9 +401,65 @@ int MCSMappingRateTable[] =
 	14, 29,   43,  57,  87, 115, 130, 144, 173, /* 11ac: 20Mhz, 400ns GI, MCS: 0~8 */
 	30, 60,   90, 120, 180, 240, 270, 300, 360, 400, /*11ac: 40Mhz, 400ns GI, MCS: 0~9 */
 	65, 130, 195, 260, 390, 520, 585, 650, 780, 867 /*11ac: 80Mhz, 400ns GI, MCS: 0~9 */
+#endif
 	};
 
-
+#if defined(RTAC85P) || defined(RMAC2100)
+#define FN_GETRATE(_fn_, _st_)						\
+_fn_(_st_ HTSetting)							\
+{									\
+	int rate_count = sizeof(MCSMappingRateTable)/sizeof(int);	\
+	int rate_index = 0;						\
+	int Antenna = 1;				\
+									\
+	if (HTSetting.field.MODE >= MODE_VHT)				\
+	{								\
+		Antenna = (HTSetting.field.MCS >> 4) + 1;	\
+		if (HTSetting.field.BW == BW_20) {			\
+			rate_index = 112 + ((Antenna - 1) * 10) +		\
+			((unsigned char)HTSetting.field.ShortGI * 160) +	\
+			((unsigned char)HTSetting.field.MCS);		\
+		}							\
+		else if (HTSetting.field.BW == BW_40) {			\
+			rate_index = 152 + ((Antenna - 1) * 10) +		\
+			((unsigned char)HTSetting.field.ShortGI * 160) +	\
+			((unsigned char)HTSetting.field.MCS);		\
+		}							\
+		else if (HTSetting.field.BW == BW_80) {			\
+			rate_index = 192 + ((Antenna - 1) * 10) +		\
+			((unsigned char)HTSetting.field.ShortGI * 160) +	\
+			((unsigned char)HTSetting.field.MCS);		\
+		}							\
+		else if (HTSetting.field.BW == BW_160) {			\
+			rate_index = 232 + ((Antenna - 1) * 10) +		\
+			((unsigned char)HTSetting.field.ShortGI * 160) +	\
+			((unsigned char)HTSetting.field.MCS);		\
+		}							\
+	}								\
+	else								\
+	if (HTSetting.field.MODE >= MODE_HTMIX)				\
+	{								\
+		Antenna = (HTSetting.field.MCS >> 4) + 1;		\
+		rate_index = 16 + ((unsigned char)HTSetting.field.BW *24) + ((unsigned char)HTSetting.field.ShortGI *48) + ((unsigned char)HTSetting.field.MCS);	\
+	}								\
+	else								\
+	if (HTSetting.field.MODE == MODE_OFDM)				\
+		rate_index = (unsigned char)(HTSetting.field.MCS) + 4;	\
+	else if (HTSetting.field.MODE == MODE_CCK)			\
+		rate_index = (unsigned char)(HTSetting.field.MCS);	\
+									\
+	if (rate_index < 0)						\
+		rate_index = 0;						\
+									\
+	if (rate_index >= rate_count)					\
+		rate_index = rate_count-1;				\
+									\
+	if (HTSetting.field.MODE != MODE_VHT)		\
+		return (((MCSMappingRateTable[rate_index] * 5)/10) * Antenna);		\
+	else										\
+		return MCSMappingRateTable[rate_index];		\
+}
+#else
 #define FN_GETRATE(_fn_, _st_)						\
 _fn_(_st_ HTSetting)							\
 {									\
@@ -384,7 +503,7 @@ _fn_(_st_ HTSetting)							\
 									\
 	return (MCSMappingRateTable[rate_index] * 5)/10;		\
 }
-
+#endif
 #if defined(RTCONFIG_HAS_5G)
 int FN_GETRATE(getRate,      MACHTTRANSMIT_SETTING_for_5G)		//getRate   (MACHTTRANSMIT_SETTING_for_5G)
 #endif	/* RTCONFIG_HAS_5G */

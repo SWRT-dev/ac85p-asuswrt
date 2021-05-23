@@ -71,7 +71,7 @@ export PATH := $(RELEASEDIR)/tools:$(SRCBASE)/ctools:$(PATH)
 #aimesh:R(384 and 385),non-aimesh:B(382 and 384),special:X(382/384/385/386)
 export SWRT_NAME := RTAC85P
 export SWRT_VER_MAJOR :=B
-export SWRT_VER_MINOR :=5.1.4
+export SWRT_VER_MINOR :=5.1.5b2
 export SWRT_VER := $(SWRT_VER_MAJOR)$(SWRT_VER_MINOR)
 export SWRTVER := $(SWRT_NAME)_$(SWRT_VER)
 

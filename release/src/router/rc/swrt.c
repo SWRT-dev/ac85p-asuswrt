@@ -613,3 +613,10 @@ swrt_toolbox(int argc, char **argv)
 	return 0;
 }
 
+#ifdef RTCONFIG_DUALWAN
+int add_multi_routes(void){
+}
+
+void set_load_balance(void){
+}
+#endif
