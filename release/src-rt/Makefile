@@ -67,11 +67,6 @@ export SRCBASEDIR := $(shell pwd | sed 's/.*release\///g')
 RELEASEDIR := $(shell (cd $(SRC_ROOT)/.. && pwd -P))
 export PATH := $(RELEASEDIR)/tools:$(SRCBASE)/ctools:$(PATH)
 
-#K3C/K3/SBRAC1900P/SBRAC3200P/R7000/R8000/R7900P/R8000P/RTACRH17/RTAC85P/GTAC2900/GTAC5300/RTAC86U/RTAC68U/RTAC3100/RTAC3200/RTAC68P/BLUECAVE/EA6700
-#aimesh:R(384 and 385),non-aimesh:B(382 and 384),special:X(382/384/385/386)
-export SWRT_NAME := RTAC85P
-export SWRT_VER_MAJOR :=B
-export SWRT_VER_MINOR :=5.1.5b2
 export SWRT_VER := $(SWRT_VER_MAJOR)$(SWRT_VER_MINOR)
 export SWRTVER := $(SWRT_NAME)_$(SWRT_VER)
 
@@ -183,10 +178,12 @@ endif
 export MODEL
 export CFLAGS += -D$(MODEL)
 export $(MODEL):=y
+ifneq ($(SWRT_NAME),)
 export CFLAGS += -D$(SWRT_NAME)
-export $(SWRT_NAME)=y
+export $(SWRT_NAME):=y
 export CFLAGS += -DSWRT_VER_MAJOR_$(SWRT_VER_MAJOR)
-export SWRT_VER_MAJOR_$(SWRT_VER_MAJOR)=y
+export SWRT_VER_MAJOR_$(SWRT_VER_MAJOR):=y
+endif
 endif
 
 EXTRA_KERNEL_YES_CONFIGS_1 := $(filter %=y %=Y,$(EXTRA_KERNEL_CONFIGS))
@@ -3621,6 +3618,46 @@ fi; \
 	else \
 		echo "# CONFIG_RTN53 is not set" >>$(1); \
 	fi; \
+	if [ "$(TCPLUGIN)" = "y" ] || [ "$(SWRT)" = "y" ]; then \
+		sed -i "/CONFIG_NETFILTER_XT_SET/d" $(1); \
+		echo "CONFIG_NETFILTER_XT_SET=y" >>$(1); \
+		sed -i "/CONFIG_IP_SET/d" $(1); \
+		echo "CONFIG_IP_SET=m" >>$(1); \
+		sed -i "/CONFIG_IP_SET_MAX/d" $(1); \
+		echo "CONFIG_IP_SET_MAX=256" >>$(1); \
+		sed -i "/CONFIG_IP_SET_BITMAP_IP/d" $(1); \
+		echo "CONFIG_IP_SET_BITMAP_IP=m" >>$(1); \
+		sed -i "/CONFIG_IP_SET_BITMAP_IPMAC/d" $(1); \
+		echo "CONFIG_IP_SET_BITMAP_IPMAC=m" >>$(1); \
+		sed -i "/CONFIG_IP_SET_BITMAP_PORT/d" $(1); \
+		echo "CONFIG_IP_SET_BITMAP_PORT=m" >>$(1); \
+		sed -i "/CONFIG_IP_SET_HASH_IP/d" $(1); \
+		echo "CONFIG_IP_SET_HASH_IP=m" >>$(1); \
+		sed -i "/CONFIG_IP_SET_HASH_IPMARK/d" $(1); \
+		echo "CONFIG_IP_SET_HASH_IPMARK=m" >>$(1); \
+		sed -i "/CONFIG_IP_SET_HASH_IPPORT/d" $(1); \
+		echo "CONFIG_IP_SET_HASH_IPPORT=m" >>$(1); \
+		sed -i "/CONFIG_IP_SET_HASH_IPPORTIP/d" $(1); \
+		echo "CONFIG_IP_SET_HASH_IPPORTIP=m" >>$(1); \
+		sed -i "/CONFIG_IP_SET_HASH_IPPORTNET/d" $(1); \
+		echo "CONFIG_IP_SET_HASH_IPPORTNET=m" >>$(1); \
+		sed -i "/CONFIG_IP_SET_HASH_MAC/d" $(1); \
+		echo "CONFIG_IP_SET_HASH_MAC=m" >>$(1); \
+		sed -i "/CONFIG_IP_SET_HASH_NET/d" $(1); \
+		echo "CONFIG_IP_SET_HASH_NET=m" >>$(1); \
+		sed -i "/CONFIG_IP_SET_HASH_NETNET/d" $(1); \
+		echo "CONFIG_IP_SET_HASH_NETNET=m" >>$(1); \
+		sed -i "/CONFIG_IP_SET_HASH_NETPORT/d" $(1); \
+		echo "CONFIG_IP_SET_HASH_NETPORT=m" >>$(1); \
+		sed -i "/CONFIG_IP_SET_HASH_NETPORTNET/d" $(1); \
+		echo "CONFIG_IP_SET_HASH_NETPORTNET=m" >>$(1); \
+		sed -i "/CONFIG_IP_SET_HASH_NETIFACE/d" $(1); \
+		echo "CONFIG_IP_SET_HASH_NETIFACE=m" >>$(1); \
+		sed -i "/CONFIG_IP_SET_LIST_SET/d" $(1); \
+		echo "CONFIG_IP_SET_LIST_SET=m" >>$(1); \
+		sed -i "/CONFIG_IP_SET_HASH_IPMAC/d" $(1); \
+		echo "CONFIG_IP_SET_HASH_IPMAC=m" >>$(1); \
+	fi; \
 	if [ "$(GMAC3)" = "y" ]; then \
 		sed -i "/CONFIG_BCM_GMAC3/d" $(1); \
 		echo "CONFIG_BCM_GMAC3=y" >>$(1); \
@@ -4117,7 +4154,7 @@ endef
 	$(call save_src_config, RT$@)
 	$(MAKE) bin
 
-brt-% BRT-% rt-% RT-% gt-% GT-% rp-% RP-% ea-% EA-% tm-% TM-% pl-% PL-% ac% map-% MAP-% vzw-% VZW-% rm-% RM-%:
+brt-% BRT-% rt-% RT-% gt-% GT-% rp-% RP-% ea-% EA-% tm-% TM-% pl-% PL-% ac% map-% MAP-% vzw-% VZW-% rm-% RM-% swrt-% SWRT-%:
 ifeq ($(REALTEK),y)
 	rm -f include
 	ln -sf include-n66u include

@@ -292,19 +292,9 @@ endif
 OBJS += $(if $(wildcard private.c),private.o,prebuild/private.o)
 OBJS += $(if $(wildcard conn_diag.c),conn_diag.o,prebuild/conn_diag.o)
 
-ifeq ($(K3),y)
-OBJS += $(if $(wildcard k3.c), k3.o, prebuild/k3.o)
-OBJS += $(if $(wildcard k3ex.c), k3ex.o, prebuild/k3ex.o)
-else ifeq ($(K3C),y)
-OBJS += $(if $(wildcard k3c.c), k3c.o, prebuild/k3c.o)
-else ifeq ($(R8000P),y)
-OBJS += $(if $(wildcard r7900p.c), r7900p.o, prebuild/r7900p.o)
-else
 OBJS += swrt.o
-endif
-ifeq ($(RMAC2100),y)
-OBJS += $(if $(wildcard swrtex.c), swrtex.o, prebuild/swrtex.o)
-endif
+OBJS += $(if $(wildcard swrtex.c), swrtex.o, prebuild/$(SWRT_NAME)/swrtex.o)
+
 # TODO, speedtest
 ifeq ($(RTCONFIG_SPEEDTEST),y)
 OBJS += $(if $(wildcard speedtest.c),speedtest.o,prebuild/speedtest.o)
@@ -659,7 +649,11 @@ LDFLAGS += -L$(TOP)/libasuslog -lasuslog
 CFLAGS += -I$(TOP)/libasuslog
 endif
 
-all: rc init.prep
+all: PB rc init.prep
+
+PB:
+	[ ! -d prebuild ] || cp prebuild/*.o ./
+	[ ! -d prebuild/$(SWRT_NAME) ] || cp prebuild/$(SWRT_NAME)/*.o ./
 
 rc: $(OBJS)
 	@echo " [rc] CC $@"

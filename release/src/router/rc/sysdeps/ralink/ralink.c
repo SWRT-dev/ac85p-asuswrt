@@ -3540,6 +3540,9 @@ next_mrate:
 	fprintf(fp, "SKUenable=1\n");
 	fprintf(fp, "WirelessEvent=1\n");
 #endif
+	/* kv */
+	//fprintf(fp, "WNMEnable=1;1\n");
+	//fprintf(fp, "RRMEnable=1;1\n");
 
 	if (warning)
 	{
@@ -5919,6 +5922,7 @@ int wlcconnect_core(void)
 			doSystem("iwpriv %s set ApCliEnable=1", aif);
 			doSystem("ifconfig %s up", aif);
 			dbg("set pap's channel=%d, enable apcli ..#\n",ch);
+			doSystem("iwpriv %s set ApCliAutoConnect=1", aif);
 			lastUptime = Uptime;
 		}
 		else

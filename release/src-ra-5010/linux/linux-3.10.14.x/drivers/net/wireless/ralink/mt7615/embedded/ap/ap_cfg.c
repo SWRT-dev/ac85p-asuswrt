@@ -16501,12 +16501,13 @@ INT RTMP_AP_IoctlHandle(
 			if (copy_to_user(wrq->u.data.pointer, Channel, wrq->u.data.length))
 				Status = -EFAULT;
 		} else if ( subcmd == ASUS_SUBCMD_DRIVERVER ) {
-			RTMP_STRING driverVersion[16];
-			wrq->u.data.length = strlen(AP_DRIVER_VERSION);
-			snprintf(driverVersion, sizeof(driverVersion), "%s", AP_DRIVER_VERSION);
-			//driverVersion[wrq->u.data.length] = '\0';
+			RTMP_STRING *driverVersion;
+			os_alloc_mem(NULL, (PUCHAR *)&driverVersion, 64);
+			snprintf(driverVersion, sizeof(driverVersion), "RT-AC85P %s", AP_DRIVER_VERSION);
+			wrq->u.data.length = strlen(driverVersion);
 			if (copy_to_user(wrq->u.data.pointer, driverVersion, wrq->u.data.length))
 				Status = -EFAULT;
+			os_free_mem(driverVersion);
 		} else if ( subcmd == ASUS_SUBCMD_RADIO_STATUS ) {
 			UINT Enable = 0;
 			if(pAd->Flags & fRTMP_ADAPTER_RADIO_OFF)
@@ -16521,6 +16522,34 @@ INT RTMP_AP_IoctlHandle(
 			RTMP_GET_TEMPERATURE(pAd, &temperature);
 			wrq->u.data.length = sizeof(UINT32);
 			if (copy_to_user(wrq->u.data.pointer, &temperature, wrq->u.data.length))
+				Status = -EFAULT;
+		} else if ( subcmd == ASUS_SUBCMD_CONN_STATUS ) {
+			UINT32 pCurrState[2] = {0};
+			PAPCLI_STRUCT pApCliEntry;
+			PMAC_TABLE_ENTRY mac;
+			pApCliEntry = &pAd->ApCfg.ApCliTab[pObj->ioctl_if];
+			mac = &pAd->MacTab.Content[pApCliEntry->MacTabWCID];
+			pCurrState[0] = pApCliEntry->CtrlCurrState;
+			pCurrState[1] = mac->CurrTxRate;//LastRxRate/LastTxRate/CurrTxRate
+			wrq->u.data.length = sizeof(pCurrState);
+			if (copy_to_user(wrq->u.data.pointer, pCurrState, wrq->u.data.length))
+				Status = -EFAULT;
+		} else if ( subcmd == ASUS_SUBCMD_GSTAINFO ) {
+		} else if ( subcmd == ASUS_SUBCMD_GSTAT ) {
+		} else if ( subcmd == ASUS_SUBCMD_GRSSI ) {
+		} else if ( subcmd == ASUS_SUBCMD_GROAM ) {
+		} else if ( subcmd == ASUS_SUBCMD_GETSKUTABLE ) {
+		} else if ( subcmd == ASUS_SUBCMD_GETSKUTABLE_TXBF ) {
+		} else if ( subcmd == ASUS_SUBCMD_CLIQ ) {
+			RTMP_STRING tmp[20];
+			PAPCLI_STRUCT pApCliEntry;
+			PMAC_TABLE_ENTRY mac;
+			memset(tmp, 0, sizeof(tmp));
+			pApCliEntry = &pAd->ApCfg.ApCliTab[pObj->ioctl_if];
+			mac = &pAd->MacTab.Content[pApCliEntry->MacTabWCID];
+			snprintf(tmp, sizeof(tmp), "%lu", mac->ChannelQuality);
+			wrq->u.data.length = strlen(tmp);
+			if (copy_to_user(wrq->u.data.pointer, tmp, wrq->u.data.length))
 				Status = -EFAULT;
 		}
 		break;

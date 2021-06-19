@@ -15135,7 +15135,7 @@ INT RTMP_AP_IoctlHandle(
 				pChannel[wrq->u.data.length] = '\0';
 				Status = copy_to_user(wrq->u.data.pointer, pChannel, wrq->u.data.length);
 			} else if ( subcmd == ASUS_SUBCMD_DRIVERVER ) {
-				RTMP_STRING driverVersion[16];
+				RTMP_STRING driverVersion[16] = {0};
 				wrq->u.data.length = strlen(AP_DRIVER_VERSION);
 				snprintf(driverVersion, sizeof(driverVersion), "%s", AP_DRIVER_VERSION);
 				driverVersion[wrq->u.data.length] = '\0';

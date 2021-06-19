@@ -3920,6 +3920,7 @@ int init_nvram(void)
 
 #if defined(RMAC2100)
 	case MODEL_RMAC2100:
+		patch_Factory();
 		swrt_init();
 		nvram_set("boardflags", "0x100"); // although it is not used in ralink driver, set for vlan
 		nvram_set("vlan1hwname", "et0");  // vlan. used to get "%smacaddr" for compare and find parent interface.

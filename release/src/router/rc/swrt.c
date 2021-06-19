@@ -17,31 +17,25 @@
  * Copyright 2019-2021, paldier <paldier@hotmail.com>.
  * Copyright 2019-2021, lostlonger<lostlonger.g@gmail.com>.
  * All Rights Reserved.
- * 
  *
  */
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/types.h>
+
 #include "rc.h"
 #include <shared.h>
 #include <version.h>
 #include <shutils.h>
-#if defined(RTCONFIG_LANTIQ)
-#include <lantiq.h>
-#endif
+#include <json.h>
 #include "swrt.h"
 #include <curl/curl.h>
-#include <auth_common.h>
 
 #if defined(RTCONFIG_SOFTCENTER)
 static void firmware_ver(void)
 {
-    char tmp[6];
+    char tmp[6] = {0};
     strncpy(tmp, RT_FWVER, 5);//5.x.x[beta]
 	doSystem("dbus set softcenter_firmware_version='%s'",tmp);
 }
@@ -70,6 +64,7 @@ void swrt_insmod(){
 	eval("insmod", "xt_TPROXY");
 	eval("insmod", "xt_set");
 }
+
 void swrt_init()
 {
 	_dprintf("############################ SWRT init #################################\n");
@@ -82,10 +77,10 @@ void swrt_init()
 #endif
 	swrt_insmod();
 }
-void swrt_init_done()
-{
+
+void swrt_init_done(){
 	_dprintf("############################ SWRT init done #################################\n");
-#ifdef RTCONFIG_SOFTCENTER
+#if defined(RTCONFIG_SOFTCENTER)
 	if (!f_exists("/jffs/softcenter/scripts/ks_tar_install.sh") && nvram_match("sc_mount","0")){
 		doSystem("/usr/sbin/jffsinit.sh &");
 		logmessage("Softcenter/软件中心", "Installing/开始安装......");
@@ -113,65 +108,103 @@ void swrt_init_done()
 #endif
 #endif
 	if(!nvram_get("modelname"))
-#if defined(K3)
-		nvram_set("modelname", "K3");
-#elif defined(K3C)
-		nvram_set("modelname", "K3C");
-#elif defined(SBRAC1900P)
+//non asus must be in front of asus
+#if defined(SBRAC1900P)
 		nvram_set("modelname", "SBRAC1900P");
-#elif defined(SBRAC3200P)
-		nvram_set("modelname", "SBRAC3200P");
 #elif defined(EA6700)
 		nvram_set("modelname", "EA6700");
-#elif defined(R8000P) || defined(R7900P)
+#elif defined(DIR868L)
+		nvram_set("modelname", "DIR868L");
+#elif defined(R6300V2)
+		nvram_set("modelname", "R6300V2");
+#elif defined(SBRAC3200P)
+		nvram_set("modelname", "SBRAC3200P");
+#elif defined(K3)
+		nvram_set("modelname", "K3");
+#elif defined(XWR3100)
+		nvram_set("modelname", "XWR3100");
+#elif defined(R7000P)
+		nvram_set("modelname", "R7000P");
+#elif defined(R8500)
+		nvram_set("modelname", "R8500");
+#elif defined(R8000P)
 		nvram_set("modelname", "R8000P");
-#elif defined(RTAC3100)
-		nvram_set("modelname", "RTAC3100");
-#elif defined(BLUECAVE)
-		nvram_set("modelname", "BLUECAVE");
-#elif defined(RTAC68U)
-		nvram_set("modelname", "RTAC68U");
-#elif defined(RTAC68P)
-		nvram_set("modelname", "RTAC68P");
-#elif defined(RTAC3200)
-		nvram_set("modelname", "RTAC3200");
-#elif defined(GTAC2900)
-		nvram_set("modelname", "GTAC2900");
-#elif defined(GTAC5300)
-		nvram_set("modelname", "GTAC5300");
-#elif defined(RTAC86U)
-		nvram_set("modelname", "RTAC86U");
-#elif defined(RTACRH17)
-		nvram_set("modelname", "RTACRH17");
-#elif defined(TUFAX3000) || defined(RTAX58U)
-		nvram_set("modelname", "TUFAX3000");
-#elif defined(RTAX56U)
-		nvram_set("modelname", "RTAX56U");
-#elif defined(RTAX88U)
-		nvram_set("modelname", "RTAX88U");
-#elif defined(GTAX11000)
-		nvram_set("modelname", "GTAX11000");
 #elif defined(RAX20)
 		nvram_set("modelname", "RAX20");
 #elif defined(RAX80)
 		nvram_set("modelname", "RAX80");
+#elif defined(RAX120)
+		nvram_set("modelname", "RAX120");
 #elif defined(RAX200)
 		nvram_set("modelname", "RAX200");
-#elif defined(TUFAC1750)
-		nvram_set("modelname", "TUFAC1750");
-#elif defined(RTACRH26)
-		nvram_set("modelname", "RTACRH26");
+#elif defined(TY6201_BCM)
+		nvram_set("modelname", "TY6201_BCM");
+#elif defined(TY6201_RTK)
+		nvram_set("modelname", "TY6201_RTK");
+#elif defined(K3C)
+		nvram_set("modelname", "K3C");
+//asus
+#elif defined(RTAC68U)
+		nvram_set("modelname", "RTAC68U");
+#elif defined(RTAC3200)
+		nvram_set("modelname", "RTAC3200");
+#elif defined(RTAC3100)
+		nvram_set("modelname", "RTAC3100");
+#elif defined(RTAC88U)
+		nvram_set("modelname", "RTAC88U");
+#elif defined(RTAC5300)
+		nvram_set("modelname", "RTAC5300");
+#elif defined(RTAC86U)
+		nvram_set("modelname", "RTAC86U");
+#elif defined(GTAC2900)
+		nvram_set("modelname", "GTAC2900");
+#elif defined(GTAC5300)
+		nvram_set("modelname", "GTAC5300");
+#elif defined(RTAX55) || defined(RTAX1800)
+		nvram_set("modelname", "RTAX55");
+#elif defined(RTAX56U)
+		nvram_set("modelname", "RTAX56U");
+#elif defined(RTAX58U) || defined(RTAX3000)
+		nvram_set("modelname", "RTAX58U");
+#elif defined(TUFAX3000)
+		nvram_set("modelname", "TUFAX3000");
+#elif defined(TUFAX5400)
+		nvram_set("modelname", "TUFAX5400");
+#elif defined(RTAX68U)
+		nvram_set("modelname", "RTAX68U");
+#elif defined(RTAX82U)
+		nvram_set("modelname", "RTAX82U");
+#elif defined(RTAX86U)
+		nvram_set("modelname", "RTAX86U");
+#elif defined(RTAX88U)
+		nvram_set("modelname", "RTAX88U");
+#elif defined(GTAX11000)
+		nvram_set("modelname", "GTAX11000");
+#elif defined(GTAXE11000)
+		nvram_set("modelname", "GTAX11000");
+#elif defined(BLUECAVE)
+		nvram_set("modelname", "BLUECAVE");
+#elif defined(RTAC82U)
+		nvram_set("modelname", "RTACRH17");
+#elif defined(RTAC95U)
+		nvram_set("modelname", "ZENWIFICT8");
+#elif defined(RTAX89U)
+		nvram_set("modelname", "RTAX89X");
 #elif defined(RTAC85P)
 		nvram_set("modelname", "RTAC85P");
 #elif defined(RMAC2100)
 		nvram_set("modelname", "RMAC2100");
+#elif defined(TUFAC1750)
+		nvram_set("modelname", "TUFAC1750");
 #endif
-#if defined(R8000P) || defined(R7900P)
+#if defined(R8000P)
 	nvram_set("ping_target","www.taobao.com");
 #endif
 	nvram_commit();
-#if defined(RMAC2100)
-	patch_Factory();
+
+#if defined(SWRT_VER_MAJOR_B)
+	del_rc_support("amasRouter");
+	del_rc_support("amas");
 #endif
 }
 
@@ -396,10 +429,10 @@ int swrt_firmware_check_update_main(int argc, char *argv[])
 						nvram_set("webs_state_url", "");
 #if (defined(RTAC82U) && !defined(RTCONFIG_AMAS)) || defined(RTAC3200) || defined(RTAC85P) || defined(RMAC2100)
 						snprintf(info,sizeof(info),"3004_382_%s_%s-%s",modelname,fwver,tag);
-#elif (defined(RTAC82U) && defined(RTCONFIG_AMAS)) || defined(RTAC95U) || defined(RTAX56_XD4) || defined(RTAX95Q) || defined(RTAC68U) || defined(RTAC3100) || defined(RTAC88U)
-						snprintf(info,sizeof(info),"3004_386_%s_%s-%s",modelname,fwver,tag);
-#else
+#elif defined(BLUECAVE)
 						snprintf(info,sizeof(info),"3004_384_%s_%s-%s",modelname,fwver,tag);
+#else
+						snprintf(info,sizeof(info),"3004_386_%s_%s-%s",modelname,fwver,tag);
 #endif
 						FWUPDATE_DBG("---- current version : %s ----", nvram_get("extendno"));
 						FWUPDATE_DBG("---- productid : %s_%s-%s ----", modelname, fwver, tag);
@@ -451,10 +484,10 @@ int swrt_firmware_check_update_main(int argc, char *argv[])
 GODONE:
 #if (defined(RTAC82U) && !defined(RTCONFIG_AMAS)) || defined(RTAC3200) || defined(RTAC85P) || defined(RMAC2100)
 	snprintf(info,sizeof(info),"3004_382_%s",nvram_get("extendno"));
-#elif (defined(RTAC82U) && defined(RTCONFIG_AMAS)) || defined(RTAC95U) || defined(RTAX56_XD4) || defined(RTAX95Q) || defined(RTAC68U) || defined(RTAC3100) || defined(RTAC88U)
-	snprintf(info,sizeof(info),"3004_386_%s",nvram_get("extendno"));
-#else
+#elif defined(BLUECAVE)
 	snprintf(info,sizeof(info),"3004_384_%s",nvram_get("extendno"));
+#else
+	snprintf(info,sizeof(info),"3004_386_%s",nvram_get("extendno"));
 #endif
 	nvram_set("webs_state_url", "");
 	nvram_set("webs_state_flag", "0");
@@ -572,51 +605,3 @@ void softcenter_eval(int sig)
 }
 #endif
 
-
-static int
-reset_sc(int all)
-{
-	if(all){
-		killall_tk("skipd");
-		doSystem("rm -rf /jffs/db");
-		if(strcmp(nvram_get("preferred_lang"), "CN"))
-			printf("Database has been cleared.\n");
-		else
-			printf("数据库已清空！\n");
-	}
-	doSystem("rm -rf /jffs/softcenter/bin/*");
-	doSystem("rm -rf /jffs/softcenter/scripts/*");
-	doSystem("rm -rf /jffs/softcenter/webs/*");
-	doSystem("rm -rf /jffs/softcenter/res/*");
-	doSystem("rm -rf /jffs/softcenter");
-	doSystem("rm -rf /jffs/configs");
-	doSystem("rm -rf /jffs/scripts/dnsmasq.postconf");
-	doSystem("service restart_dnsmasq >/dev/null 2>&1");
-	sleep(1);
-	doSystem("jffsinit.sh >/dev/null 2>&1");
-	if(strcmp(nvram_get("preferred_lang"), "CN"))
-		printf("Software Center reset is complete, Please clear your browser cache and reopen the website page of the software center!\n");
-	else
-		printf("软件中心重置完成，请清空浏览器缓存后重新进入软件中心！\n");
-	return 0;
-}
-
-int
-swrt_toolbox(int argc, char **argv)
-{
-	if (argv[1] && !strcmp(argv[1], "reset")) {
-		if(argv[2] && !strcmp(argv[2], "all"))
-			reset_sc(1);
-		else
-			reset_sc(0);
-	}
-	return 0;
-}
-
-#ifdef RTCONFIG_DUALWAN
-int add_multi_routes(void){
-}
-
-void set_load_balance(void){
-}
-#endif
