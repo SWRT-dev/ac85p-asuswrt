@@ -10146,6 +10146,8 @@ prepare_restore(webs_t wp){
 	if (model == MODEL_RTN65U || model == MODEL_RTAC85U || model == MODEL_RTAC85P || model == MODEL_RTACRH26 
 #if defined(RMAC2100)
 	|| model == MODEL_RMAC2100
+#elif defined(R6800)
+	|| model == MODEL_R6800
 #endif
 	)
 		offset = 15;
@@ -11796,11 +11798,9 @@ do_upgrade_post(char *url, FILE *stream, int len, char *boundary)
 		} else _dprintf("could not retrieve firmware information!\n");
 	}
 #endif
-#if defined(RTAC85P) || defined(RMAC2100)
-	upgrade_err=0;//mkimage has bug, crc is wrong. asus always don't release new mkimage.
-#else
+
 	upgrade_err = check_imagefile(upload_fifo);
-#endif
+
 	if (upgrade_err) /* 0: legal image, 1: illegal image 2: new trx format validation failure */
 		goto err;
 

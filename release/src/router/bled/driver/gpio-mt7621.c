@@ -42,6 +42,12 @@
 #define RALINK_REG_PIO9564SET           (RALINK_PRGIO_ADDR + 0x38)
 #define RALINK_REG_PIO9564RESET         (RALINK_PRGIO_ADDR + 0x48)
 
+#if defined(CONFIG_MODEL_R6800)
+#include <linux/leds.h>
+extern void bled_sx150x_set(unsigned char gpio, enum led_brightness brightness);
+extern int bled_sx150x_get(unsigned char gpio);
+#endif
+
 
 static struct mt7621_gpio_reg_s {
 	int start;
@@ -95,20 +101,28 @@ static int get_gpio_register(int gpio_nr, int value, u32 *reg, u32 *mask)
 
 static void mt7621_gpio_set(int gpio_nr, int value)
 {
+#if defined(CONFIG_MODEL_R6800)
+	bled_sx150x_set(gpio_nr, value ? LED_FULL : LED_OFF);
+#else
 	u32 reg = 0, mask = 0;
 	if (get_gpio_register(gpio_nr, value, &reg, &mask)) {
 		return;
 	}
 	*(volatile u32*)reg = mask;
+#endif
 }
 
 static int mt7621_gpio_get(int gpio_nr)
 {
+#if defined(CONFIG_MODEL_R6800)
+	return bled_sx150x_get(gpio_nr);
+#else
 	u32 reg = 0, mask = 0;
 	if (get_gpio_register(gpio_nr, -1, &reg, &mask)) {
 		return 0;
 	}
 	return !!(*(volatile u32*)reg & mask);
+#endif
 }
 
 struct gpio_api_s gpio_api_tbl[GPIO_API_MAX] = {

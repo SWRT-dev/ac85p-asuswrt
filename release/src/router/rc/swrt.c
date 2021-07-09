@@ -194,6 +194,8 @@ void swrt_init_done(){
 		nvram_set("modelname", "RTAC85P");
 #elif defined(RMAC2100)
 		nvram_set("modelname", "RMAC2100");
+#elif defined(R6800)
+		nvram_set("modelname", "R6800");
 #elif defined(TUFAC1750)
 		nvram_set("modelname", "TUFAC1750");
 #endif
@@ -427,7 +429,7 @@ int swrt_firmware_check_update_main(int argc, char *argv[])
 					//_dprintf("%s#%s\n",fwver,cur_fwver);
 					if(versioncmp((cur_fwver+1),(fwver+1))==1){
 						nvram_set("webs_state_url", "");
-#if (defined(RTAC82U) && !defined(RTCONFIG_AMAS)) || defined(RTAC3200) || defined(RTAC85P) || defined(RMAC2100)
+#if (defined(RTAC82U) && !defined(RTCONFIG_AMAS)) || defined(RTAC3200) || defined(RTAC85P) || defined(RMAC2100) || defined(R6800)
 						snprintf(info,sizeof(info),"3004_382_%s_%s-%s",modelname,fwver,tag);
 #elif defined(BLUECAVE)
 						snprintf(info,sizeof(info),"3004_384_%s_%s-%s",modelname,fwver,tag);
@@ -482,7 +484,7 @@ int swrt_firmware_check_update_main(int argc, char *argv[])
 	curl_global_cleanup();
 
 GODONE:
-#if (defined(RTAC82U) && !defined(RTCONFIG_AMAS)) || defined(RTAC3200) || defined(RTAC85P) || defined(RMAC2100)
+#if (defined(RTAC82U) && !defined(RTCONFIG_AMAS)) || defined(RTAC3200) || defined(RTAC85P) || defined(RMAC2100) || defined(R6800)
 	snprintf(info,sizeof(info),"3004_382_%s",nvram_get("extendno"));
 #elif defined(BLUECAVE)
 	snprintf(info,sizeof(info),"3004_384_%s",nvram_get("extendno"));

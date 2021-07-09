@@ -2,3 +2,4 @@
 swrtex.c
 tcode.c
 *.log
+gpio-sx1503-leds.c

@@ -4814,7 +4814,7 @@ int mtk_nand_probe()
     }
 #endif
 
-#if defined(CONFIG_MODEL_RMAC2100)
+#if defined(CONFIG_MODEL_RMAC2100) || defined(CONFIG_MODEL_R6800)
 #if defined (__KERNEL_NAND__)
     MSG(INIT, "[mtk_nand] Line = %d!\n", __LINE__);
 

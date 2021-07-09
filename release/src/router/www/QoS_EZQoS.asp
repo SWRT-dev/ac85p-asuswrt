@@ -419,7 +419,7 @@ function initial(){
 	}
 
 	/* MODELDEP */
-	if(based_modelid == "RT-AC85U" || based_modelid == "RT-AC85P" || based_modelid == "RT-AC65U" || based_modelid == "RM-AC2100"){
+	if(based_modelid == "RT-AC85U" || based_modelid == "RT-AC85P" || based_modelid == "RT-AC65U" || based_modelid == "RM-AC2100" || based_modelid == "R6800"){
 		if(qos_type_orig == "1"){
 			document.getElementById('bandwidth_setting_tr').style.display = "none";
 			document.form.qos_type_radio[1].checked = true;
@@ -686,7 +686,7 @@ function submitQoS(){
 
 function change_qos_type(value){
 	/* MODELDEP */
-	if(value=="1" && (based_modelid == "RT-AC85U" || based_modelid == "RT-AC85P" || based_modelid == "RT-AC65U" || based_modelid == "RM-AC2100")){	//Force change to 0
+	if(value=="1" && (based_modelid == "RT-AC85U" || based_modelid == "RT-AC85P" || based_modelid == "RT-AC65U" || based_modelid == "RM-AC2100" || based_modelid == "R6800")){	//Force change to 0
 		value = 0;
 	}
 

@@ -16,6 +16,10 @@ config  MODEL_RMAC2100
 	bool "RM-AC2100"
 	default n
 
+config  MODEL_R6800
+	bool "R6800"
+	default n
+
 config  MODEL_RPAC87
 	bool "RP-AC87"
 	default n

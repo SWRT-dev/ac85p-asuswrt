@@ -686,6 +686,8 @@ enum {
 	MODEL_RTAC85U,
 #if defined(RMAC2100)
 	MODEL_RMAC2100,
+#elif defined(R6800)
+	MODEL_R6800,
 #endif
 	MODEL_RTAC85P,
 	MODEL_RTACRH26,

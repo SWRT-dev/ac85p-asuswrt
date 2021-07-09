@@ -16,6 +16,12 @@ extern unsigned int  CFG_BLOCKSIZE;
 #define LARGE_MTD_FACTORY_PART_SIZE	(0x40000)
 #define TRX_FIRMWARE_SIZE		(34 * 1024 * 1024) 	//50 MB
 #define TRX_FW_NUM			2
+#elif defined(CONFIG_MODEL_R6800)
+#define LARGE_MTD_BOOT_PART_SIZE	(0x100000)
+#define LARGE_MTD_CONFIG_PART_SIZE	(0x40000)
+#define LARGE_MTD_FACTORY_PART_SIZE	(0x400000)
+#define TRX_FIRMWARE_SIZE		(34 * 1024 * 1024) 	//50 MB
+#define TRX_FW_NUM			2
 #else
 #define LARGE_MTD_BOOT_PART_SIZE	(CFG_BLOCKSIZE * 7)
 #define LARGE_MTD_CONFIG_PART_SIZE	(CFG_BLOCKSIZE * 8)
@@ -73,7 +79,7 @@ static struct mtd_partition g_pasStatic_Partition[] = {
         /* Put your own partition definitions here */
         {
                 name:           "Bootloader",
-#if defined(CONFIG_MODEL_RMAC2100)
+#if defined(CONFIG_MODEL_RMAC2100) || defined(CONFIG_MODEL_R6800)
                size:           0x100000,
 #else
                 size:           MTD_BOOT_PART_SIZE,
@@ -81,7 +87,7 @@ static struct mtd_partition g_pasStatic_Partition[] = {
                 offset:         0,
         }, {
                 name:           "nvram",
-#if defined(CONFIG_MODEL_RMAC2100)
+#if defined(CONFIG_MODEL_RMAC2100) || defined(CONFIG_MODEL_R6800)
                 size:           0x40000,
                 offset:         0x140000,
 #else
@@ -93,6 +99,9 @@ static struct mtd_partition g_pasStatic_Partition[] = {
 #if defined(CONFIG_MODEL_RMAC2100)
                 size:           0x40000,
                 offset:         0x100000,
+#elif defined(CONFIG_MODEL_R6800)
+                size:           0x400000,
+                offset:         0x4600000,
 #else
                 size:           MTD_FACTORY_PART_SIZE,
                 offset:         MTDPART_OFS_APPEND
@@ -103,6 +112,9 @@ static struct mtd_partition g_pasStatic_Partition[] = {
 #if defined(CONFIG_MODEL_RMAC2100)
                 size:           0x40000,
                 offset:         0x100000,
+#elif defined(CONFIG_MODEL_R6800)
+                size:           0x400000,
+                offset:         0x4600000,
 #else
                 size:           MTD_FACTORY_PART_SIZE,
                 offset:         MTDPART_OFS_APPEND
@@ -130,7 +142,7 @@ static struct mtd_partition g_pasStatic_Partition[] = {
 #else //CONFIG_RT2880_ROOTFS_IN_RAM
         }, {
                 name:           "linux",
-#if defined(CONFIG_MODEL_RMAC2100)
+#if defined(CONFIG_MODEL_RMAC2100) || defined(CONFIG_MODEL_R6800)
                 size:           0x2800000,
                 offset:         0x200000,
 #else
@@ -139,17 +151,17 @@ static struct mtd_partition g_pasStatic_Partition[] = {
 #endif
         }, {
                 name:           "RootFS",
-#if defined(CONFIG_MODEL_RMAC2100)
+#if defined(CONFIG_MODEL_RMAC2100) || defined(CONFIG_MODEL_R6800)
                 size:           0x2600000,
                 offset:         0x400000,
 #else
                 size:           MTD_ROOTFS_PART_SIZE,
                 offset:         MTDPART_OFS_APPEND,
 #endif
-#if defined(CONFIG_DUAL_TRX) || defined(CONFIG_MODEL_RMAC2100)
+#if defined(CONFIG_DUAL_TRX) || defined(CONFIG_MODEL_RMAC2100) || defined(CONFIG_MODEL_R6800)
         }, {
                 name:           "linux2",
-#if defined(CONFIG_MODEL_RMAC2100)
+#if defined(CONFIG_MODEL_RMAC2100) || defined(CONFIG_MODEL_R6800)
                 size:           0x2800000,
                 offset:         0x200000,
 #else
@@ -158,7 +170,7 @@ static struct mtd_partition g_pasStatic_Partition[] = {
 #endif
         }, {
                 name:           "RootFS2",
-#if defined(CONFIG_MODEL_RMAC2100)
+#if defined(CONFIG_MODEL_RMAC2100) || defined(CONFIG_MODEL_R6800)
                 size:           0x2600000,
                 offset:         0x400000,
 #else
@@ -184,6 +196,9 @@ static struct mtd_partition g_pasStatic_Partition[] = {
 #if defined(CONFIG_MODEL_RMAC2100)
                 size:           0x5500000,
                 offset:         0x2a00000,
+#elif defined(CONFIG_MODEL_R6800)
+                size:           0x3500000,
+                offset:         0x4a00000,
 #else
                 size:           MTD_JFFS2_PART_SIZE,
                 offset:         MTDPART_OFS_APPEND,
@@ -193,7 +208,7 @@ static struct mtd_partition g_pasStatic_Partition[] = {
                 size:           MTDPART_SIZ_FULL,
                 offset:         0,
 		}
-#if defined(CONFIG_MODEL_RMAC2100)
+#if defined(CONFIG_MODEL_RMAC2100) || defined(CONFIG_MODEL_R6800)
         , {
                 name:           "RootFS-default",
                 size:           0x2600000,
