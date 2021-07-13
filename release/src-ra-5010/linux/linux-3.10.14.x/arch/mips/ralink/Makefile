@@ -30,7 +30,7 @@ obj-$(CONFIG_MTK_MTD_NAND) +=  dev-nand.o
 ifeq ($(CONFIG_RALINK_MT7621),y)
 obj-$(CONFIG_MTD_ANY_RALINK) +=  dev-nand.o
 endif
-#obj-$(CONFIG_I2C_RALINK) +=  dev-i2c.o
+obj-$(CONFIG_I2C_RALINK) +=  dev-i2c.o
 
 obj-$(CONFIG_RALINK_RT3883) +=  ehci_ohci.o udc.o
 obj-$(CONFIG_RALINK_RT3352) +=  ehci_ohci.o udc.o

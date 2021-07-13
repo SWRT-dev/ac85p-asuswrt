@@ -2148,6 +2148,56 @@ void ATE_mt7621_esw_port_status(void)
 	switch_fini();
 }
 
+#if defined(RTCONFIG_SWRT_I2CLED)
+void swrt_esw_port_status(int port, int *mode, int *speed)
+{
+	int i;
+	unsigned int value;
+	phyState pS;
+
+	if (switch_init() < 0)
+		return;
+
+	for (i = 0; i < (NR_WANLAN_PORT+dv); i++) {
+		pS.link[i] = 0;
+		pS.speed[i] = 0;
+#if defined(RTCONFIG_RALINK_MT7620)
+		mt7620_reg_read((REG_ESW_MAC_PMSR_P0 + 0x100*i), &value);
+#elif defined(RTCONFIG_RALINK_MT7621)
+		mt7621_reg_read((REG_ESW_MAC_PMSR_P0 + 0x100*i), &value);
+#endif		
+		pS.link[i] = value & 0x1;
+		pS.speed[i] = (value >> 2) & 0x3;
+	}
+	switch(port){
+		case WAN_PORT:
+			*mode = (pS.link[WAN_PORT] == 1);
+			*speed = (pS.speed[WAN_PORT] == 2);
+			break;
+		case LAN1_PORT:
+			*mode = (pS.link[LAN1_PORT] == 1);
+			*speed = (pS.speed[LAN1_PORT] == 2);
+			break;
+		case LAN2_PORT:
+			*mode = (pS.link[LAN2_PORT] == 1);
+			*speed = (pS.speed[LAN2_PORT] == 2);
+			break;
+		case LAN3_PORT:
+			*mode = (pS.link[LAN3_PORT] == 1);
+			*speed = (pS.speed[LAN3_PORT] == 2);
+			break;
+		case LAN4_PORT:
+			*mode = (pS.link[LAN4_PORT] == 1);
+			*speed = (pS.speed[LAN4_PORT] == 2);
+			break;
+		default:
+			*mode = 0;
+			*speed = 0;
+			break;
+	}
+	switch_fini();
+}
+#endif
 
 void restore_esw(void)
 {

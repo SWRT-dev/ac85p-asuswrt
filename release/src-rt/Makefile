@@ -536,7 +536,9 @@ ifeq ($(CONFIG_RALINK),y)
 		PAD=`expr 64 - $${SIZE} % 64` ; \
 		dd if=/dev/zero count=1 bs=$${PAD} 2> /dev/null | tr \\000 \\377 >> $(PLATFORMDIR)/zImage.img ; \
 	fi ; \
-
+	if [ "$(BUILD_NAME)" = "R6800" ]; then \
+		cp $(PLATFORMDIR)/zImage.img $(PLATFORMDIR)/kernel.img ; \
+	fi ; \
 	cat $(PLATFORMDIR)/target.image >> $(PLATFORMDIR)/zImage.img ; \
 	#generate ASUS Image
 	@ENTRY=`LANG=en_US readelf -h $(ROOTDIR)/$(LINUXDIR)/vmlinux | grep "Entry" | awk '{print $$4}'` ; \
@@ -550,6 +552,11 @@ ifeq ($(CONFIG_RALINK),y)
 		asustools/mkimage -A mips -O linux -T kernel -C lzma -a 80001000 -e $${ENTRY} -r $${RFSOFFSET} \
 		-n $(BUILD_NAME) -V "$(KERNEL_VER)" "$(FS_VER)" "$(SERIALNO)" "$(SWRT_CODEBASE)" "0" "0" "0" "0" "0" "0"  \
 		-d $(PLATFORMDIR)/zImage.img image/$(IMGNAME).trx ; \
+		if [ "$(BUILD_NAME)" = "R6800" ]; then \
+			asustools/mkimage -A mips -O linux -T kernel -C lzma -a 80001000 -e $${ENTRY} -r $${RFSOFFSET} \
+			-n $(BUILD_NAME) -V "$(KERNEL_VER)" "$(FS_VER)" "$(SERIALNO)" "$(SWRT_CODEBASE)" "0" "0" "0" "0" "0" "0"  \
+			-d $(PLATFORMDIR)/kernel.img image/kernel.bin ; \
+		fi ; \
 	else \
 		asustools/mkimage -A mips -O linux -T kernel -C lzma -a 80000000 -e $${ENTRY} -r $${RFSOFFSET} \
 		-n $(BUILD_NAME) -V "$(KERNEL_VER)" "$(FS_VER)" "$(SERIALNO)" "$(EXTENDNO)" "0" "0" "0" "0" "0" "0" \
@@ -747,12 +754,24 @@ ifeq ($(ARM),y)
 	ln -sf $(LINUXDIR)/vmlinux image/vmlinux
 	ln -sf $(LINUXDIR)/vmlinux.o image/vmlinux.o
 endif
-#ifeq ($(R6800),y)
-	#gcc asustools/mksercommfw.c -o asustools/mksercommfw
-	#cp image/$(IMGNAME).trx image/$(IMGNAME).img
-	#asustools/mksercommfw -i image/$(IMGNAME).img -f -b BZV -r A001 -v 0x0062
-	#asustools/mksercommfw -i image/$(IMGNAME).img -b BZV -r A001 -v 0x0062
-#endif
+ifeq ($(R6800),y)
+	gcc asustools/mksercommfw.c -o asustools/mksercommfw
+	dd if=/dev/zero bs=2048K count=1 conv=sync 2> /dev/null | tr \\000 \\377 >> image/factory.img
+	cat image/kernel.bin >> image/factory.img
+	@SIZE=`wc -c image/kernel.bin | awk '{ print $$1 }'` ; \
+	PAD=`expr 4194304 - $$SIZE` ; \
+	dd if=/dev/zero count=1 bs=$$PAD conv=sync 2> /dev/null | tr \\000 \\377 >> image/factory.img
+	cat $(PLATFORMDIR)/target.image >> image/factory.img
+	@SIZE=`wc -c image/factory.img | awk '{ print $$1 }'` ; \
+	PAD=`expr 83886080 - $$SIZE` ; \
+	dd if=/dev/zero count=1 bs=$$PAD conv=sync 2> /dev/null | tr \\000 \\377 >> image/factory.img
+	#asustools/mksercommfw -i image/factory.img -b BZV -r A001 -v 0x0062 -f
+	mkdir image/factory.img.tmp
+	mv image/factory.img image/factory.img.tmp/R6950.bin
+	zip -j -X image/factory.img image/factory.img.tmp/R6950.bin
+	rm -rf image/factory.img.tmp
+	asustools/mksercommfw -i image/factory.img -b BZV -r A001 -v 0x0062
+endif
 	@echo ""
 
 export_config:

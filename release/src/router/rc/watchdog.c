@@ -2408,6 +2408,67 @@ void led_on_off(void)
 		led_control(LED_ALL, LED_OFF);
 	}
 }
+#elif defined(R6800)
+void i2c_led_check(void)
+{
+	int mode = 0, speed = 0;
+	int i;
+
+	i2cled_control(I2CLED_2G_WHITE,  get_radio_status(nvram_get("wl0_ifname")));
+	i2cled_control(I2CLED_5G_WHITE,  get_radio_status(nvram_get("wl1_ifname")));
+	for(i = 0; i < 5; i++){
+		swrt_esw_port_status(i, &mode, &speed);
+		switch(i){
+			case 4:
+				if(mode == 0){
+					i2cled_control(I2CLED_WAN_WHITE, 0);
+					i2cled_control(I2CLED_WAN_ORANGE, 0);
+				}else{
+					i2cled_control(I2CLED_WAN_WHITE, speed ? 1 : 0);
+					i2cled_control(I2CLED_WAN_ORANGE, speed ? 0 : 1);
+				}
+				break;
+			case 3:
+				if(mode == 0){
+					i2cled_control(I2CLED_LAN4_WHITE, 0);
+					i2cled_control(I2CLED_LAN4_ORANGE, 0);
+				}else{
+					i2cled_control(I2CLED_LAN4_WHITE, speed ? 1 : 0);
+					i2cled_control(I2CLED_LAN4_ORANGE, speed ? 0 : 1);
+				}
+				break;
+			case 2:
+				if(mode == 0){
+					i2cled_control(I2CLED_LAN3_WHITE, 0);
+					i2cled_control(I2CLED_LAN3_ORANGE, 0);
+				}else{
+					i2cled_control(I2CLED_LAN3_WHITE, speed ? 1 : 0);
+					i2cled_control(I2CLED_LAN3_ORANGE, speed ? 0 : 1);
+				}
+				break;
+			case 1:
+				if(mode == 0){
+					i2cled_control(I2CLED_LAN2_WHITE, 0);
+					i2cled_control(I2CLED_LAN2_ORANGE, 0);
+				}else{
+					i2cled_control(I2CLED_LAN2_WHITE, speed ? 1 : 0);
+					i2cled_control(I2CLED_LAN2_ORANGE, speed ? 0 : 1);
+				}
+				break;
+			case 0:
+				if(mode == 0){
+					i2cled_control(I2CLED_LAN1_WHITE, 0);
+					i2cled_control(I2CLED_LAN1_ORANGE, 0);
+				}else{
+					i2cled_control(I2CLED_LAN1_WHITE, speed ? 1 : 0);
+					i2cled_control(I2CLED_LAN1_ORANGE, speed ? 0 : 1);
+				}
+				break;
+			default:
+				break;
+		}
+	}
+}
 #endif
 
 void btn_check(void)
@@ -2829,7 +2890,7 @@ void btn_check(void)
 			if (LED_status_on) {
 				TRACE_PT("LED turn to normal\n");
 				led_control(LED_POWER, LED_ON);
-#if defined(RTAC65U) || defined(RTAC85U) || defined(RTAC85P) || defined(RTN800HP) || defined(RTACRH26) || defined(RMAC2100)
+#if defined(RTAC65U) || defined(RTAC85U) || defined(RTAC85P) || defined(RTN800HP) || defined(RTACRH26) || defined(RMAC2100) || defined(R6800)
 			if (nvram_match("wl0_radio", "1")) {
 				led_control(LED_2G, LED_ON);
 			}
@@ -4058,11 +4119,7 @@ void fake_etlan_led(void)
 	}
 	allstatus = 1;
 #endif
-#if defined(K3)
-	if (!GetPhyStatusk3(0)) {
-#else
 	if (!GetPhyStatus(0)) {
-#endif
 		if (lstatus)
 #ifdef GTAC5300
 			aggled_control(AGGLED_ACT_ALLOFF);
@@ -6933,11 +6990,6 @@ void watchdog(int sig)
 	/* handle button */
 	btn_check();
 
-#if defined(RMAC2100)
-	/* handle led */
-	led_on_off();
-#endif
-
 	if (nvram_match("asus_mfg", "0")
 #if defined(RTCONFIG_LED_BTN) || defined(RTCONFIG_WPS_ALLLED_BTN)
 		&& nvram_get_int("AllLED")
@@ -7110,6 +7162,13 @@ void watchdog(int sig)
 
 	if (!nvram_match("asus_mfg", "0"))
 		return;
+
+#if defined(RMAC2100)
+	/* handle led */
+	led_on_off();
+#elif defined(R6800)
+	i2c_led_check();
+#endif
 
 	watchdog_period = (watchdog_period + 1) % 30;
 #ifdef WATCHDOG_PERIOD2

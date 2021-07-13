@@ -151,9 +151,12 @@ static struct mtd_partition g_pasStatic_Partition[] = {
 #endif
         }, {
                 name:           "RootFS",
-#if defined(CONFIG_MODEL_RMAC2100) || defined(CONFIG_MODEL_R6800)
+#if defined(CONFIG_MODEL_RMAC2100)
                 size:           0x2600000,
                 offset:         0x400000,
+#elif defined(CONFIG_MODEL_R6800)
+                size:           0x2400000,
+                offset:         0x600000,
 #else
                 size:           MTD_ROOTFS_PART_SIZE,
                 offset:         MTDPART_OFS_APPEND,
@@ -170,9 +173,12 @@ static struct mtd_partition g_pasStatic_Partition[] = {
 #endif
         }, {
                 name:           "RootFS2",
-#if defined(CONFIG_MODEL_RMAC2100) || defined(CONFIG_MODEL_R6800)
+#if defined(CONFIG_MODEL_RMAC2100)
                 size:           0x2600000,
                 offset:         0x400000,
+#elif defined(CONFIG_MODEL_R6800)
+                size:           0x2400000,
+                offset:         0x600000,
 #else
                 size:           MTD_ROOTFS_PART_SIZE,
                 offset:         MTDPART_OFS_APPEND,
@@ -197,8 +203,8 @@ static struct mtd_partition g_pasStatic_Partition[] = {
                 size:           0x5500000,
                 offset:         0x2a00000,
 #elif defined(CONFIG_MODEL_R6800)
-                size:           0x3500000,
-                offset:         0x4a00000,
+                size:           0x2b60000,
+                offset:         0x5420000,
 #else
                 size:           MTD_JFFS2_PART_SIZE,
                 offset:         MTDPART_OFS_APPEND,
@@ -208,11 +214,17 @@ static struct mtd_partition g_pasStatic_Partition[] = {
                 size:           MTDPART_SIZ_FULL,
                 offset:         0,
 		}
-#if defined(CONFIG_MODEL_RMAC2100) || defined(CONFIG_MODEL_R6800)
+#if defined(CONFIG_MODEL_RMAC2100)
         , {
                 name:           "RootFS-default",
                 size:           0x2600000,
                 offset:         0x400000,
+		}
+#elif defined(CONFIG_MODEL_R6800)
+        , {
+                name:           "RootFS-default",
+                size:           0x2400000,
+                offset:         0x600000,
 		}
 #endif
 

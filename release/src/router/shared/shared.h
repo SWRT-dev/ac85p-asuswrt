@@ -927,7 +927,7 @@ enum led_id {
 	LED_5G2,
 	LED_60G,
 	LED_USB3,
-#ifdef RTCONFIG_LAN4WAN_LED
+#if defined(RTCONFIG_LAN4WAN_LED)
 	LED_LAN1,
 	LED_LAN2,
 	LED_LAN3,
@@ -1570,7 +1570,7 @@ extern int get_channel_list_via_country(int unit, const char *country_code, char
 extern int get_mtk_wifi_driver_version(char *buffer, int len);
 #if defined(RTCONFIG_RALINK_MT7620)
 extern int __mt7620_wan_bytecount(int unit, unsigned long *tx, unsigned long *rx);
-#elif defined(RTCONFIG_RALINK_MT7620)
+#elif defined(RTCONFIG_RALINK_MT7621)
 extern int __mt7621_wan_bytecount(int unit, unsigned long *tx, unsigned long *rx);
 #endif
 
@@ -1913,6 +1913,9 @@ extern void set_lan_phy(char *phy);
 extern void add_lan_phy(char *phy);
 extern void set_wan_phy(char *phy);
 extern void add_wan_phy(char *phy);
+#if defined(RTCONFIG_SWRT_I2CLED)
+extern void swrt_esw_port_status(int port, int *mode, int *speed);
+#endif
 
 /* semaphore.c */
 extern void init_spinlock(void);
@@ -2413,5 +2416,27 @@ static inline int get_sw_mode(void)
 
 extern int get_discovery_ssid(char *ssid_g, int size);
 extern int get_chance_to_control(void);
+
+#if defined(RTCONFIG_SWRT_I2CLED)
+enum {
+	I2CLED_WAN_WHITE=1,
+	I2CLED_WAN_ORANGE,
+	I2CLED_LAN1_WHITE,
+	I2CLED_LAN1_ORANGE,
+	I2CLED_LAN2_WHITE,
+	I2CLED_LAN2_ORANGE,
+	I2CLED_LAN3_WHITE,
+	I2CLED_LAN3_ORANGE,
+	I2CLED_LAN4_WHITE,
+	I2CLED_LAN4_ORANGE,
+	I2CLED_PWR_WHITE,
+	I2CLED_PWR_ORANGE,
+	I2CLED_2G_WHITE,
+	I2CLED_5G_WHITE,
+	I2CLED_USB_WHITE,
+	I2CLED_GUEST_WHITE
+};
+extern void i2cled_control(int which, int onoff);
+#endif
 #endif	/* !__SHARED_H__ */
 

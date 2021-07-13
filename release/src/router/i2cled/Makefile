@@ -34,7 +34,5 @@ install:
 	@find $(INSTALLDIR) -name "*.ko" | xargs $(STRIPX)
 
 clean:
-	$(RM) *.o *.ko driver/*.o driver/*.ko driver/*.mod.* driver/.*.cmd driver/Module.symvers driver/modules.order
-	rm -rf driver/.tmp_versions/
+	$(RM) *.o *.ko driver/*.o driver/*.ko driver/*.mod.*
 
-.phony: all clean install

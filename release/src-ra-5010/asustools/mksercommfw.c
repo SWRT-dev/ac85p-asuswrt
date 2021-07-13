@@ -6,7 +6,7 @@
 #include <byteswap.h>
 #include <endian.h>
 #include <getopt.h>
-
+#define DEBUG
 #if !defined(__BYTE_ORDER)
 #error "Unknown byte order"
 #endif

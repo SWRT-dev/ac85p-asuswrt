@@ -405,7 +405,6 @@ int init_gpio(void)
 		if(gpio_pin == 72)	//skip 2g wifi led NOT to be gpio LED
 			continue;
 #endif
-
 		disable = (use_gpio&GPIO_ACTIVE_LOW)==0 ? 0: 1;
 #ifndef RTCONFIG_LEDS_CLASS
 		gpio_dir(gpio_pin, GPIO_DIR_OUT);
@@ -425,7 +424,9 @@ int init_gpio(void)
 			disable = !disable;
 #endif
 #endif
-
+#if defined(R6800)
+		if(gpio_pin == 17 || gpio_pin == 5)
+#endif
 #if !defined(RTCONFIG_CONCURRENTREPEATER)
 		set_gpio(gpio_pin, disable);
 #endif
@@ -444,8 +445,12 @@ int init_gpio(void)
 #endif
 	{
 		enable = (use_gpio&GPIO_ACTIVE_LOW)==0 ? 1 : 0;
+#if defined(R6800)
+		i2cled_control(I2CLED_WAN_WHITE, 1);
+#else
 #if !defined(RTCONFIG_CONCURRENTREPEATER)
 		set_gpio(gpio_pin, enable);
+#endif
 #endif
 #ifdef RT4GAC55U	// save setting value
 		{ int i; char led[16]; for(i=0; i<LED_ID_MAX; i++) if(gpio_pin == (led_gpio_table[i]&0xff)){snprintf(led, sizeof(led), "led%02d", i); nvram_set_int(led, LED_ON); break;}}
@@ -682,7 +687,22 @@ int do_led_control(int which, int mode)
 		stop_bled(use_gpio);
 	}
 #endif
+#if defined(R6800)
+	if(which == LED_WPS || which == LED_ALL)
+#endif
 	set_gpio(gpio_nr, v);
+#if defined(R6800)
+	if(which == LED_WAN)
+		i2cled_control(I2CLED_WAN_WHITE, mode);
+	else if (which == LED_USB)
+		i2cled_control(I2CLED_USB_WHITE, mode);
+	else if (which == LED_5G)
+		i2cled_control(I2CLED_5G_WHITE, mode);
+	else if (which == LED_2G)
+		i2cled_control(I2CLED_2G_WHITE, mode);
+	else if (which == LED_POWER)
+		i2cled_control(I2CLED_PWR_WHITE, mode);
+#endif
 #ifndef HND_ROUTER
 	if (mode == LED_ON) {
 		start_bled(use_gpio);
@@ -1019,4 +1039,62 @@ int lanport_ctrl(int ctrl)
 	return set_phy_ctrl(mask, ctrl);
 #endif
 }
+
+#if defined(RTCONFIG_SWRT_I2CLED)
+void i2cled_control(int which, int onoff)
+{
+	switch(which){
+		case I2CLED_WAN_WHITE:
+			f_write_string("/sys/class/leds/netgear:internet:white/trigger", onoff ? "default-on" : "none", 0, 0);
+			break;
+		case I2CLED_WAN_ORANGE:
+			f_write_string("/sys/class/leds/netgear:internet:orange/trigger", onoff ? "default-on" : "none", 0, 0);
+			break;
+		case I2CLED_LAN1_WHITE:
+			f_write_string("/sys/class/leds/netgear:lan1:white/trigger", onoff ? "default-on" : "none", 0, 0);
+			break;
+		case I2CLED_LAN1_ORANGE:
+			f_write_string("/sys/class/leds/netgear:lan1:orange/trigger", onoff ? "default-on" : "none", 0, 0);
+			break;
+		case I2CLED_LAN2_WHITE:
+			f_write_string("/sys/class/leds/netgear:lan2:white/trigger", onoff ? "default-on" : "none", 0, 0);
+			break;
+		case I2CLED_LAN2_ORANGE:
+			f_write_string("/sys/class/leds/netgear:lan2:orange/trigger", onoff ? "default-on" : "none", 0, 0);
+			break;
+		case I2CLED_LAN3_WHITE:
+			f_write_string("/sys/class/leds/netgear:lan3:white/trigger", onoff ? "default-on" : "none", 0, 0);
+			break;
+		case I2CLED_LAN3_ORANGE:
+			f_write_string("/sys/class/leds/netgear:lan3:orange/trigger", onoff ? "default-on" : "none", 0, 0);
+			break;
+		case I2CLED_LAN4_WHITE:
+			f_write_string("/sys/class/leds/netgear:lan4:white/trigger", onoff ? "default-on" : "none", 0, 0);
+			break;
+		case I2CLED_LAN4_ORANGE:
+			f_write_string("/sys/class/leds/netgear:lan4:orange/trigger", onoff ? "default-on" : "none", 0, 0);
+			break;
+		case I2CLED_PWR_WHITE:
+			f_write_string("/sys/class/leds/netgear:power:white/trigger", onoff ? "default-on" : "none", 0, 0);
+			break;
+		case I2CLED_PWR_ORANGE:
+			f_write_string("/sys/class/leds/netgear:power:orange/trigger", onoff ? "default-on" : "none", 0, 0);
+			break;
+		case I2CLED_2G_WHITE:
+			f_write_string("/sys/class/leds/netgear:2g:white/trigger", onoff ? "default-on" : "none", 0, 0);
+			break;
+		case I2CLED_5G_WHITE:
+			f_write_string("/sys/class/leds/netgear:5g:white/trigger", onoff ? "default-on" : "none", 0, 0);
+			break;
+		case I2CLED_USB_WHITE:
+			f_write_string("/sys/class/leds/netgear:usb:white/trigger", onoff ? "default-on" : "none", 0, 0);
+			break;
+		case I2CLED_GUEST_WHITE:
+			f_write_string("/sys/class/leds/netgear:guest:white/trigger", onoff ? "default-on" : "none", 0, 0);
+			break;
+		default:
+			break;
+	}
+}
+#endif
 

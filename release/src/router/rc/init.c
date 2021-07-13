@@ -3979,22 +3979,33 @@ int init_nvram(void)
 		set_basic_ifname_vars("eth3", "vlan1", wl_ifaces, "usb", "vlan1", NULL, "vlan3", NULL, 0);
 
 		nvram_set_int("btn_rst_gpio",  12|GPIO_ACTIVE_LOW);
-		nvram_set_int("btn_wps_gpio",  18);
+		nvram_set_int("btn_wps_gpio",  18|GPIO_ACTIVE_LOW);
 		//nvram_set_int("btn_wifi_gpio", 14|GPIO_ACTIVE_LOW);
 		nvram_set_int("led_wps_gpio",  17);
 		nvram_set_int("led_all_gpio", 5|GPIO_ACTIVE_LOW);
 		//i2c
-		nvram_set_int("led_pwr_gpio",  9|GPIO_ACTIVE_LOW);
+		nvram_set_int("led_pwr_gpio",  9);//8/9
+		nvram_set_int("led_wan_gpio", 11);//10/11
+		nvram_set_int("led_lan1_gpio", 7);//6/7
+		nvram_set_int("led_lan2_gpio", 5);//4/5
+		nvram_set_int("led_lan3_gpio", 3);//2/3
+		nvram_set_int("led_lan4_gpio", 1);//0/1
 		nvram_set_int("led_usb_gpio", 15);
+		//nvram_set_int("led_usb3_gpio", 14);
 		nvram_set_int("led_5g_gpio", 13);
 		nvram_set_int("led_2g_gpio", 12);
-		nvram_set_int("led_wan_gpio", 11);
 
 		eval("rtkswitch", "11");
 
 		/* enable bled */
-		config_netdev_bled("led_2g_gpio", "ra0");
-		config_netdev_bled("led_5g_gpio", "rai0");
+		//config_netdev_bled("led_2g_gpio", "ra0");
+		//config_netdev_bled("led_5g_gpio", "rai0");
+		//config_netdev_bled("led_wan_gpio", "eth3");
+		//config_swports_bled("led_lan1_gpio", 8);
+		//config_swports_bled("led_lan2_gpio", 4);
+		//config_swports_bled("led_lan3_gpio", 2);
+		//config_swports_bled("led_lan4_gpio", 1);
+		//config_usbbus_bled("led_usb_gpio", "1 2");
 
 		nvram_set("ehci_ports", "1-1");
 		nvram_set("ohci_ports", "2-1");
@@ -10216,6 +10227,9 @@ static void sysinit(void)
 #if !defined(RTCONFIG_SOC_IPQ40XX)
 #if defined(RTCONFIG_BLINK_LED)
 	modprobe("bled");
+#endif
+#if defined(RTCONFIG_SWRT_I2CLED)
+	modprobe("sx150x-leds");
 #endif
 #endif
 #ifdef LINUX26

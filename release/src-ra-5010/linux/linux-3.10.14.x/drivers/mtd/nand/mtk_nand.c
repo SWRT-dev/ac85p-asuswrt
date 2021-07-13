@@ -4825,7 +4825,7 @@ int mtk_nand_probe()
 		uint8_t unused[60];
 		uint32_t ih_ksz;
 	};
-
+	char n[2];
 	int j;
 	image_header_t hdr;
 	version_t *hw2 = &hdr.u.tail.hw[0];
@@ -4857,6 +4857,15 @@ int mtk_nand_probe()
             u.p[3] = hw2->minor;
             MSG(INIT, "[mtk_nand] Line = %d!\n", __LINE__);        
             rfs_offset = ntohl(u.rfs_offset_net_endian);
+#if defined(CONFIG_MODEL_RMAC2100)		
+			ranand_read(n, 0x400000, 2);
+			if(n[0] == 0x68 && n[1] == 0x73)
+				rfs_offset = 0x200000;
+#elif defined(CONFIG_MODEL_R6800)
+			ranand_read(n, 0x600000, 2);
+			if(n[0] == 0x68 && n[1] == 0x73)
+				rfs_offset = 0x400000;
+#endif
             MSG(INIT, "[mtk_nand] Line = %d rfs_offset = %08X!\n", __LINE__, rfs_offset);
         }
     
