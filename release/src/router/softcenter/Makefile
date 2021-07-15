@@ -60,9 +60,9 @@ endif
 	install -m 0755 softcenter/bin/softcenter-wan.sh $(INSTALLDIR)/rom/etc/softcenter/bin
 	install -m 0755 softcenter/bin/softcenter-services.sh $(INSTALLDIR)/rom/etc/softcenter/bin
 	install -m 0755 softcenter/bin/softcenter-unmount.sh $(INSTALLDIR)/rom/etc/softcenter/bin
-	install -m 0755 softcenter/res/scCN.json $(INSTALLDIR)/rom/etc/softcenter/res
-	install -m 0755 softcenter/res/scEN.json $(INSTALLDIR)/rom/etc/softcenter/res
-	install -m 0755 softcenter/res/scTW.json $(INSTALLDIR)/rom/etc/softcenter/res
+	install -m 0755 softcenter/res/sc1CN.json $(INSTALLDIR)/rom/etc/softcenter/res
+	install -m 0755 softcenter/res/sc1EN.json $(INSTALLDIR)/rom/etc/softcenter/res
+	install -m 0755 softcenter/res/sc1TW.json $(INSTALLDIR)/rom/etc/softcenter/res
 	install -m 0755 softcenter/res/icon-default.png $(INSTALLDIR)/rom/etc/softcenter/res
 	install -m 0755 softcenter/res/swrt.png $(INSTALLDIR)/rom/etc/softcenter/res
 	install -m 0755 softcenter/res/upgrade.png $(INSTALLDIR)/rom/etc/softcenter/res
@@ -107,9 +107,15 @@ endif
 	install -m 0755 helper.sh $(INSTALLDIR)/usr/sbin
 ifeq ($(HND_ROUTER), y)
 	install -m 0755 i18n.js $(INSTALLDIR)/www/www/js
+	install -m 0755 scCN.json $(INSTALLDIR)/www/www/res
+	install -m 0755 scEN.json $(INSTALLDIR)/www/www/res
+	install -m 0755 scTW.json $(INSTALLDIR)/www/www/res
 	install -m 0755 Softcenter.asp $(INSTALLDIR)/www/www
 else
 	install -m 0755 i18n.js $(INSTALLDIR)/www/js
+	install -m 0755 scCN.json $(INSTALLDIR)/www/res
+	install -m 0755 scEN.json $(INSTALLDIR)/www/res
+	install -m 0755 scTW.json $(INSTALLDIR)/www/res
 	install -m 0755 Softcenter.asp $(INSTALLDIR)/www
 endif
 ifeq ($(SWRT_NAME), $(filter $(SWRT_NAME), SBRAC1900P SBRAC3200P K3 R8500 XWR3100 TY6201_RTK TY6201_BCM))
