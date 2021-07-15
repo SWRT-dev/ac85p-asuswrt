@@ -407,6 +407,9 @@ int init_gpio(void)
 #endif
 		disable = (use_gpio&GPIO_ACTIVE_LOW)==0 ? 0: 1;
 #ifndef RTCONFIG_LEDS_CLASS
+#if defined(R6800)
+		if(gpio_pin == 17 || gpio_pin == 5)
+#endif
 		gpio_dir(gpio_pin, GPIO_DIR_OUT);
 #endif
 
