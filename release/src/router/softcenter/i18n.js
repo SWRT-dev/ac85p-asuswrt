@@ -10,11 +10,12 @@ function sc_load_lang(path) {
     case "TW":
       setLanguage("TW",path);
       break
+      break
     case "CN":
       setLanguage("CN",path);
       break
     default:
-      setLanguage("EN",path);
+      setLanguage(web_lang,path);
   }
 }
 
@@ -26,7 +27,7 @@ function translate(lang,path) {
   if(sessionStorage.getItem(path + lang + "Data") != null){
     dict = JSON.parse(sessionStorage.getItem(path + lang + "Data"));
   }else{
-    loadDict(path);
+    loadDict(lang,path);
   }
 
   $("[sclang]").each(function () {
@@ -47,8 +48,7 @@ function __tr(src) {
   return (dict[src] || src);
 }
 
-function loadDict(path) {
-  var lang = (web_lang || "EN");
+function loadDict(lang,path) {
   $.ajax({
     async: false,
     type: "GET",
@@ -56,7 +56,10 @@ function loadDict(path) {
     success: function (msg) {
       dict = msg;
       sessionStorage.setItem(path + lang + 'Data', JSON.stringify(dict));
-    }
+    },
+	error: function() {
+		loadDict("EN",path);
+	}
   });
 
 }
