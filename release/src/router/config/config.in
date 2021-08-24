@@ -1819,3 +1819,7 @@ config RTCONFIG_SWRT_FULLCONE
 config RTCONFIG_SWRT_I2CLED
 	bool "RTCONFIG_SWRT_I2CLED"
 	default n
+
+config RTCONFIG_ENTWARE
+	bool "install entware"
+	default n
