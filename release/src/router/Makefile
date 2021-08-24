@@ -1058,6 +1058,7 @@ obj-$(RTCONFIG_FTPCLIENT) += ftpclient
 obj-$(RTCONFIG_SAMBACLIENT) += sambaclient
 obj-$(RTCONFIG_USBCLIENT) += usbclient
 
+obj-$(RTCONFIG_ENTWARE) += libiconv-1.14
 #aaews,asusnatnl related
 obj-$(RTCONFIG_TUNNEL) += libxml2
 obj-$(RTCONFIG_TUNNEL) += curl
