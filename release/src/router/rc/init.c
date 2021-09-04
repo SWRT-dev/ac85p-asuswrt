@@ -71,19 +71,8 @@
 
 #define SHELL "/bin/sh"
 #define LOGIN "/bin/login"
-#if defined(K3)
-#include "k3.h"
-#elif defined(K3C)
-#include "k3c.h"
-#elif defined(SBRAC1900P)
-#include "ac1900p.h"
-#elif defined(SBRAC3200P)
-#include "ac3200p.h"
-#elif defined(R8000P)
-#include "r7900p.h"
-#else
+
 #include "swrt.h"
-#endif
 
 static int fatalsigs[] = {
 	SIGILL,
