@@ -1574,14 +1574,15 @@ VOID PeerPairMsg2Action(
 
 		wdev = &pAd->ApCfg.MBSSID[apidx].wdev;
 		pBssid = wdev->bssid;
-		if (FALSE
+
 #if defined(DOT11_SAE_SUPPORT) || defined(CONFIG_OWE_SUPPORT)
-			|| (pEntry->AuthMode == Ndis802_11AuthModeOWE) || (pEntry->AuthMode == Ndis802_11AuthModeWPA3PSK)
+		if ( (pEntry->AuthMode == Ndis802_11AuthModeOWE) || (pEntry->AuthMode == Ndis802_11AuthModeWPA3PSK) )
+ 			pmk_ptr = pEntry->PMK;
+ 		else
+ 			pmk_ptr = pAd->ApCfg.MBSSID[apidx].PMK;
+#else
+		pmk_ptr = pAd->ApCfg.MBSSID[apidx].PMK;
 #endif
-			)
-			pmk_ptr = pEntry->PMK;
-		else
-			pmk_ptr = pAd->ApCfg.MBSSID[apidx].PMK;
 		gtk_ptr = pAd->ApCfg.MBSSID[apidx].GTK;
 		group_cipher = wdev->GroupKeyWepStatus;
 		default_key = wdev->DefaultKeyId;
@@ -2611,6 +2612,11 @@ VOID PeerPairMsg4Action(
 		}
 #endif /* WH_EVENT_NOTIFIER */
 
+#ifdef IAPP_SUPPORT
+		if (IS_ENTRY_CLIENT(pEntry)) {
+			IAPP_L2_Update_Frame_Send(pAd, pEntry->Addr,pEntry->wdev->wdev_idx);
+		}
+#endif /* IAPP_SUPPORT */
 			/* send wireless event - for set key done WPA2*/
 				RTMPSendWirelessEvent(pAd, IW_SET_KEY_DONE_WPA2_EVENT_FLAG, pEntry->Addr, pEntry->wdev->wdev_idx, 0);
 

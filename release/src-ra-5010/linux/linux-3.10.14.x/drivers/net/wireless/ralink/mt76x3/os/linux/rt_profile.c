@@ -643,11 +643,11 @@ INT get_dev_config_idx(RTMP_ADAPTER *pAd)
 	else if (IS_RT5392(pAd) || IS_MT76x0(pAd) || IS_MT76x2(pAd))
 		idx = 1;
 
-#if defined(CONFIG_FIRST_IF_MT7615E)
+#if defined(CONFIG_RT_FIRST_IF_MT7615E)
 	/* MT7615A (ra0) + MT7603(rai0) combination */
 	if (IS_MT7603E(pAd))
 		idx = 1;
-#endif /* defined(CONFIG_FIRST_IF_MT7603E) */
+#endif
 
 #endif /* defined(CONFIG_RT_FIRST_CARD) && defined(CONFIG_RT_SECOND_CARD) */
 
@@ -1244,6 +1244,7 @@ void announce_802_3_packet(
 			RTMP_IRQ_LOCK(&pAd->page_lock, flags);
 			if(ra_sw_nat_hook_rx(pRxPkt)) 
 			{
+				FOE_MAGIC_TAG(RTPKT_TO_OSPKT(pRxPkt)) = 0;
 				RtmpOsPktRcvHandle(pRxPkt);
 			}
 			RTMP_IRQ_UNLOCK(&pAd->page_lock, flags);

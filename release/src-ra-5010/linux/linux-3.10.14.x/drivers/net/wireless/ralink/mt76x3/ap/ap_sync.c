@@ -682,7 +682,7 @@ DBGPRINT(RT_DEBUG_TRACE, ("%s():shiang! PeerProbeReqSanity failed!\n", __FUNCTIO
 		if (pAd->CommonCfg.bCountryFlag)
 		{
 			ULONG TmpLen2=0;
-			UCHAR TmpFrame[256];
+			UCHAR TmpFrame[256] = {0};
 			UCHAR CountryIe = IE_COUNTRY;
 			UCHAR MaxTxPower=16;
 
@@ -718,7 +718,7 @@ DBGPRINT(RT_DEBUG_TRACE, ("%s():shiang! PeerProbeReqSanity failed!\n", __FUNCTIO
 			}
 #endif /* A_BAND_SUPPORT */
 
-			NdisZeroMemory(TmpFrame, sizeof(TmpFrame));
+			//NdisZeroMemory(TmpFrame, sizeof(TmpFrame));
 
 			/* prepare channel information */
 			MakeOutgoingFrame(TmpFrame+TmpLen2,     &TmpLen,

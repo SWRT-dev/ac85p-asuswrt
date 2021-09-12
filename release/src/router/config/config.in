@@ -1820,6 +1820,11 @@ config RTCONFIG_SWRT_I2CLED
 	bool "RTCONFIG_SWRT_I2CLED"
 	default n
 
+config RTCONFIG_SWRT_KVR
+	bool "mtk kvr support"
+	depends on RTCONFIG_RALINK
+	default n
+
 config RTCONFIG_ENTWARE
 	bool "install entware"
 	default n

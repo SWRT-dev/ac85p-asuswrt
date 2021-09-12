@@ -2186,7 +2186,7 @@ void compose_rrm_BcnReq_ie(RTMP_ADAPTER *pAd,
 
 	if (p_beacon_req->detail == 1) {
 		RRM_InsertRequestIE_11KV_API(pAd, (pOutBuffer+FrameLen),
-			&FrameLen, p_beacon_req->request_len, p_beacon_req->request);
+			&FrameLen, p_beacon_req->request, p_beacon_req->request_len);
 		TotalLen += (p_beacon_req->request_len + 2);
 	}
 

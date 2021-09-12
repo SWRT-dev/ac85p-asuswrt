@@ -1688,10 +1688,8 @@ int RtmpOSNetDevAttach(
 		   function will make kernel panic.
 		 */
 		if (pDevOpHook->get_stats)
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,31)
-			pNetDevOps->ndo_get_stats = pDevOpHook->get_stats;
-#else
-			pNetDev->get_stats = pDevOpHook->get_stats;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,35)
+			pNetDevOps->ndo_get_stats64 = pDevOpHook->get_stats;
 #endif
 
 		/* OS specific flags, here we used to indicate if we are virtual interface */
@@ -2364,7 +2362,7 @@ VOID RtmpOsPktNatMagicTag(IN PNDIS_PACKET pNetPkt)
 #if !defined(CONFIG_RA_NAT_NONE)
 #if defined (CONFIG_RA_HW_NAT)  || defined (CONFIG_RA_HW_NAT_MODULE)
 	struct sk_buff *pRxPkt = RTPKT_TO_OSPKT(pNetPkt);
-	FOE_MAGIC_TAG(pRxPkt) = FOE_MAGIC_WLAN;
+	FOE_MAGIC_TAG(pRxPkt) = FOE_MAGIC_EXTIF;
 #endif /* CONFIG_RA_HW_NAT || CONFIG_RA_HW_NAT_MODULE */
 #endif /* CONFIG_RA_NAT_NONE */
 }

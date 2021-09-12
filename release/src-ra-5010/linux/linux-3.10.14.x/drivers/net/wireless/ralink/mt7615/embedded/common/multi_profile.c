@@ -31,16 +31,16 @@
 #define FIRST_APCLI_5G_DEVNAME "apclix"
 #endif
 #define SECOND_AP_2G_PROFILE_PATH	"/etc/Wireless/iNIC/iNIC_ap_2G.dat"
-#define SECOND_AP_5G_PROFILE_PATH	"/etc/Wireless/iNIC/iNIC_ap.dat"
+#define SECOND_AP_5G_PROFILE_PATH	"/etc/Wireless/iNIC/iNIC_ap_5G.dat"
 #define SECOND_AP_MERGE_PROFILE_PATH ""
 #if defined(BB_SOC) && !defined(MULTI_INF_SUPPORT)
 #define SECOND_AP_5G_DEVNAME "ra0"
 #define SECOND_MBSSID_5G_DEVNAME "ra"
 #define SECOND_APCLI_5G_DEVNAME "apcli"
 #else
-#define SECOND_AP_5G_DEVNAME "rai0"
-#define SECOND_MBSSID_5G_DEVNAME "rai"
-#define SECOND_APCLI_5G_DEVNAME "apclii"
+#define SECOND_AP_5G_DEVNAME "ray0"
+#define SECOND_MBSSID_5G_DEVNAME "ray"
+#define SECOND_APCLI_5G_DEVNAME "apcliiy"
 #endif
 #define THIRD_AP_2G_PROFILE_PATH	"/etc/Wireless/WIFI3/RT2870AP_2G.dat"
 #define THIRD_AP_5G_PROFILE_PATH	"/etc/Wireless/WIFI3/RT2870AP_5G.dat"
@@ -2161,6 +2161,18 @@ INT multi_profile_check(struct _RTMP_ADAPTER *ad, CHAR *final)
 	fname = multi_profile_fname_get(ad, MTB_2G_PROFILE);
 #endif
 
+	/*
+	 * if DEFAULT_5G_PROFILE is enabled, buf1 is 5G profile, buf2 is 2G profile.
+	 * Otherwise, buf1 is 2G profile, buf2 is 5G profile
+	 */
+#ifdef DEFAULT_5G_PROFILE
+	printk("%s: DEFAULT_5G_PROFILE is enable, buf1 is 5G profile, buf2 is 2G profile\n", __func__);
+#else
+	printk("%s: DEFAULT_5G_PROFILE is disable, buf1 is 2G profile, buf2 is 5G profile\n", __func__);
+#endif
+
+	printk("%s: buf1: %s\n", __func__, fname);
+
 	if (multi_profile_read(fname, buf1) != NDIS_STATUS_SUCCESS)
 		goto end1;
 
@@ -2175,6 +2187,8 @@ INT multi_profile_check(struct _RTMP_ADAPTER *ad, CHAR *final)
 #else
 	fname = multi_profile_fname_get(ad, MTB_5G_PROFILE);
 #endif
+
+	printk("%s: buf2: %s\n", __func__, fname);
 
 	if (multi_profile_read(fname, buf2) != NDIS_STATUS_SUCCESS)
 		goto end2;

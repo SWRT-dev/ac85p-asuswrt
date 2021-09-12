@@ -146,11 +146,7 @@ INT wdev_tx_pkts(NDIS_HANDLE dev_hnd, PPNDIS_PACKET pkt_list, UINT pkt_cnt, stru
 #if !defined(CONFIG_RA_NAT_NONE)
 			if(ra_sw_nat_hook_tx!= NULL)
 			{
-				unsigned long flags;
-		
-				RTMP_INT_LOCK(&pAd->page_lock, flags);
-				ra_sw_nat_hook_tx(pPacket);
-				RTMP_INT_UNLOCK(&pAd->page_lock, flags);
+				ra_sw_nat_hook_tx(pPacket, 0);
 			}
 #endif
 #endif /* CONFIG_RAETH */

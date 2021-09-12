@@ -1357,14 +1357,12 @@ typedef struct _RT_802_11_EVENT_TABLE {
 /* MIMO Tx parameter, ShortGI, MCS, STBC, etc.  these are fields in TXWI. Don't change this definition!!! */
 typedef union _MACHTTRANSMIT_SETTING {
 	struct {
-		USHORT MCS:6;
-		USHORT ldpc:1;
-		USHORT BW:2;
+		USHORT MCS:7;	/* MCS */
+		USHORT BW:1;	/*channel bandwidth 20MHz or 40 MHz */
 		USHORT ShortGI:1;
-		USHORT STBC:1;
-		USHORT eTxBF:1;
-		USHORT iTxBF:1;
-		USHORT MODE:3;
+		USHORT STBC:2;	/*SPACE */
+		USHORT rsv:3;
+		USHORT MODE:2;	/* Use definition MODE_xxx. */
 	} field;
 	USHORT word;
 } MACHTTRANSMIT_SETTING, *PMACHTTRANSMIT_SETTING;
@@ -1381,14 +1379,6 @@ typedef struct _RT_802_11_MAC_ENTRY {
 	UINT32 ConnectedTime;
 	MACHTTRANSMIT_SETTING TxRate;
 	UINT32 LastRxRate;
-
-//sync with WEB UI's structure for ioctl usage.
-//#ifdef RTMP_RBUS_SUPPORT
-	SHORT StreamSnr[3];				/* BF SNR from RXWI. Units=0.25 dB. 22 dB offset removed */
-	SHORT SoundingRespSnr[3];			/* SNR from Sounding Response. Units=0.25 dB. 22 dB offset removed */
-/*	SHORT TxPER;	*/					/* TX PER over the last second. Percent */
-/*	SHORT reserved;*/
-//#endif /* RTMP_RBUS_SUPPORT */
 
 } RT_802_11_MAC_ENTRY, *PRT_802_11_MAC_ENTRY;
 

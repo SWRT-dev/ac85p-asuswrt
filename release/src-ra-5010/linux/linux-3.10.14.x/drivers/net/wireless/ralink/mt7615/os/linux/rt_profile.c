@@ -514,11 +514,11 @@ INT get_dev_config_idx(RTMP_ADAPTER *pAd)
 #endif /* MULTI_INF_SUPPORT */
 
 #if defined(CONFIG_RT_SECOND_CARD)
-#if defined(CONFIG_FIRST_IF_MT7603E)
+#if defined(CONFIG_RT_FIRST_IF_MT7603E)
 	/* MT7603(ra0) + MT7615(rai0) combination */
 	if (IS_MT7615(pAd))
 		idx = 1;
-#endif /* defined(CONFIG_FIRST_IF_MT7603E) */
+#endif /* defined(CONFIG_RT_FIRST_IF_MT7603E) */
 #endif /* defined(RT_SECOND_CARD) */
 
 	pAd->dev_idx = idx;
@@ -1106,10 +1106,12 @@ void announce_802_3_packet(
 		if (ra_sw_nat_hook_rx != NULL) {
 
 			RtmpOsPktProtocolAssign(pRxPkt);
-			RtmpOsPktNatMagicTag(pRxPkt);
+			FOE_MAGIC_TAG(RTPKT_TO_OSPKT(pRxPkt)) = FOE_MAGIC_EXTIF;
 
-			if (ra_sw_nat_hook_rx(pRxPkt))
-				RtmpOsPktRcvHandle(pRxPkt);
+			if (ra_sw_nat_hook_rx(pRxPkt)) {
+				FOE_MAGIC_TAG(RTPKT_TO_OSPKT(pRxPkt)) = 0;
+ 				RtmpOsPktRcvHandle(pRxPkt);
+			}
 
 			return;
 		}

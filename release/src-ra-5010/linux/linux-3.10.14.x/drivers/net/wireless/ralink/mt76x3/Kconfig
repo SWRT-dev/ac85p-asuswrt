@@ -1,63 +1,15 @@
-if FIRST_IF_MT7603E || SECOND_IF_MT7603E
+if RT_FIRST_IF_MT7603E || RT_SECOND_IF_MT7603E
+
+config WIFI_DRIVER
+	bool
+	default y
+
 config MT7603E_RLT_WIFI
 	tristate "RLT 7603 WIFI Driver"
 	select MT7603E_WIFI_BASIC_FUNC if MT7603E_RLT_WIFI
 
-config MT7603E_MT_WIFI_PATH
-        string
-        depends on MT7603E_RLT_WIFI
-        default "rlt_wifi"
-
 if MT7603E_RLT_WIFI
-menu "WiFi Generic Feature Options"
-
-if FIRST_IF_MT7603E
-choice
-        prompt "EEPROM Type of 1st Card"
-        depends on ! FIRST_IF_NONE
-
-        config MT7603E_FIRST_IF_EEPROM_PROM
-        bool "EEPROM"
-
-        config MT7603E_FIRST_IF_EEPROM_EFUSE
-        bool "EFUSE"
-
-        config MT7603E_FIRST_IF_EEPROM_FLASH
-        bool "FLASH"
-endchoice
-
-config MT7603E_RT_FIRST_CARD_EEPROM
-        string
-        depends on ! FIRST_IF_NONE
-        default "prom" if MT7603E_FIRST_IF_EEPROM_PROM
-        default "efuse" if MT7603E_FIRST_IF_EEPROM_EFUSE
-        default "flash" if MT7603E_FIRST_IF_EEPROM_FLASH
-endif
-# endif FIRST_IF_MT7603E
-
-if SECOND_IF_MT7603E
-choice
-        prompt "EEPROM Type of 2nd Card"
-        depends on ! SECOND_IF_NONE
-
-        config MT7603E_SECOND_IF_EEPROM_PROM
-        bool "EEPROM"
-
-        config MT7603E_SECOND_IF_EEPROM_EFUSE
-        bool "EFUSE"
-
-        config MT7603E_SECOND_IF_EEPROM_FLASH
-        bool "FLASH"
-endchoice
-
-config MT7603E_RT_SECOND_CARD_EEPROM
-        string
-        depends on ! SECOND_IF_NONE
-        default "prom" if MT7603E_SECOND_IF_EEPROM_PROM
-        default "efuse" if MT7603E_SECOND_IF_EEPROM_EFUSE
-        default "flash" if MT7603E_SECOND_IF_EEPROM_FLASH
-endif
-#endif SECOND_IF_MT7603E
+menu "MT7603E Generic Feature Options"
 
 config MT7603E_MULTI_INF_SUPPORT
         bool
@@ -323,36 +275,6 @@ config MT7603E_UAPSD
 	depends on WIFI_DRIVER
 	default y
 
-#config MT7603E_EPA_ELNA
-#	bool "ePAeLNA"
-#	depends on WIFI_DRIVER
-#	default n
-
-choice
-        prompt "PA,LNA Type"
-        depends on MT7603E_RLT_WIFI
-
-        config MT7603E_IPA_ILNA
-        bool "iPAiLNA"
-
-        config MT7603E_IPA_ELNA
-        bool "iPAeLNA"
-
-        config MT7603E_EPA_ILNA
-        bool "ePAiLNA"
-
-        config MT7603E_EPA_ELNA
-        bool "ePAeLNA"
-endchoice
-
-config MT7603E_PA_LNA
-        string
-        depends on MT7603E_RLT_WIFI
-        default "iPAiLNA" if MT7603E_IPA_ILNA
-        default "iPAeLNA" if MT7603E_IPA_ELNA
-        default "ePAiLNA" if MT7603E_EPA_ILNA
-        default "ePAeLNA" if MT7603E_EPA_ELNA
-
 #
 # Section for chip architectures
 #
@@ -413,84 +335,7 @@ menu "WiFi Operation Modes"
         source "drivers/net/wireless/ralink/mt76x3_ap/Kconfig"
     endif
 
-    #if MT7603E_WIFI_MODE_STA || MT7603E_WIFI_MODE_BOTH
-     #   source "drivers/net/wireless/rlt_wifi_sta/Kconfig"
-    #endif
-endmenu	
-
-#"RT2860 series"
-config MT7603E_RALINK_RT28XX
-        bool
-        default n
-        select MT7603E_RTMP_PCI_SUPPORT
-
-#"RT3092"
-config MT7603E_RALINK_RT3092
-        bool
-        default n
-        select MT7603E_RTMP_PCI_SUPPORT
-
-#"RT3572"
-config MT7603E_RALINK_RT3572
-        bool
-        default n
-        select MT7603E_RTMP_USB_SUPPORT
-
-#"RT5392"
-config MT7603E_RALINK_RT5392
-        bool
-        default n
-        select MT7603E_RTMP_PCI_SUPPORT
-
-#"RT5572"
-config MT7603E_RALINK_RT5572
-        bool
-        default n
-        select MT7603E_RTMP_USB_SUPPORT
-
-#"RT5592"
-config MT7603E_RALINK_RT5592
-        bool
-        default n
-        select MT7603E_RTMP_PCI_SUPPORT
-
-#"MT7620/RT6352"
-config MT7603E_RALINK_RT6352
-        bool
-        default n
-        select MT7603E_RTMP_RBUS_SUPPORT
-#        select MT7603E_RTMP_TEMPERATURE_CALIBRATION
-#        select MT7603E_RTMP_INTERNAL_TX_ALC
-
-#"MT7610E"
-config MT7603E_RALINK_MT7610E
-        bool
-        default n
-        select MT7603E_RTMP_PCI_SUPPORT
-
-#"MT7610U"
-config MT7603E_RALINK_MT7610U
-        bool
-        default n
-        select MT7603E_RTMP_USB_SUPPORT
-
-#"RT8592"
-config MT7603E_RALINK_RT8592
-        bool
-        default n
-        select MT7603E_RTMP_PCI_SUPPORT
-
-#"MT7612E"
-config MT7603E_RALINK_MT7612E
-        bool
-        default n
-        select MT7603E_RTMP_PCI_SUPPORT
-
-#"MT7612U"
-config MT7603E_RALINK_MT7612U
-        bool
-        default n
-        select MT7603E_RTMP_USB_SUPPORT
+endmenu
 
 #"MT7603E"
 config MT7603E_RALINK_MT7603E
@@ -498,25 +343,7 @@ config MT7603E_RALINK_MT7603E
         default y
         select MT7603E_RTMP_PCI_SUPPORT
 
-#"MT7603U"
-config MT7603E_RALINK_MT7603U
-        bool
-        default n
-        select MT7603E_RTMP_USB_SUPPORT
-
 endif
-
-#if MT7603E_RLT_MAC
-#	config MT7603E_RLT_MAC
-#		bool
-#		default y
-#endif
-
-#if MT7603E_RTMP_MAC
-#	config MT7603E_RTMP_MAC
-#		bool
-#		default y
-#endif
 
 if MT7603E_RALINK_MT7603E
 	config MT7603E_MT_MAC
@@ -530,4 +357,4 @@ if MT7603E_RALINK_MT7603U
 		default y
 endif
 endif
-#endif FIRST_IF_MT7603E || SECOND_IF_MT7603E
+#endif RT_FIRST_IF_MT7603E || RT_SECOND_IF_MT7603E

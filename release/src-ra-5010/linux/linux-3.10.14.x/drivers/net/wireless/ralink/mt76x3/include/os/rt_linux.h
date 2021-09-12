@@ -153,19 +153,19 @@ typedef struct usb_ctrlrequest devctrlrequest;
 #define AP_RTMP_FIRMWARE_FILE_NAME "/etc_ro/Wireless/iNIC/RT2860AP.bin"
 #else
 
-#if defined(CONFIG_FIRST_IF_MT7603E) || defined(CONFIG_SECOND_IF_MT7603E)
+#if defined(CONFIG_RT_FIRST_IF_MT7603E) || defined(CONFIG_RT_SECOND_IF_MT7603E)
 //for SDK's PATH
-#define AP_PROFILE_PATH			"/etc/Wireless/RT2860/RT2860.dat"
-#else /* CONFIG_FIRST_IF_MT7603E */
+#define AP_PROFILE_PATH			"/etc/Wireless/RT2860/RT2860AP.dat"
+#else
 //for PC's PATH
 #define AP_PROFILE_PATH			"/etc/Wireless/RT2860AP/RT2860AP.dat"
-#endif /* !CONFIG_FIRST_IF_MT7603E */
+#endif
 #define AP_RTMP_FIRMWARE_FILE_NAME "/etc/Wireless/RT2860AP/RT2860AP.bin"
 
 #endif
 
 
-#define AP_DRIVER_VERSION			"4.0.1.0rev2.P3"
+#define AP_DRIVER_VERSION			"4.1.2.0_20190222"
 #ifdef MULTIPLE_CARD_SUPPORT
 #define CARD_INFO_PATH			"/etc/Wireless/RT2860AP/RT2860APCard.dat"
 #endif /* MULTIPLE_CARD_SUPPORT */
@@ -1289,7 +1289,7 @@ do { \
 
 #ifdef CONFIG_RAETH
 #if !defined(CONFIG_RA_NAT_NONE)
-extern int (*ra_sw_nat_hook_tx)(VOID *skb);
+extern int (*ra_sw_nat_hook_tx)(VOID *skb, int gmac_no);
 extern int (*ra_sw_nat_hook_rx)(VOID *skb);
 #ifdef CONFIG_RA_HW_NAT_WIFI_NEW_ARCH
 extern void (*ppe_dev_register_hook)(VOID  *dev);

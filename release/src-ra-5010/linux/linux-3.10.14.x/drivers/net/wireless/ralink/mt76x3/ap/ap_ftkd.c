@@ -84,7 +84,7 @@
 #include "ft_cmm.h"
 
 #define TYPE_FUNC
-#define FT_KDP_DEBUG
+//#define FT_KDP_DEBUG
 #define FT_KDP_FUNC_TEST
 /*#define FT_KDP_EMPTY */ /* empty codes to debug */
 

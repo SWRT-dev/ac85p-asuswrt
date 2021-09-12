@@ -174,7 +174,7 @@ void wifi_tx_tuple_add(void *entry, unsigned char *tx_info)
 
 	if (whnat && ra_sw_nat_hook_tx && whnat->cfg.hw_tx_en) {
 		struct sk_buff *skb = (struct sk_buff *)info->pkt;
-#if 0
+
 		if ((FOE_AI_HEAD(skb) == HIT_UNBIND_RATE_REACH) || (FOE_AI_TAIL(skb) == HIT_UNBIND_RATE_REACH)) {
 			if (IS_SPACE_AVAILABLE_HEAD(skb)) {
 				/*WDMA idx*/
@@ -197,7 +197,7 @@ void wifi_tx_tuple_add(void *entry, unsigned char *tx_info)
 				FOE_BSS_ID_TAIL(skb) = info->bssidx;
 			}
 		}
-#endif
+
 		/*use port for specify which hw_nat architecture*/
 		if (ra_sw_nat_hook_tx) {
 			if (ra_sw_nat_hook_tx(skb, WHNAT_WDMA_PORT) != 1) {
