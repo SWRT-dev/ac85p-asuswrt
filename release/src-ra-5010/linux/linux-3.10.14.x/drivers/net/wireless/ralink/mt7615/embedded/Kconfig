@@ -2,6 +2,11 @@ config WIFI_DRIVER
 	bool
 	default y
 
+config MT_WIFI_PATH
+	string
+	depends on MT_WIFI
+	default "mt_wifi"
+
 config CHIP_MT7615E
 	bool
 	default y
@@ -11,9 +16,54 @@ config MT_WIFI
 
 if MT_WIFI
 menu "WiFi Generic Feature Options"
+choice
+		prompt "EEPROM Type of 1st Card"
+		depends on ! FIRST_IF_NONE
+
+		config RT_FIRST_IF_EEPROM_FLASH
+		bool "FLASH"
+
+		config RT_FIRST_IF_EEPROM_EFUSE
+		bool "EFUSE"
+endchoice
+
+config RT_FIRST_CARD_EEPROM
+		string
+		depends on ! FIRST_IF_NONE
+	default "flash" if RT_FIRST_IF_EEPROM_FLASH
+
+choice
+		prompt "EEPROM Type of 2nd Card"
+		depends on ! SECOND_IF_NONE
+
+		config RT_SECOND_IF_EEPROM_FLASH
+		bool "FLASH"
+
+		config RT_SECOND_IF_EEPROM_PROM
+		bool "EEPROM"
+
+		config RT_SECOND_IF_EEPROM_EFUSE
+		bool "EFUSE"
+
+endchoice
+
+config RT_SECOND_CARD_EEPROM
+	string
+	depends on ! SECOND_IF_NONE
+	default "prom" if RT_SECOND_IF_EEPROM_PROM
+	default "efuse" if RT_SECOND_IF_EEPROM_EFUSE
+	default "flash" if RT_SECOND_IF_EEPROM_FLASH
+
+config RT_THIRD_CARD_EEPROM
+	string
+	depends on ! RT_THIRD_IF_NONE
+	default "prom" if RT_THIRD_IF_EEPROM_PROM
+	default "efuse" if RT_THIRD_IF_EEPROM_EFUSE
+	default "flash" if RT_THIRD_IF_EEPROM_FLASH
+
 config MULTI_INF_SUPPORT
 		bool
-		default y if !RT_FIRST_IF_NONE && !RT_SECOND_IF_NONE
+		default y if !FIRST_IF_NONE && !SECOND_IF_NONE
 		
 config WIFI_BASIC_FUNC
 	bool "Basic Functions"
@@ -328,6 +378,34 @@ config FDB_SUPPORT
        depends on WIFI_DRIVER
        default n
 
+choice
+        prompt "PA LNA Type of 1st Card"
+		depends on ! FIRST_IF_NONE
+
+		config FIRST_IF_EPAELNA
+		bool "ePAeLNA"
+		config FIRST_IF_IPAILNA
+		bool "iPAiLNA"		
+		config FIRST_IF_IPAELNA
+		bool "iPAeLNA"
+#		config FIRST_IF_EPAILNA
+#		bool "ePAiLNA"
+endchoice
+choice
+        prompt "PA LNA Type of 2nd Card"
+		depends on ! SECOND_IF_NONE
+
+		config SECOND_IF_EPAELNA
+		bool "ePAeLNA"
+		config SECOND_IF_IPAILNA
+		bool "iPAiLNA"		
+		config SECOND_IF_IPAELNA
+		bool "iPAeLNA"
+#		config SECOND_IF_EPAILNA
+#		bool "ePAiLNA"
+endchoice
+
+#### PA_LNA_Type choice END 
 #
 # Section for chip architectures
 #
@@ -370,6 +448,23 @@ config RTMP_RBUS_SUPPORT
 endmenu
 
 menu "WiFi Operation Modes"
+	choice
+		prompt "Main Mode"
+		default WIFI_MODE_AP
+
+		config WIFI_MODE_AP
+				tristate "AP"
+				select MT_AP_SUPPORT
+
+		config WIFI_MODE_STA
+				tristate "STA"
+				select MT_STA_SUPPORT
+
+		config WIFI_MODE_BOTH
+				tristate "APSTA"
+				select MT_AP_SUPPORT
+				select MT_STA_SUPPORT
+    endchoice
     if WIFI_MODE_AP || WIFI_MODE_BOTH
 		source "drivers/net/wireless/ralink/mt7615_ap/Kconfig"
     endif

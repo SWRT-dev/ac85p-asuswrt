@@ -2442,7 +2442,7 @@ VOID RtmpOsPktNatMagicTag(IN PNDIS_PACKET pNetPkt)
 {
 	struct sk_buff *pRxPkt = RTPKT_TO_OSPKT(pNetPkt);
 
-	FOE_MAGIC_TAG(pRxPkt) = FOE_MAGIC_EXTIF;
+	FOE_MAGIC_TAG(pRxPkt) = FOE_MAGIC_WLAN;
 }
 #endif /*CONFIG_FAST_NAT_SUPPORT*/
 

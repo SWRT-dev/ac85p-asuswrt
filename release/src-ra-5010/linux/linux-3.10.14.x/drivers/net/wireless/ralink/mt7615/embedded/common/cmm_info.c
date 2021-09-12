@@ -4622,9 +4622,9 @@ VOID RTMPIoctlGetSiteSurvey(
 	UINT32		bss_start_idx;
 	BSS_ENTRY *pBss;
 	UINT32 TotalLen, BufLen = IW_SCAN_MAX_DATA;
-#if 0
 	BSS_TABLE *pScanTab;
 	pScanTab = &pAdapter->ScanTab;
+#if 0
 #ifdef WSC_INCLUDED
 max_len += WPS_LINE_LEN;
 #endif

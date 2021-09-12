@@ -2,7 +2,7 @@
 
 wan_if=$(nvram get wan0_ifname)
 start() {   
-	if grep -q 'mt76x3_ap' /proc/modules ; then
+	if grep -q 'rlt_wifi_7603e' /proc/modules ; then
 	    ralinkiappd -wi rai0 &
 		echo 10000 > /proc/sys/net/ipv4/neigh/rai0/base_reachable_time_ms
 		echo 1 > /proc/sys/net/ipv4/neigh/rai0/delay_first_probe_time

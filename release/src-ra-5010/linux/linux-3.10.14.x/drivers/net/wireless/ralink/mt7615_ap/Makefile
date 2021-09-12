@@ -1,105 +1,15 @@
-ifeq ($(CONFIG_SUPPORT_OPENWRT),y)
-WIFI_DRV_PATH := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))/..
-else
-ifeq ($(CONFIG_DEFAULTS_KERNEL_4_4),y)
-WIFI_DRV_PATH = drivers/net/wireless/mediatek
-else
-WIFI_DRV_PATH = drivers/net/wireless/ralink
-endif
-endif
+WIFI_DRV_PATH = drivers/net/wireless/ralink/mt7615
 
-EXTRA_CFLAGS = -I$(WIFI_DRV_PATH)/mt7615/include \
-				-I$(WIFI_DRV_PATH)/mt7615/embedded/include \
-				-I$(WIFI_DRV_PATH)/mt7615/ate/include \
-				-I$(WIFI_DRV_PATH)/mt7615/include/mcu
+EXTRA_CFLAGS = -I$(WIFI_DRV_PATH)/include \
+				-I$(WIFI_DRV_PATH)/embedded/include \
+				-I$(WIFI_DRV_PATH)/ate/include \
+				-I$(WIFI_DRV_PATH)/include/mcu
 
 DRV_NAME = mt_wifi_7615E
 SRC_DIR = ../mt7615
 SRC_EMBEDDED_DIR = ../mt7615/embedded
-ifeq ($(CONFIG_SUPPORT_OPENWRT),y)
-EXTRA_CFLAGS += -DCONFIG_SUPPORT_OPENWRT
-ifneq ($(CONFIG_RT_FIRST_CARD),)
-EXTRA_CFLAGS += -DCONFIG_RT_FIRST_CARD=$(CONFIG_RT_FIRST_CARD)
-EXTRA_CFLAGS += -DCONFIG_RT_FIRST_IF_RF_OFFSET=$(CONFIG_RT_FIRST_IF_RF_OFFSET)
-endif
-ifneq ($(CONFIG_RT_SECOND_CARD),)
-EXTRA_CFLAGS += -DCONFIG_RT_SECOND_CARD=$(CONFIG_RT_SECOND_CARD)
-EXTRA_CFLAGS += -DCONFIG_RT_SECOND_IF_RF_OFFSET=$(CONFIG_RT_SECOND_IF_RF_OFFSET)
-endif
-ifneq ($(CONFIG_RT_THIRD_CARD),)
-EXTRA_CFLAGS += -DCONFIG_RT_THIRD_CARD=$(CONFIG_RT_THIRD_CARD)
-EXTRA_CFLAGS += -DCONFIG_RT_THIRD_IF_RF_OFFSET=$(CONFIG_RT_THIRD_IF_RF_OFFSET)
-endif
-ifeq ($(CONFIG_RT_FIRST_IF_EEPROM_PROM),y)
-EXTRA_CFLAGS += -DCONFIG_RT_FIRST_CARD_EEPROM="\"prom\""
-else
-ifeq ($(CONFIG_RT_FIRST_IF_EEPROM_EFUSE),y)
-EXTRA_CFLAGS += -DCONFIG_RT_FIRST_CARD_EEPROM="\"efuse\""
-else
-ifeq ($(CONFIG_RT_FIRST_IF_EEPROM_FLASH),y)
-EXTRA_CFLAGS += -DCONFIG_RT_FIRST_CARD_EEPROM="\"flash\""
-endif
-endif
-endif
-ifeq ($(CONFIG_RT_SECOND_IF_EEPROM_PROM),y)
-EXTRA_CFLAGS += -DCONFIG_RT_SECOND_CARD_EEPROM="\"prom\""
-else
-ifeq ($(CONFIG_RT_SECOND_IF_EEPROM_EFUSE),y)
-EXTRA_CFLAGS += -DCONFIG_RT_SECOND_CARD_EEPROM="\"efuse\""
-else
-ifeq ($(CONFIG_RT_SECOND_IF_EEPROM_FLASH),y)
-EXTRA_CFLAGS += -DCONFIG_RT_SECOND_CARD_EEPROM="\"flash\""
-endif
-endif
-endif
-ifeq ($(CONFIG_RT_THIRD_IF_EEPROM_PROM),y)
-EXTRA_CFLAGS += -DCONFIG_RT_THIRD_CARD_EEPROM="\"prom\""
-else
-ifeq ($(CONFIG_RT_THIRD_IF_EEPROM_EFUSE),y)
-EXTRA_CFLAGS += -DCONFIG_RT_THIRD_CARD_EEPROM="\"efuse\""
-else
-ifeq ($(CONFIG_RT_THIRD_IF_EEPROM_FLASH),y)
-EXTRA_CFLAGS += -DCONFIG_RT_THIRD_CARD_EEPROM="\"flash\""
-endif
-endif
-endif
-endif
 
-ifeq ($(CONFIG_FIRST_IF_EPAELNA),y)
-EXTRA_CFLAGS += -DCONFIG_FIRST_IF_EPAELNA
-else
-ifeq ($(CONFIG_FIRST_IF_IPAILNA),y)
-EXTRA_CFLAGS += -DCONFIG_FIRST_IF_IPAILNA
-else
-ifeq ($(CONFIG_FIRST_IF_IPAELNA),y)
-EXTRA_CFLAGS += -DCONFIG_FIRST_IF_IPAELNA
-endif
-endif
-endif
-ifeq ($(CONFIG_SECOND_IF_EPAELNA),y)
-EXTRA_CFLAGS += -DCONFIG_SECOND_IF_EPAELNA
-else
-ifeq ($(CONFIG_SECOND_IF_IPAILNA),y)
-EXTRA_CFLAGS += -DCONFIG_SECOND_IF_IPAILNA
-else
-ifeq ($(CONFIG_SECOND_IF_IPAELNA),y)
-EXTRA_CFLAGS += -DCONFIG_SECOND_IF_IPAELNA
-endif
-endif
-endif
-ifeq ($(CONFIG_THIRD_IF_EPAELNA),y)
-EXTRA_CFLAGS += -DCONFIG_THIRD_IF_EPAELNA
-else
-ifeq ($(CONFIG_THIRD_IF_IPAILNA),y)
-EXTRA_CFLAGS += -DCONFIG_THIRD_IF_IPAILNA
-else
-ifeq ($(CONFIG_THIRD_IF_IPAELNA),y)
-EXTRA_CFLAGS += -DCONFIG_THIRD_IF_IPAELNA
-endif
-endif
-endif
-
-#support built-in/ko for Openwrt/Linux SDK
+# support built-in/ko for Openwrt/Linux SDK
 obj-$(CONFIG_MT_AP_SUPPORT) += $(DRV_NAME).o
 
 ifeq ($(CONFIG_MTK_EMI_7622),y)
@@ -192,10 +102,9 @@ cmm_objs := $(SRC_EMBEDDED_DIR)/common/action.o\
 		$(SRC_DIR)/protocol/protection.o\
 		$(SRC_EMBEDDED_DIR)/common/misc_app.o
 
-ifeq ($(CONFIG_MULTI_PROFILE_SUPPORT),y)
 EXTRA_CFLAGS += -DMULTI_PROFILE
 cmm_objs += $(SRC_EMBEDDED_DIR)/common/multi_profile.o
-endif
+
 ifeq ($(CONFIG_DEFAULT_5G_PROFILE),y)
 EXTRA_CFLAGS += -DDEFAULT_5G_PROFILE
 endif
@@ -418,7 +327,7 @@ ifeq ($(CONFIG_WNM_SUPPORT),y)
         spec_objs += $(SRC_EMBEDDED_DIR)/common/wnm.o
 endif
 
-ifeq ($(CONFIG_INTERWORKING),y)
+ifeq ($(CONFIG_MT_INTERWORKING),y)
         EXTRA_CFLAGS += -DCONFIG_DOT11U_INTERWORKING
         spec_objs += $(SRC_EMBEDDED_DIR)/common/gas.o
 endif
@@ -536,7 +445,7 @@ ifeq ($(CONFIG_CFG80211_SUPPORT),y)
 endif
 
 ifeq ($(CONFIG_MAP_SUPPORT),y)
-	EXTRA_CFLAGS += -DA4_CONN -DROUTING_TAB_SUPPORT -DWAPP_SUPPORT -DCONFIG_MAP_SUPPORT 
+	EXTRA_CFLAGS += -DA4_CONN -DROUTING_TAB_SUPPORT -DWAPP_SUPPORT -DCONFIG_MAP_SUPPORT
 	spec_objs += $(SRC_EMBEDDED_DIR)/common/map.o
 	spec_objs += $(SRC_EMBEDDED_DIR)/common/a4_conn.o
 	spec_objs += $(SRC_EMBEDDED_DIR)/common/routing_tab.o
@@ -1099,7 +1008,7 @@ endif
 endif
 
 #EXTRA_CFLAGS += -Wframe-larger-than=4096
-WFLAGS += -Werror
+#WFLAGS += -Werror
 
 ifeq ($(CONFIG_HDR_TRANS_TX_SUPPORT),y)
 	EXTRA_CFLAGS += -DHDR_TRANS_TX_SUPPORT -DCUT_THROUGH_FULL_OFFLOAD
@@ -1211,7 +1120,7 @@ ifeq ($(CONFIG_PLATFORM_DRV_SUPPROT),y)
 EXTRA_CFLAGS += -DPLATFORM_DRIVER_SUPPORT
 endif
 
-EXTRA_CFLAGS += -Werror
+#EXTRA_CFLAGS += -Werror
 ifeq ($(CONFIG_HDR_TRANS_TX_SUPPORT),y)
         EXTRA_CFLAGS += -DHDR_TRANS_TX_SUPPORT -DCUT_THROUGH_FULL_OFFLOAD
 endif
@@ -1338,7 +1247,7 @@ endif
 #  CFLAGS
 ##################
 EXTRA_CFLAGS += -DAGGREGATION_SUPPORT -DPIGGYBACK_SUPPORT -DWMM_SUPPORT  -DLINUX \
-              -Wstrict-prototypes -Wno-trigraphs -Wall -Wno-unused-but-set-variable
+              -Wstrict-prototypes -Wno-trigraphs -Wall -Wno-unused-variable
 
 EXTRA_CFLAGS += -DOLDSEC
 
@@ -1414,9 +1323,7 @@ EXTRA_CFLAGS += -DCONFIG_WIFI_PKT_FWD
 EXTRA_CFLAGS += -DMTFWD
 #endif
 
-#ifeq ($(CONFIG_ROAMING_ENHANCE_SUPPORT),y)
 EXTRA_CFLAGS += -DROAMING_ENHANCE_SUPPORT
-#endif
 
 EXTRA_CFLAGS += -DIP_ASSEMBLY
 EXTRA_CFLAGS += -DOUI_CHECK_SUPPORT
@@ -1432,6 +1339,8 @@ EXTRA_CFLAGS += -DMT_WIFI_MODULE
 endif
 endif
 
+EXTRA_CFLAGS += -DVENDOR_FEATURE6_SUPPORT
+
 MODULE_FLAGS=$(EXTRA_CFLAGS)
 export MODULE_FLAGS
-obj-m+=$(SRC_EMBEDDED_DIR)/plug_in/
+#obj-m+=$(SRC_EMBEDDED_DIR)/plug_in/

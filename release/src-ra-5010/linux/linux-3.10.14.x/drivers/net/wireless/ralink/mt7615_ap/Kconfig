@@ -9,7 +9,6 @@ config MT_AP_SUPPORT
 	select WIRELESS_EXT
 	select WEXT_SPY
 	select WEXT_PRIV
-	default y
 
 config WDS_SUPPORT
 	bool "WDS"
@@ -81,7 +80,7 @@ config DOT11K_RRM_SUPPORT
 	depends on MT_AP_SUPPORT
 	default n
 
-config INTERWORKING
+config MT_INTERWORKING
 	bool "802.11u Interworking/Gas Support"
         depends on MT_AP_SUPPORT
         default n
@@ -194,10 +193,10 @@ config CON_WPS_SUPPORT
 #	depends on MULTI_INF_SUPPORT
 	default n
 
-config LLTD_SUPPORT
-	bool "LLTD (Link Layer Topology Discovery Protocol)"
-	depends on MT_AP_SUPPORT
-	default y
+#config LLTD_SUPPORT
+#	bool "LLTD (Link Layer Topology Discovery Protocol)"
+#	depends on MT_AP_SUPPORT
+#	default y
 
 #config COC_SUPPORT
 #	bool "CoC Support"

@@ -1524,7 +1524,7 @@ int gen_ralink_config(int band, int is_iNIC)
 						if(!strncmp(nvram_safe_get("territory_code"),&t_code_noselect_5G[i][0],2)){
 							if(atoi(nvram_safe_get("acs_dfs")) == 0) {							
 								memset(tmpstr, 0x00, sizeof(tmpstr));
-								sprintf(tmpstr,"%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d",52,56,60,64,100,104,108,112,116,120,124,128,132,136,140);	
+								sprintf(tmpstr,"%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d",52,56,60,64,100,104,108,112,116,120,124,128,132,136,140);	
 								fprintf(fp,"AutoChannelSkipList=%s\n",tmpstr);	
 							}
 							nvram_set("skip_channel_5g", "band23");								
@@ -2702,7 +2702,7 @@ int gen_ralink_config(int band, int is_iNIC)
 			if (band)
 				fprintf(fp, "MUTxRxEnable=%d\n", (mumimo ? 1 : 0));
 #if defined (RTCONFIG_WLMODULE_MT7615E_AP)
-			fprintf(fp, "MuMimoDlEnable=%d\n", , (mumimo ? 1 : 0));
+			fprintf(fp, "MuMimoDlEnable=%d\n", (mumimo ? 1 : 0));
 			fprintf(fp, "MuMimoUlEnable=%d\n", 0);
 #endif
 #endif
