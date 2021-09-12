@@ -3967,7 +3967,7 @@ getSiteSurvey(int band,char* ofile)
 		return 0;
 	}
 	memset(header, 0, sizeof(header));
-	sprintf(header, "%-4s%-33s%-20s%-9s%-16s%-9s%-7s%-7s%-3s%-4s%-5s\n", "Ch", "SSID", "BSSID", "Enc", "Auth", "Signal(%)", "W-Mode", "ExtCH", "NT", "WPS", "DPID");
+	sprintf(header, "%-4s%-33s%-20s%-23s%-9s%-12s%-7s%-3s%-4s%-5s\n", "Ch", "SSID", "BSSID", "Security", "Signal(%)", "W-Mode", "ExtCH", "NT", "WPS", "DPID");
 	dbg("\n%s", header);
 
 	if (wrq.u.data.length > 0 && strlen(wrq.u.data.pointer)>0)
@@ -3982,10 +3982,9 @@ getSiteSurvey(int band,char* ofile)
 			ssap->SiteSurvey[i].channel[3] = '\0';
 			ssap->SiteSurvey[i].ssid[32] = '\0';
 			ssap->SiteSurvey[i].bssid[19] = '\0';
-			ssap->SiteSurvey[i].encryption[8] = '\0';
-			ssap->SiteSurvey[i].authmode[15] = '\0';
+			ssap->SiteSurvey[i].security[22] = '\0';
 			ssap->SiteSurvey[i].signal[8] = '\0';
-			ssap->SiteSurvey[i].wmode[6] = '\0';
+			ssap->SiteSurvey[i].wmode[11] = '\0';
 			ssap->SiteSurvey[i].extch[6] = '\0';
 			ssap->SiteSurvey[i].nt[2] = '\0';
 			ssap->SiteSurvey[i].wps[3] = '\0';
@@ -3996,12 +3995,11 @@ getSiteSurvey(int band,char* ofile)
 
 		for (i=0;i<apCount;i++)
 		{
-			dbg("%-4s%-33s%-20s%-9s%-16s%-9s%-7s%-7s%-3s%-4s%-5s\n",
+			dbg("%-4s%-33s%-20s%-23s%-9s%-12s%-7s%-3s%-4s%-5s\n",
 			ssap->SiteSurvey[i].channel,
 			(char*)ssap->SiteSurvey[i].ssid,
 			ssap->SiteSurvey[i].bssid,
-			ssap->SiteSurvey[i].encryption,
-			ssap->SiteSurvey[i].authmode,
+			ssap->SiteSurvey[i].security,
 			ssap->SiteSurvey[i].signal,
 			ssap->SiteSurvey[i].wmode,
 			ssap->SiteSurvey[i].extch,
@@ -4057,16 +4055,16 @@ getSiteSurvey(int band,char* ofile)
 
 					fprintf(fp, "\"%d\",", atoi(ssap->SiteSurvey[i].channel));
 
-					if(strstr(ssap->SiteSurvey[i].authmode,"WPA-Enterprise"))
+					if(strstr(ssap->SiteSurvey[i].security,"WPA-Enterprise"))
 						fprintf(fp, "\"%s\",","WPA-Enterprise");
-					else if(strstr(ssap->SiteSurvey[i].authmode,"WPA2-Enterprise"))
+					else if(strstr(ssap->SiteSurvey[i].security,"WPA2-Enterprise"))
 						fprintf(fp, "\"%s\",","WPA2-Enterprise");
-					else if(strstr(ssap->SiteSurvey[i].authmode,"WPA-Personal"))
+					else if(strstr(ssap->SiteSurvey[i].security,"WPA-Personal"))
 						fprintf(fp, "\"%s\",","WPA-Personal");
-					else if(strstr(ssap->SiteSurvey[i].authmode,"WPA2-Personal"))
+					else if(strstr(ssap->SiteSurvey[i].security,"WPA2-Personal"))
 						fprintf(fp, "\"%s\",","WPA2-Personal");
-					else if(strstr(ssap->SiteSurvey[i].authmode,"Open System")) {
-						if(strstr(ssap->SiteSurvey[i].encryption, "WEP"))
+					else if(strstr(ssap->SiteSurvey[i].security,"Open System")) {
+						if(strstr(ssap->SiteSurvey[i].security, "WEP"))
 							fprintf(fp, "\"%s\",","Unknown");
 						else
 							fprintf(fp, "\"%s\",","Open System");
@@ -4074,13 +4072,13 @@ getSiteSurvey(int band,char* ofile)
 					else
 						fprintf(fp, "\"%s\",","Unknown");
 
-					if(strstr(ssap->SiteSurvey[i].encryption, "NONE"))
+					if(strstr(ssap->SiteSurvey[i].security, "NONE"))
 						fprintf(fp, "\"%s\",", "NONE");
-					else if(strstr(ssap->SiteSurvey[i].encryption, "WEP"))
+					else if(strstr(ssap->SiteSurvey[i].security, "WEP"))
 						fprintf(fp, "\"%s\",", "WEP");
-					else if(strstr(ssap->SiteSurvey[i].encryption, "TKIP"))
+					else if(strstr(ssap->SiteSurvey[i].security, "TKIP"))
 						fprintf(fp, "\"%s\",", "TKIP");
-					else if(strstr(ssap->SiteSurvey[i].encryption, "AES"))
+					else if(strstr(ssap->SiteSurvey[i].security, "AES"))
 						fprintf(fp, "\"%s\",", "AES");
 					else
 						fprintf(fp, "\"%s\",", "UNKNOW");
@@ -4130,17 +4128,17 @@ getSiteSurvey(int band,char* ofile)
 #endif
 					fprintf(fp, "\"%d\",", atoi(ssap->SiteSurvey[i].signal));
 					fprintf(fp, "\"%s\",", ssap->SiteSurvey[i].bssid);
-					if(strcmp(ssap->SiteSurvey[i].wmode,"11b    ")==0)
+					if(strncmp(ssap->SiteSurvey[i].wmode, "11b    ", 7)==0)
 						fprintf(fp, "\"%s\",", "b");
-					else if(strcmp(ssap->SiteSurvey[i].wmode,"11a    ")==0)
+					else if(strncmp(ssap->SiteSurvey[i].wmode, "11a    ", 7)==0)
 						fprintf(fp, "\"%s\",", "a");
-					else if(strcmp(ssap->SiteSurvey[i].wmode,"11a/n  ")==0)
+					else if(strncmp(ssap->SiteSurvey[i].wmode, "11a/n  ", 7)==0)
 						fprintf(fp, "\"%s\",", "an");
-					else if(strcmp(ssap->SiteSurvey[i].wmode,"11b/g  ")==0)
+					else if(strncmp(ssap->SiteSurvey[i].wmode, "11b/g  ", 7)==0)
 						fprintf(fp, "\"%s\",", "bg");
-					else if(strcmp(ssap->SiteSurvey[i].wmode,"11b/g/n")==0)
+					else if(strncmp(ssap->SiteSurvey[i].wmode, "11b/g/n", 7)==0)
 						fprintf(fp, "\"%s\",", "bgn");
-					else if(strcmp(ssap->SiteSurvey[i].wmode,"11ac   ")==0)
+					else if(strncmp(ssap->SiteSurvey[i].wmode, "11ac   ", 7)==0)
 						fprintf(fp, "\"%s\",", "ac");
 					else
 						fprintf(fp, "\"%s\",", "");
@@ -4318,7 +4316,7 @@ int site_survey_for_channel(int n, const char *wif, int *HT_EXT)
 	}
 
 	memset(header, 0, sizeof(header));
-	sprintf(header, "%-4s%-33s%-20s%-9s%-16s%-9s%-7s%-7s%-3s%-4s%-5s\n", "Ch", "SSID", "BSSID", "Enc", "Auth", "Signal(%)", "W-Mode", "ExtCH", "NT", "WPS", "DPID");
+	sprintf(header, "%-4s%-33s%-20s%-23s%-9s%-12s%-7s%-3s%-4s%-5s\n", "Ch", "SSID", "BSSID", "Security", "Signal(%)", "W-Mode", "ExtCH", "NT", "WPS", "DPID");
 	//dbg("\n%s", header);
 	if (wrq.u.data.length > 0) {
 		char commch[4];
@@ -4333,10 +4331,9 @@ int site_survey_for_channel(int n, const char *wif, int *HT_EXT)
 			ssap->SiteSurvey[i].channel[3] = '\0';
 			ssap->SiteSurvey[i].ssid[32] = '\0';
 			ssap->SiteSurvey[i].bssid[19] = '\0';
-			ssap->SiteSurvey[i].encryption[8] = '\0';
-			ssap->SiteSurvey[i].authmode[15] = '\0';
+			ssap->SiteSurvey[i].security[22] = '\0';
 			ssap->SiteSurvey[i].signal[8] = '\0';
-			ssap->SiteSurvey[i].wmode[6] = '\0';
+			ssap->SiteSurvey[i].wmode[11] = '\0';
 			ssap->SiteSurvey[i].extch[6] = '\0';
 			ssap->SiteSurvey[i].nt[2] = '\0';
 			ssap->SiteSurvey[i].wps[3] = '\0';

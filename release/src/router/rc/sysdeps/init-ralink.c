@@ -1274,6 +1274,9 @@ void init_syspara(void)
 		nvram_set("wl_mssid", "0");
 	else
 		nvram_set("wl_mssid", "1");
+#if defined(R6800)
+	nvram_set("wl_mssid", "1");//fix guest wifi
+#endif
 #if defined(RTN14U) || defined(RTN11P) || defined(RTN300) || defined(RTN11P_B1) || defined(RTN800HP)// single band
 	nvram_set("et0macaddr", macaddr);
 	nvram_set("et1macaddr", macaddr);

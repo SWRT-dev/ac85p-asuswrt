@@ -4234,7 +4234,8 @@ RTMP_STRING *GetAuthMode(CHAR auth)
     ==========================================================================
 */
 //#define	LINE_LEN	(4+33+20+9+16+9+7+7+3)	/* Channel+SSID+Bssid+Security+Signal+WiressMode+ExtCh+NetworkType*/
-#define	LINE_LEN	(4+33+18+9+16+9+8)	/* Channel+SSID(2*32+1)+Bssid+Enc+Auth+Signal+WiressMode*/
+//#define	LINE_LEN	(4+33+18+9+16+9+8)	/* Channel+SSID(2*32+1)+Bssid+Enc+Auth+Signal+WiressMode*/
+#define	LINE_LEN	(4+33+20+23+9+12+7+3)	/* Channel+SSID+Bssid+Security+Signal+WiressMode+ExtCh+NetworkType*/
 
 #ifdef WSC_INCLUDED
 #define	WPS_LINE_LEN	(4+5)	/* WPS+DPID*/
@@ -4273,7 +4274,7 @@ VOID RTMPCommSiteSurveyData(
 
 	sprintf(msg + strlen(msg), "%-33s", Ssid);
 	/*BSSID*/
-	sprintf(msg + strlen(msg), "%02x:%02x:%02x:%02x:%02x:%02x ",
+	sprintf(msg + strlen(msg), "%02x:%02x:%02x:%02x:%02x:%02x   ",
 			pBss->Bssid[0],
 			pBss->Bssid[1],
 			pBss->Bssid[2],
@@ -4283,9 +4284,9 @@ VOID RTMPCommSiteSurveyData(
 	/*Security*/
 	RTMPZeroMemory(SecurityStr, 32);
 	snprintf(SecurityStr, sizeof(SecurityStr), "%s/%s", GetAuthModeStr(pBss->AKMMap), GetEncryModeStr(pBss->PairwiseCipher));
-//	sprintf(msg + strlen(msg), "%-23s", SecurityStr);
-	sprintf(msg + strlen(msg), "%-9s", GetEncryModeStr(pBss->PairwiseCipher));
-	sprintf(msg + strlen(msg), "%-16s", GetAuthModeStr(pBss->AKMMap));
+	sprintf(msg + strlen(msg), "%-23s", SecurityStr);
+	//sprintf(msg + strlen(msg), "%-9s", GetEncryModeStr(pBss->PairwiseCipher));
+	//sprintf(msg + strlen(msg), "%-16s", GetAuthModeStr(pBss->AKMMap));
 	/* Rssi*/
 	Rssi = (INT)pBss->Rssi;
 
@@ -4304,20 +4305,20 @@ VOID RTMPCommSiteSurveyData(
 
 	if (wireless_mode == Ndis802_11FH ||
 		wireless_mode == Ndis802_11DS)
-		sprintf(msg + strlen(msg), "%-8s", "11b");
+		sprintf(msg + strlen(msg), "%-12s", "11b");
 	else if (wireless_mode == Ndis802_11OFDM5)
-		sprintf(msg + strlen(msg), "%-8s", "11a");
+		sprintf(msg + strlen(msg), "%-12s", "11a");
 	else if (wireless_mode == Ndis802_11OFDM5_N)
-		sprintf(msg + strlen(msg), "%-8s", "11a/n");
+		sprintf(msg + strlen(msg), "%-12s", "11a/n");
 	else if (wireless_mode == Ndis802_11OFDM5_AC)
-		sprintf(msg + strlen(msg), "%-8s", "11a/n/ac");
+		sprintf(msg + strlen(msg), "%-12s", "11a/n/ac");
 	else if (wireless_mode == Ndis802_11OFDM24)
-		sprintf(msg + strlen(msg), "%-8s", "11b/g");
+		sprintf(msg + strlen(msg), "%-12s", "11b/g");
 	else if (wireless_mode == Ndis802_11OFDM24_N)
-		sprintf(msg + strlen(msg), "%-8s", "11b/g/n");
+		sprintf(msg + strlen(msg), "%-12s", "11b/g/n");
 	else
-		sprintf(msg + strlen(msg), "%-8s", "unknow");
-#if 0
+		sprintf(msg + strlen(msg), "%-12s", "unknow");
+
 	/* Ext Channel*/
 	if (pBss->AddHtInfoLen > 0) {
 		if (pBss->AddHtInfo.AddHtInfo.ExtChanOffset == EXTCHA_ABOVE)
@@ -4339,7 +4340,7 @@ VOID RTMPCommSiteSurveyData(
 //	sprintf(msg + strlen(msg), " %-8d", pBss->SsidLen);
 
 //	sprintf(msg + strlen(msg), "\n");
-#endif
+
 	return;
 }
 
@@ -4624,17 +4625,17 @@ VOID RTMPIoctlGetSiteSurvey(
 	UINT32 TotalLen, BufLen = IW_SCAN_MAX_DATA;
 	BSS_TABLE *pScanTab;
 	pScanTab = &pAdapter->ScanTab;
-#if 0
+
 #ifdef WSC_INCLUDED
 max_len += WPS_LINE_LEN;
 #endif
-max_len += BCNREP_LINE_LEN;
+//max_len += BCNREP_LINE_LEN;
 
-#ifdef APCLI_OWE_SUPPORT
+#if 0 //#ifdef APCLI_OWE_SUPPORT
 max_len += OWETRANSIE_LINE_LEN;
 
 #endif
-#endif
+
 	os_alloc_mem(NULL, (UCHAR **)&this_char, wrq->u.data.length + 1);
 	if (!this_char) {
 		MTWF_LOG(DBG_CAT_CFG, DBG_SUBCAT_ALL, DBG_LVL_ERROR, ("%s: Allocate memory fail!!!\n", __func__));
@@ -4696,18 +4697,19 @@ max_len += OWETRANSIE_LINE_LEN;
 	//sprintf(msg + strlen(msg), "%s", "\n");
 //	sprintf(msg + strlen(msg), "%-4s%-33s%-20s%-9s%-16s%-9s%-7s%-7s%-3s\n",
 //			"Ch", "SSID", "BSSID", "Enc", "Auth", "Signal(%)", "W-Mode", "ExtCH", "NT");
-	sprintf(msg + strlen(msg), "%-4s%-33s%-18s%-9s%-16s%-9s%-8s\n",
-			"Ch", "SSID", "BSSID", "Enc", "Auth", "Siganl(%)", "W-Mode");
+//	sprintf(msg + strlen(msg), "%-4s%-33s%-18s%-9s%-16s%-9s%-8s\n",
+//			"Ch", "SSID", "BSSID", "Enc", "Auth", "Siganl(%)", "W-Mode");
+	sprintf(msg + strlen(msg), "%-4s%-33s%-20s%-23s%-9s%-12s%-7s%-3s\n",
+			"Ch", "SSID", "BSSID", "Security", "Signal(%)", "W-Mode", " ExtCH", " NT");
 
-#if 0
 #ifdef WSC_INCLUDED
-	sprintf(msg + strlen(msg) - 1, "%-4s%-5s\n", "WPS", "DPID");
+	sprintf(msg + strlen(msg) - 1, "%-4s%-5s\n", " WPS", " DPID");
 #endif /* WSC_INCLUDED */
 //	sprintf(msg + strlen(msg) - 1, "%-10s\n", "BcnRept");
 #ifdef APCLI_OWE_SUPPORT
-//		sprintf(msg + strlen(msg) - 1, "%-10s\n", "OWETranIe");
+//		sprintf(msg + strlen(msg) - 1, "%-10s\n", " OWETranIe");
 #endif /* APCLI_OWE_SUPPORT */
-#endif
+
 	WaitCnt = 0;
 
 	while ((ScanRunning(pAdapter) == TRUE) && (WaitCnt++ < 200))
@@ -4734,7 +4736,7 @@ max_len += OWETRANSIE_LINE_LEN;
 		/*No*/
 //		sprintf(msg + strlen(msg), "%-4d", i);
 		RTMPCommSiteSurveyData(msg, pBss, TotalLen);
-#if 0
+
 #ifdef WSC_INCLUDED
 
 		/*WPS*/
@@ -4753,15 +4755,15 @@ max_len += OWETRANSIE_LINE_LEN;
 #endif /* WSC_INCLUDED */
 //		sprintf(msg + strlen(msg), "%-10s\n", pBss->FromBcnReport ? " YES" : " NO");
 
-#ifdef APCLI_OWE_SUPPORT
-//	if (pBss->bhas_owe_trans_ie)
-		//sprintf(msg + strlen(msg), "%-10s\n", " YES");
-//	else
-		//sprintf(msg + strlen(msg), "%-10s\n", " NO");
+#if 0 //#ifdef APCLI_OWE_SUPPORT
+	if (pBss->bhas_owe_trans_ie)
+		sprintf(msg + strlen(msg), "%-10s\n", " YES");
+	else
+		sprintf(msg + strlen(msg), "%-10s\n", " NO");
 #else
 	sprintf(msg + strlen(msg), "\n");
 #endif
-#endif
+
 	}
 
 	wrq->u.data.length = strlen(msg);

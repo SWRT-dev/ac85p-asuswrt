@@ -1,6 +1,5 @@
 #!/bin/sh
 
-wan_if=$(nvram get wan0_ifname)
 start() {   
 	if grep -q 'rlt_wifi_7603e' /proc/modules ; then
 	    ralinkiappd -wi rai0 &
@@ -21,8 +20,8 @@ start() {
 	echo 1 > /proc/sys/net/ipv4/neigh/br0/delay_first_probe_time
 	echo 10000 > /proc/sys/net/ipv4/neigh/ra0/base_reachable_time_ms
 	echo 1 > /proc/sys/net/ipv4/neigh/ra0/delay_first_probe_time
-	echo 10000 > /proc/sys/net/ipv4/neigh/$wan_if/base_reachable_time_ms
-	echo 1 > /proc/sys/net/ipv4/neigh/$wan_if/delay_first_probe_time
+	echo 10000 > /proc/sys/net/ipv4/neigh/eth2/base_reachable_time_ms
+	echo 1 > /proc/sys/net/ipv4/neigh/eth2/delay_first_probe_time
     iptables -A INPUT -i br0 -p tcp --dport 3517 -j ACCEPT
     iptables -A INPUT -i br0 -p udp --dport 3517 -j ACCEPT 
 }
