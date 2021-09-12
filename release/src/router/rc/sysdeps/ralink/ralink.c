@@ -3572,7 +3572,7 @@ next_mrate:
 			fprintf(fp, "G_BAND_256QAM=%d\n", atoi(str));
 	}
 #endif
-	fprintf(fp, "SKUenable=1\n");
+	fprintf(fp, "SKUenable=0\n");//builtin or SingleSKU_mt7615e-sku.dat?
 	fprintf(fp, "WirelessEvent=1\n");
 #endif
 #if defined(RTCONFIG_SWRT_KVR)
