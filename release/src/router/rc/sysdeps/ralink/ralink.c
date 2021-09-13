@@ -3576,11 +3576,13 @@ next_mrate:
 	fprintf(fp, "WirelessEvent=1\n");
 #endif
 #if defined(RTCONFIG_SWRT_KVR)
-	fprintf(fp, "WNMEnable=1;1\n");
-	fprintf(fp, "RRMEnable=1;1\n");
-	fprintf(fp, "FtSupport=1\n");
-	fprintf(fp, "FtOtd=0\n");
-	fprintf(fp, "FtRic=1\n");
+	fprintf(fp, "WNMEnable=1\n");
+	fprintf(fp, "RRMEnable=1\n");
+	if(nvram_get("swrt_ftenable")){
+		fprintf(fp, "FtSupport=1\n");
+		fprintf(fp, "FtOtd=0\n");
+		fprintf(fp, "FtRic=1\n");
+	}
 #endif
 
 	if (warning)
