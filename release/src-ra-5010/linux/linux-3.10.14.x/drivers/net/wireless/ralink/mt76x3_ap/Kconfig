@@ -1,13 +1,9 @@
 config MT7603E_RLT_AP_SUPPORT
 	tristate "MT7603 802.11n AP support"
 #	depends on NET_RADIO 
-	select MT76X3_AP
 	select WIRELESS_EXT
 	select WEXT_SPY
 	select WEXT_PRIV
-
-config MT76X3_AP
-	tristate
 
 #config RLT_AP_SUPPORT
 #	bool "7603"

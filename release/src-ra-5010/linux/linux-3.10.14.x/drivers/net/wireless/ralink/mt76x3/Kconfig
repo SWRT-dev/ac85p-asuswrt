@@ -1,15 +1,68 @@
-if RT_FIRST_IF_MT7603E || RT_SECOND_IF_MT7603E
+if FIRST_IF_MT7603E || SECOND_IF_MT7603E
 
 config WIFI_DRIVER
 	bool
 	default y
+
+config MT7603E_MT_WIFI_PATH
+        string
+        depends on MT7603E_RLT_WIFI
+        default "rlt_wifi"
 
 config MT7603E_RLT_WIFI
 	tristate "RLT 7603 WIFI Driver"
 	select MT7603E_WIFI_BASIC_FUNC if MT7603E_RLT_WIFI
 
 if MT7603E_RLT_WIFI
-menu "MT7603E Generic Feature Options"
+menu "WiFi Generic Feature Options"
+
+if FIRST_IF_MT7603E
+choice
+        prompt "EEPROM Type of 1st Card"
+        depends on ! FIRST_IF_NONE
+
+        config MT7603E_FIRST_IF_EEPROM_PROM
+        bool "EEPROM"
+
+        config MT7603E_FIRST_IF_EEPROM_EFUSE
+        bool "EFUSE"
+
+        config MT7603E_FIRST_IF_EEPROM_FLASH
+        bool "FLASH"
+endchoice
+
+config MT7603E_RT_FIRST_CARD_EEPROM
+        string
+        depends on ! FIRST_IF_NONE
+        default "prom" if MT7603E_FIRST_IF_EEPROM_PROM
+        default "efuse" if MT7603E_FIRST_IF_EEPROM_EFUSE
+        default "flash" if MT7603E_FIRST_IF_EEPROM_FLASH
+endif
+# endif FIRST_IF_MT7603E
+
+if SECOND_IF_MT7603E
+choice
+        prompt "EEPROM Type of 2nd Card"
+        depends on ! SECOND_IF_NONE
+
+        config MT7603E_SECOND_IF_EEPROM_PROM
+        bool "EEPROM"
+
+        config MT7603E_SECOND_IF_EEPROM_EFUSE
+        bool "EFUSE"
+
+        config MT7603E_SECOND_IF_EEPROM_FLASH
+        bool "FLASH"
+endchoice
+
+config MT7603E_RT_SECOND_CARD_EEPROM
+        string
+        depends on ! SECOND_IF_NONE
+        default "prom" if MT7603E_SECOND_IF_EEPROM_PROM
+        default "efuse" if MT7603E_SECOND_IF_EEPROM_EFUSE
+        default "flash" if MT7603E_SECOND_IF_EEPROM_FLASH
+endif
+#endif SECOND_IF_MT7603E
 
 config MT7603E_MULTI_INF_SUPPORT
         bool
@@ -357,4 +410,4 @@ if MT7603E_RALINK_MT7603U
 		default y
 endif
 endif
-#endif RT_FIRST_IF_MT7603E || RT_SECOND_IF_MT7603E
+#endif FIRST_IF_MT7603E || SECOND_IF_MT7603E

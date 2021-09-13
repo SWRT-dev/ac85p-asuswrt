@@ -1448,7 +1448,7 @@ VOID ap_cmm_peer_assoc_req_action(
 #endif /* DOT1X_SUPPORT */
 #ifdef DOT11R_FT_SUPPORT
 	PFT_CFG pFtCfg = NULL;
-	FT_INFO FtInfoBuf = {0};
+	FT_INFO FtInfoBuf;
 #endif /* DOT11R_FT_SUPPORT */
 #ifdef WSC_AP_SUPPORT
 	WSC_CTRL *wsc_ctrl;
@@ -1464,7 +1464,9 @@ VOID ap_cmm_peer_assoc_req_action(
 	UINT8 wapp_cnnct_stage = WAPP_ASSOC;
 	UINT16 wapp_assoc_fail = NOT_FAILURE;
 #endif/* WAPP_SUPPORT */
-
+#ifdef DOT11R_FT_SUPPORT
+	NdisZeroMemory(&FtInfoBuf, sizeof(FT_INFO));
+#endif /* DOT11R_FT_SUPPORT */
 #ifdef WH_EZ_SETUP
 	if(IS_ADPTR_EZ_SETUP_ENABLED(pAd))
 		EZ_DEBUG(DBG_CAT_AP, DBG_SUBCAT_ALL, DBG_LVL_OFF,

@@ -221,7 +221,7 @@ config FTM_SUPPORT
 config MBO_SUPPORT
 	bool "MBO Support"
 	depends on WIFI_DRIVER
-	select INTERWORKING
+	select MT_INTERWORKING
 	select WNM_SUPPORT
 	select DOT11K_RRM_SUPPORT
 	select DOT11R_FT_SUPPORT
