@@ -255,7 +255,7 @@ skip_check:
 				RTMP_DRIVER_BITRATE_GET(pAd, pIoctlRate);
 
 
-			wrqin->u.bitrate.value = pIoctlRate->BitRate;
+			wrqin->u.bitrate.value = (pIoctlRate->BitRate/1000);
 			wrqin->u.bitrate.disabled = 0;
             }
 			break;

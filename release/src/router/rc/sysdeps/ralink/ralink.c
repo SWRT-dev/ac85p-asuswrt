@@ -769,6 +769,7 @@ int gen_ralink_config(int band, int is_iNIC)
 	char tmp1[128];
 	int wlc_express = nvram_get_int("wlc_express");
 #endif
+	char *tcode = nvram_safe_get("territory_code");
 
 	if (!is_iNIC)
 	{
@@ -2514,8 +2515,9 @@ int gen_ralink_config(int band, int is_iNIC)
 
 #if defined(RTN54U) || defined(RTAC1200HP) || defined(RTAC54U) || defined(RTN56UB1) || defined(RTN56UB2) || defined(RTAC1200GA1)  || defined(RTAC1200GU) || defined(RTAC1200) || defined(RTCONFIG_MTK_REP) || defined(RTAC85P) || defined(RTACRH26) || defined(RMAC2100) || defined(R6800)
 #if defined(VHT_SUPPORT)
+	if(band)
 		fprintf(fp, "VHT_STBC=%d\n",1);
-		fprintf(fp, "VHT_LDPC=%d\n",1);
+	fprintf(fp, "VHT_LDPC=%d\n",1);
 #endif
 #endif
 
@@ -3572,7 +3574,10 @@ next_mrate:
 			fprintf(fp, "G_BAND_256QAM=%d\n", atoi(str));
 	}
 #endif
-	fprintf(fp, "SKUenable=0\n");//builtin or SingleSKU_mt7615e-sku.dat?
+	if(*tcode)
+		fprintf(fp, "SKUenable=1\n");
+	else
+		fprintf(fp, "SKUenable=0\n");
 	fprintf(fp, "WirelessEvent=1\n");
 #endif
 #if defined(RTCONFIG_SWRT_KVR)

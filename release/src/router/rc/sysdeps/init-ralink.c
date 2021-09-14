@@ -362,7 +362,7 @@ void config_switch()
 #if defined(RMAC2100)
 	case MODEL_RMAC2100:
 #elif defined(R6800)
-		case MODEL_R6800:
+	case MODEL_R6800:
 #endif
 	case MODEL_RPAC87:
 	case MODEL_RTN800HP:
@@ -1274,7 +1274,7 @@ void init_syspara(void)
 		nvram_set("wl_mssid", "0");
 	else
 		nvram_set("wl_mssid", "1");
-#if defined(R6800)
+#if defined(R6800) || defined(RMAC2100)
 	nvram_set("wl_mssid", "1");//fix guest wifi
 #endif
 #if defined(RTN14U) || defined(RTN11P) || defined(RTN300) || defined(RTN11P_B1) || defined(RTN800HP)// single band

@@ -872,7 +872,7 @@ static int __update_eeprom_checksum(unsigned char *buf)
 
 	return 0;
 }
-
+#if !defined(CONFIG_MODEL_RMAC2100)
 /* Write EEPROM set in RAM to all factory volume except active EEPROM set.
  * Caller must hod act_set->mutex
  * @buf:	pointer to active EEPROM set in RAM
@@ -924,7 +924,7 @@ static int __sync_factory2_eeprom(unsigned char *buf)
 
 	return ret;
 }
-
+#endif
 int mtd_write(struct mtd_info *mtd, loff_t to, size_t len, size_t *retlen,
 	      const u_char *buf)
 {
@@ -961,10 +961,10 @@ int mtd_write(struct mtd_info *mtd, loff_t to, size_t len, size_t *retlen,
 		__update_eeprom_checksum(p);
 
 		ret_len = mtd->_write(mtd, to, len, retlen, p);
-
+#if !defined(CONFIG_MODEL_RMAC2100)
 		/* sync to factory2's EEPROM */
 		__sync_factory2_eeprom(p);
-
+#endif
 		if (!alloc_type)
 			kfree(p);
 		else
