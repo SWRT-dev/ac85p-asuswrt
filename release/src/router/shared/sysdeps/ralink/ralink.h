@@ -357,6 +357,9 @@ typedef enum _RT_802_11_PHY_MODE {
 #if defined(RTN800HP)
 #define OFFSET_MAC_ADDR_2G	0x40004
 #define OFFSET_MAC_ADDR		0x40004 //only one MAC
+#elif defined(RMAC2100)//fix vlan
+#define OFFSET_MAC_ADDR		0x4E000
+#define OFFSET_MAC_ADDR_2G	0x4E006
 #else
 #define OFFSET_MAC_ADDR_2G	0x40004
 #define OFFSET_MAC_ADDR		0x48004
