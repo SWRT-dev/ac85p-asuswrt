@@ -16526,15 +16526,12 @@ INT RTMP_AP_IoctlHandle(
 			if (copy_to_user(wrq->u.data.pointer, &temperature, wrq->u.data.length))
 				Status = -EFAULT;
 		} else if ( subcmd == ASUS_SUBCMD_CONN_STATUS ) {
-			UINT32 pCurrState[2] = {0};
+			UINT32 pCurrState = 0;
 			PAPCLI_STRUCT pApCliEntry;
-			PMAC_TABLE_ENTRY mac;
 			pApCliEntry = &pAd->ApCfg.ApCliTab[pObj->ioctl_if];
-			mac = &pAd->MacTab.Content[pApCliEntry->MacTabWCID];
-			pCurrState[0] = pApCliEntry->CtrlCurrState;
-			pCurrState[1] = mac->CurrTxRate;//LastRxRate/LastTxRate/CurrTxRate
-			wrq->u.data.length = sizeof(pCurrState);
-			if (copy_to_user(wrq->u.data.pointer, pCurrState, wrq->u.data.length))
+			pCurrState = pApCliEntry->CtrlCurrState;
+			wrq->u.data.length = sizeof(UINT32);
+			if (copy_to_user(wrq->u.data.pointer, &pCurrState, wrq->u.data.length))
 				Status = -EFAULT;
 		} else if ( subcmd == ASUS_SUBCMD_GSTAINFO ) {
 		} else if ( subcmd == ASUS_SUBCMD_GSTAT ) {

@@ -1881,7 +1881,7 @@ static int ej_wl_rate(int eid, webs_t wp, int argc, char_t **argv, int unit)
 #endif		
 		snprintf(prefix, sizeof(prefix), "wl%d.1_", unit);
 	else
-#if 0
+#if 1
 		snprintf(prefix, sizeof(prefix), "wl%d_", unit);
 
 	name = nvram_safe_get(strcat_r(prefix, "ifname", tmp));
@@ -1897,7 +1897,7 @@ static int ej_wl_rate(int eid, webs_t wp, int argc, char_t **argv, int unit)
 	if ((rate == -1) || (rate == 0))
 		strlcpy(rate_buf, "auto", sizeof(rate_buf));
 	else
-		snprintf(rate_buf, sizeof(rate_buf), "%d Mbps", (rate / 1000000));
+		snprintf(rate_buf, sizeof(rate_buf), "%d Mbps", (rate / 1000));
 #else
 		goto ERROR;
 	name = nvram_safe_get(strcat_r(prefix, "ifname", tmp));

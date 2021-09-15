@@ -15153,6 +15153,13 @@ INT RTMP_AP_IoctlHandle(
 				temperature = MtAsicGetThemalSensor(pAd, 0);
 				wrq->u.data.length = sizeof(UINT32);
 				Status = copy_to_user(wrq->u.data.pointer, &temperature, wrq->u.data.length);
+			} else if ( subcmd == ASUS_SUBCMD_CONN_STATUS ) {
+				UINT32 pCurrState = 0;
+				PAPCLI_STRUCT pApCliEntry;
+				pApCliEntry = &pAd->ApCfg.ApCliTab[pObj->ioctl_if];
+				pCurrState = pApCliEntry->CtrlCurrState;
+				wrq->u.data.length = sizeof(UINT32);
+				Status = copy_to_user(wrq->u.data.pointer, &pCurrState, wrq->u.data.length);
 			}
 			break;
 
