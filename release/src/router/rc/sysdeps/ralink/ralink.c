@@ -4030,6 +4030,11 @@ getSiteSurvey(int band,char* ofile)
 				printf("[wlcscan] Output %s error\n", ofile);
 			}else{
 				for (i = 0; i < apCount; i++){
+					char buf[33];
+					char auth[16], enc[9];
+					memset(buf, 0, sizeof(buf));
+					memset(auth, 0, sizeof(auth));
+					memset(enc, 0, sizeof(enc));
 					if(atoi(ssap->SiteSurvey[i].channel) < 0 )
 					{
 						fprintf(fp, "\"ERR_BNAD\",");
@@ -4062,16 +4067,20 @@ getSiteSurvey(int band,char* ofile)
 
 					fprintf(fp, "\"%d\",", atoi(ssap->SiteSurvey[i].channel));
 
-					if(strstr(ssap->SiteSurvey[i].security,"WPA-Enterprise"))
-						fprintf(fp, "\"%s\",","WPA-Enterprise");
-					else if(strstr(ssap->SiteSurvey[i].security,"WPA2-Enterprise"))
-						fprintf(fp, "\"%s\",","WPA2-Enterprise");
-					else if(strstr(ssap->SiteSurvey[i].security,"WPA-Personal"))
-						fprintf(fp, "\"%s\",","WPA-Personal");
-					else if(strstr(ssap->SiteSurvey[i].security,"WPA2-Personal"))
+					snprintf(buf, sizeof(buf), "%s", ssap->SiteSurvey[i].security);
+					sscanf(buf, "%[A-Z0-9]/%[A-Z]", auth, enc);
+					if(!strcmp(auth,"WPAPSKWPA2PSK"))
 						fprintf(fp, "\"%s\",","WPA2-Personal");
-					else if(strstr(ssap->SiteSurvey[i].security,"Open System")) {
-						if(strstr(ssap->SiteSurvey[i].security, "WEP"))
+					else if(!strcmp(auth,"WPA2PSK"))
+						fprintf(fp, "\"%s\",","WPA2-Personal");
+					else if(!strcmp(auth,"WPAPSK"))
+						fprintf(fp, "\"%s\",","WPA-Personal");
+					else if(!strcmp(auth,"WPA2"))
+						fprintf(fp, "\"%s\",","WPA2-Enterprise");
+					else if(!strcmp(auth,"WPA"))
+						fprintf(fp, "\"%s\",","WPA-Enterprise");
+					else if(!strcmp(auth,"OPEN")) {
+						if(!strcmp(enc, "WEP"))
 							fprintf(fp, "\"%s\",","Unknown");
 						else
 							fprintf(fp, "\"%s\",","Open System");
@@ -4079,14 +4088,16 @@ getSiteSurvey(int band,char* ofile)
 					else
 						fprintf(fp, "\"%s\",","Unknown");
 
-					if(strstr(ssap->SiteSurvey[i].security, "NONE"))
+					if(!strcmp(enc, "NONE"))
 						fprintf(fp, "\"%s\",", "NONE");
-					else if(strstr(ssap->SiteSurvey[i].security, "WEP"))
+					else if(!strcmp(enc, "WEP"))
 						fprintf(fp, "\"%s\",", "WEP");
-					else if(strstr(ssap->SiteSurvey[i].security, "TKIP"))
+					else if(!strcmp(enc, "TKIP"))
 						fprintf(fp, "\"%s\",", "TKIP");
-					else if(strstr(ssap->SiteSurvey[i].security, "AES"))
+					else if(!strcmp(enc, "AES"))
 						fprintf(fp, "\"%s\",", "AES");
+					else if(!strcmp(enc, "TKIPAES"))
+						fprintf(fp, "\"%s\",", "TKIPAES");
 					else
 						fprintf(fp, "\"%s\",", "UNKNOW");
 
@@ -4135,18 +4146,18 @@ getSiteSurvey(int band,char* ofile)
 #endif
 					fprintf(fp, "\"%d\",", atoi(ssap->SiteSurvey[i].signal));
 					fprintf(fp, "\"%s\",", ssap->SiteSurvey[i].bssid);
-					if(strncmp(ssap->SiteSurvey[i].wmode, "11b    ", 7)==0)
-						fprintf(fp, "\"%s\",", "b");
-					else if(strncmp(ssap->SiteSurvey[i].wmode, "11a    ", 7)==0)
-						fprintf(fp, "\"%s\",", "a");
-					else if(strncmp(ssap->SiteSurvey[i].wmode, "11a/n  ", 7)==0)
-						fprintf(fp, "\"%s\",", "an");
-					else if(strncmp(ssap->SiteSurvey[i].wmode, "11b/g  ", 7)==0)
-						fprintf(fp, "\"%s\",", "bg");
+					if(strncmp(ssap->SiteSurvey[i].wmode, "11a/n/ac", 8)==0)
+						fprintf(fp, "\"%s\",", "ac");
 					else if(strncmp(ssap->SiteSurvey[i].wmode, "11b/g/n", 7)==0)
 						fprintf(fp, "\"%s\",", "bgn");
-					else if(strncmp(ssap->SiteSurvey[i].wmode, "11ac   ", 7)==0)
-						fprintf(fp, "\"%s\",", "ac");
+					else if(strncmp(ssap->SiteSurvey[i].wmode, "11a/n", 5)==0)
+						fprintf(fp, "\"%s\",", "an");
+					else if(strncmp(ssap->SiteSurvey[i].wmode, "11b/g", 5)==0)
+						fprintf(fp, "\"%s\",", "bg");
+					else if(strncmp(ssap->SiteSurvey[i].wmode, "11a", 3)==0)
+						fprintf(fp, "\"%s\",", "a");
+					else if(strncmp(ssap->SiteSurvey[i].wmode, "11b", 3)==0)
+						fprintf(fp, "\"%s\",", "b");
 					else
 						fprintf(fp, "\"%s\",", "");
 

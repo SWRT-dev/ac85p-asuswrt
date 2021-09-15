@@ -16,6 +16,9 @@
 #include <asm/prom.h>
 
 unsigned int vced_count, vcei_count;
+#if defined(CONFIG_RALINK_MT7621)
+extern u32 mips_cpu_feq;
+#endif
 
 static int show_cpuinfo(struct seq_file *m, void *v)
 {
@@ -38,6 +41,10 @@ static int show_cpuinfo(struct seq_file *m, void *v)
 		if (mips_get_machine_name())
 			seq_printf(m, "machine\t\t\t: %s\n",
 				   mips_get_machine_name());
+#if defined(CONFIG_RALINK_MT7621)
+		if(mips_cpu_feq > 0 )
+			seq_printf(m, "cpu MHz\t\t\t: %u\n", mips_cpu_feq / 1000 / 1000);
+#endif
 	}
 
 	seq_printf(m, "processor\t\t: %ld\n", n);

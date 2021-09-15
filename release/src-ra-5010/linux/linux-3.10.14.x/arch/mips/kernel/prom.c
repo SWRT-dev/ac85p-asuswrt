@@ -23,7 +23,15 @@
 #include <asm/page.h>
 #include <asm/prom.h>
 
+#if defined(CONFIG_MODEL_RTAC85P)
+static char mips_machine_name[64] = "RT-AC85P";
+#elif defined(CONFIG_MODEL_RMAC2100)
+static char mips_machine_name[64] = "RM-AC2100";
+#elif defined(CONFIG_MODEL_R6800)
+static char mips_machine_name[64] = "R6800";
+#else
 static char mips_machine_name[64] = "Unknown";
+#endif
 
 __init void mips_set_machine_name(const char *name)
 {

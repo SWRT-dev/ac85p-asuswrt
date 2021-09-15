@@ -264,7 +264,14 @@ int ej_show_sysinfo(int eid, webs_t wp, int argc, char_t ** argv)
 			else
 				strcpy(result, "0");//bug?
 #elif defined(RTCONFIG_RALINK)
-			strcpy(result, "880");
+			char freq[5];
+			strcpy(freq, "0");
+			char *buffer = read_whole_file("/proc/cpuinfo");
+			if (buffer) {
+				tmp = strstr(buffer, "cpu MHz");
+				if (tmp) sscanf(tmp, "cpu MHz			: %4[^\n]s", freq);
+			}
+			strcpy(result, freq);
 #endif
 		} else if(strcmp(type,"memory.total") == 0) {
 			sysinfo(&sys);
