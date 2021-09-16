@@ -2251,13 +2251,6 @@ int gen_ralink_config(int band, int is_iNIC)
 		fprintf(fp, "%s", tmpstr);
 	}
 
-/*
-	fprintf(fp, "SecurityMode=%d\n", 0);
-	fprintf(fp, "VLANEnable=%d\n", 0);
-	fprintf(fp, "VLANName=\n");
-	fprintf(fp, "VLANID=%d\n", 0);
-	fprintf(fp, "VLANPriority=%d\n", 0);
-*/
 	fprintf(fp, "HSCounter=%d\n", 0);
 
 	//HT_HTC
@@ -2393,6 +2386,7 @@ int gen_ralink_config(int band, int is_iNIC)
 
 	//HT_BW
 	//str = nvram_safe_get(strcat_r(prefix, "bw", tmp));
+#if 0 //Override wl_bw?
 		for (i = 0; i < MAX_NO_MSSID; i++)
 		{
 			if (sw_mode == SW_MODE_REPEATER
@@ -2418,7 +2412,7 @@ int gen_ralink_config(int band, int is_iNIC)
 					wl_bw = get_bw_via_channel(band, Channel);
 				}			
 		} // for	
-	
+#endif	
 
 		if(wl_bw == 0)
 				fprintf(fp, "HT_BW=%d\n", 0);
@@ -2498,7 +2492,8 @@ int gen_ralink_config(int band, int is_iNIC)
 		fprintf(fp, "HT_GI=%d\n", atoi(str));
 #if defined(RTN54U) || defined(RTAC1200HP) || defined(RTN56UB1) || defined(RTAC54U) ||defined(RTN56UB2) || defined(RTAC1200GA1) || defined(RTAC1200GU) || defined(RTAC1200) || defined(RTCONFIG_MTK_REP) || defined(RTAC85P) || defined(RTACRH26) || defined(RMAC2100) || defined(R6800)
 #if defined(VHT_SUPPORT)
-		fprintf(fp, "VHT_SGI=%d\n", atoi(str));
+		if(band)
+			fprintf(fp, "VHT_SGI=%d\n", atoi(str));
 #endif
 #endif
 	}
@@ -2508,16 +2503,18 @@ int gen_ralink_config(int band, int is_iNIC)
 		fprintf(fp, "HT_GI=%d\n", 1);
 #if defined(RTN54U) || defined(RTAC1200HP) || defined(RTN56UB1) || defined(RTAC54U) || defined(RTN56UB2) || defined(RTAC1200GA1)  || defined(RTAC1200GU) || defined(RTAC1200) || defined(RTCONFIG_MTK_REP) || defined(RTAC85P) || defined(RTACRH26) || defined(RMAC2100) || defined(R6800)
 #if defined(VHT_SUPPORT)
-		fprintf(fp, "VHT_SGI=%d\n", 1);
+		if(band)
+			fprintf(fp, "VHT_SGI=%d\n", 1);
 #endif
 #endif
 	}
 
 #if defined(RTN54U) || defined(RTAC1200HP) || defined(RTAC54U) || defined(RTN56UB1) || defined(RTN56UB2) || defined(RTAC1200GA1)  || defined(RTAC1200GU) || defined(RTAC1200) || defined(RTCONFIG_MTK_REP) || defined(RTAC85P) || defined(RTACRH26) || defined(RMAC2100) || defined(R6800)
 #if defined(VHT_SUPPORT)
-	if(band)
+	if(band){
 		fprintf(fp, "VHT_STBC=%d\n",1);
-	fprintf(fp, "VHT_LDPC=%d\n",1);
+		fprintf(fp, "VHT_LDPC=%d\n",1);
+	}
 #endif
 #endif
 
@@ -2606,7 +2603,9 @@ int gen_ralink_config(int band, int is_iNIC)
 
 #endif
 
-		int vbw = 0;						
+
+#if 0
+		int vbw = 0;		
 		for (i = 0; i < MAX_NO_MSSID; i++)
 		{
 			if (sw_mode == SW_MODE_REPEATER
@@ -2634,7 +2633,9 @@ int gen_ralink_config(int band, int is_iNIC)
 				vbw = get_bw_via_channel(band, Channel);
 			}
 		}
-		
+#else
+		int vbw = get_bw_via_channel(band, Channel);
+#endif	
 		if (band) {
 			if (vbw > 0)
 			{
@@ -2656,6 +2657,7 @@ int gen_ralink_config(int band, int is_iNIC)
 				fprintf(fp, "VHT_DisallowNonVHT=%d\n", atoi(str));
 			else
 				fprintf(fp, "VHT_DisallowNonVHT=%d\n", 0);
+			fprintf(fp, "VHT_BW_SIGNAL=%d\n", 0);
 		}
 		
 
@@ -3231,11 +3233,18 @@ int gen_ralink_config(int band, int is_iNIC)
 
 		nvram_set(strcat_r(prefix, "crypto", tmp), nvram_safe_get("wlc_crypto"));
 		nvram_set(strcat_r(prefix, "wpa_psk", tmp), nvram_safe_get("wlc_wpa_psk"));
+#if defined (RTCONFIG_WLMODULE_MT7615E_AP)
+// ui force 40,but 7615 support 80 and 160
+		if(band)
+			nvram_set(strcat_r(prefix, "bw", tmp), "1");
+		else
+#endif
 		nvram_set(strcat_r(prefix, "bw", tmp), nvram_safe_get("wlc_nbw_cap"));
 
 
+
 		fprintf(fp, "ApCliEnable=1\n");
-		fprintf(fp, "ApCliSsid%d=%s\n", 1, nvram_safe_get("wlc_ssid"));
+		fprintf(fp, "ApCliSsid=%s\n", nvram_safe_get("wlc_ssid"));
 		fprintf(fp, "ApCliBssid=\n");
 
 		str = nvram_safe_get("wlc_auth_mode");
@@ -3266,7 +3275,7 @@ int gen_ralink_config(int band, int is_iNIC)
 					fprintf(fp, "ApCliEncrypType=%s\n", "AES");
 
 				//WPAPSK
-				fprintf(fp, "ApCliWPAPSK%d=%s\n", 1, nvram_safe_get("wlc_wpa_psk"));
+				fprintf(fp, "ApCliWPAPSK=%s\n", nvram_safe_get("wlc_wpa_psk"));
 			}
 			else
 			{
@@ -4365,7 +4374,6 @@ int site_survey_for_channel(int n, const char *wif, int *HT_EXT)
 				memset(commch,0,sizeof(commch));
 				memcpy(commch,ssap->SiteSurvey[i].channel,3);
 				commonchannel=atoi(commch);
-
 				//fprintf(stderr, "##common ch=%d##\n",commonchannel);
 #if 0
 				memset(cench,0,sizeof(cench));

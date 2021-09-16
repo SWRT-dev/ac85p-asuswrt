@@ -609,27 +609,6 @@ wl_status(int eid, webs_t wp, int argc, char_t **argv, int unit)
 	if (ralink_get_range_info(&range, buffer, wrq2.u.data.length) < 0)
 		return ret;
 
-#if defined(RTN65U)
-	if (unit == 0 && get_model() == MODEL_RTN65U)
-	{
-		FILE *fp;
-		phy_mode = 0;
-		if((fp = fopen("/etc/Wireless/iNIC/iNIC_ap.dat", "r")) != NULL)
-		{
-			while(fgets(tmp, sizeof(tmp), fp) != NULL)
-			{
-				if(strncmp(tmp, "WirelessMode=", 13) == 0)
-				{
-					phy_mode = atoi(tmp + 13);
-					break;
-				}
-			}
-			fclose(fp);
-		}
-	}
-	else
-	{
-#endif	/* RTN65U */
 	bzero(buffer, sizeof(unsigned long));
 	wrq2.u.data.length = sizeof(unsigned long);
 	wrq2.u.data.pointer = (caddr_t) buffer;
@@ -645,10 +624,7 @@ wl_status(int eid, webs_t wp, int argc, char_t **argv, int unit)
 	}
 	else
 		phy_mode=wrq2.u.mode;
-#if defined(RTN65U)
-	}
-#endif	/* RTN65U */
-
+	logmessage("debug","phy_mode=%lu",phy_mode);
 	freq = iw_freq2float(&(wrq1.u.freq));
 	if (freq < KILO)
 		channel = (int) freq;
@@ -709,28 +685,49 @@ wl_status(int eid, webs_t wp, int argc, char_t **argv, int unit)
 	}
 	else
 #endif
-	if (phy_mode==PHY_11BG_MIXED)
-		ret+=websWrite(wp, "Phy Mode	: 11b/g\n");
-	else if (phy_mode==PHY_11B)
-		ret+=websWrite(wp, "Phy Mode	: 11b\n");
-	else if (phy_mode==PHY_11A)
-		ret+=websWrite(wp, "Phy Mode	: 11a\n");
-	else if (phy_mode==PHY_11ABG_MIXED)
-		ret+=websWrite(wp, "Phy Mode	: 11a/b/g\n");
-	else if (phy_mode==PHY_11G)
-		ret+=websWrite(wp, "Phy Mode	: 11g\n");
-	else if (phy_mode==PHY_11ABGN_MIXED)
-		ret+=websWrite(wp, "Phy Mode	: 11a/b/g/n\n");
-	else if (phy_mode==PHY_11N)
-		ret+=websWrite(wp, "Phy Mode	: 11n\n");
-	else if (phy_mode==PHY_11GN_MIXED)
-		ret+=websWrite(wp, "Phy Mode	: 11g/n\n");
-	else if (phy_mode==PHY_11AN_MIXED)
-		ret+=websWrite(wp, "Phy Mode	: 11a/n\n");
-	else if (phy_mode==PHY_11BGN_MIXED)
-		ret+=websWrite(wp, "Phy Mode	: 11b/g/n\n");
-	else if (phy_mode==PHY_11AGN_MIXED)
-		ret+=websWrite(wp, "Phy Mode	: 11a/g/n\n");
+	{
+		switch(phy_mode){
+			case PHY_11BG_MIXED:
+				ret+=websWrite(wp, "Phy Mode	: 11b/g\n");
+				break;
+			case PHY_11B:
+				ret+=websWrite(wp, "Phy Mode	: 11b\n");
+				break;
+			case PHY_11A:
+				ret+=websWrite(wp, "Phy Mode	: 11a\n");
+				break;
+			case PHY_11ABG_MIXED:
+				ret+=websWrite(wp, "Phy Mode	: 11a/b/g\n");
+				break;
+			case PHY_11G:
+				ret+=websWrite(wp, "Phy Mode	: 11g\n");
+				break;
+			case PHY_11ABGN_MIXED:
+			case PHY_11VHT_N_ABG_MIXED:
+				ret+=websWrite(wp, "Phy Mode	: 11a/b/g/n\n");
+				break;
+			case PHY_11N:
+			case PHY_11VHT_N_MIXED:
+				ret+=websWrite(wp, "Phy Mode	: 11n\n");
+				break;
+			case PHY_11GN_MIXED:
+				ret+=websWrite(wp, "Phy Mode	: 11g/n\n");
+				break;
+			case PHY_11AN_MIXED:
+			case PHY_11VHT_N_A_MIXED:
+				ret+=websWrite(wp, "Phy Mode	: 11a/n\n");
+				break;
+			case PHY_11BGN_MIXED:
+				ret+=websWrite(wp, "Phy Mode	: 11b/g/n\n");
+				break;
+			case PHY_11AGN_MIXED:
+			case PHY_11VHT_N_AG_MIXED:
+				ret+=websWrite(wp, "Phy Mode	: 11a/g/n\n");
+				break;
+			default:
+				ret+=websWrite(wp, "Phy Mode	: unknown[%lu]\n", phy_mode);
+		}
+	}
 
 	ret+=websWrite(wp, "Channel		: %d\n", channel);
 
@@ -1854,7 +1851,7 @@ static int ej_wl_rate(int eid, webs_t wp, int argc, char_t **argv, int unit)
 	char word[256], *next;
 	int unit_max = MAX_NR_WL_IF;
 	int rate=0;
-	int status;
+	int *status;
 	char rate_buf[32];
 	int sw_mode = sw_mode();
 	int wlc_band = nvram_get_int("wlc_band");
@@ -1881,7 +1878,6 @@ static int ej_wl_rate(int eid, webs_t wp, int argc, char_t **argv, int unit)
 #endif		
 		snprintf(prefix, sizeof(prefix), "wl%d.1_", unit);
 	else
-#if 1
 		snprintf(prefix, sizeof(prefix), "wl%d_", unit);
 
 	name = nvram_safe_get(strcat_r(prefix, "ifname", tmp));
@@ -1894,17 +1890,9 @@ static int ej_wl_rate(int eid, webs_t wp, int argc, char_t **argv, int unit)
 	}
 
 	rate = wrq.u.bitrate.value;
-	if ((rate == -1) || (rate == 0))
-		strlcpy(rate_buf, "auto", sizeof(rate_buf));
-	else
-		snprintf(rate_buf, sizeof(rate_buf), "%d Mbps", (rate / 1000));
-#else
-		goto ERROR;
-	name = nvram_safe_get(strcat_r(prefix, "ifname", tmp));
-
-	memset(tmp, 0x00, sizeof(tmp));
+	memset(tmp, 0, sizeof(tmp));
 	wrq.u.data.length = sizeof(tmp);
-	wrq.u.data.pointer = (caddr_t) tmp;
+	wrq.u.data.pointer = &tmp;
 	wrq.u.data.flags = ASUS_SUBCMD_CONN_STATUS;
 
 	if (wl_ioctl(name, RTPRIV_IOCTL_ASUSCMD, &wrq) < 0)
@@ -1912,12 +1900,13 @@ static int ej_wl_rate(int eid, webs_t wp, int argc, char_t **argv, int unit)
 		dbg("%s: errors in getting %s CONN_STATUS result\n", __func__, name);
 		goto ERROR;
 	}
-	status = ((int*)tmp)[0];
-	rate   = ((int*)tmp)[1];
-
-	if(status == 6)
-		snprintf(rate_buf, sizeof(rate_buf), "%d Mbps", rate);
-#endif
+	status = (unsigned int*)tmp;
+	if(*status == 6){
+		if ((rate == -1) || (rate == 0))
+			strlcpy(rate_buf, "auto", sizeof(rate_buf));
+		else
+			snprintf(rate_buf, sizeof(rate_buf), "%d Mbps", (rate / 1000));
+	}
 
 ERROR:
 	if(from_app == 0)
