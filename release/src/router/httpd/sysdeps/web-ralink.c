@@ -624,7 +624,7 @@ wl_status(int eid, webs_t wp, int argc, char_t **argv, int unit)
 	}
 	else
 		phy_mode=wrq2.u.mode;
-	logmessage("debug","phy_mode=%lu",phy_mode);
+
 	freq = iw_freq2float(&(wrq1.u.freq));
 	if (freq < KILO)
 		channel = (int) freq;
