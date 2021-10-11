@@ -77,3 +77,7 @@ endif
 
 obj-$(CONFIG_RA_HW_NAT)         += nat/hw_nat/
 
+ifeq ($(PGB_QUICK_PATH),y)
+obj-y		+= swrt_fastpath/
+endif
+

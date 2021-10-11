@@ -145,7 +145,9 @@
 #include <net/xfrm.h>
 #include <linux/mroute.h>
 #include <linux/netlink.h>
-
+#ifdef PGB_QUICK_PATH
+#include <linux/swrt_fastpath/fast_path.h>
+#endif
 
 #ifdef CONFIG_NF_SHORTCUT_HOOK
 extern int (*smb_nf_local_in_hook)(struct sk_buff *skb);
@@ -260,6 +262,11 @@ int ip_local_deliver(struct sk_buff *skb)
 
 #ifdef CONFIG_NF_SHORTCUT_HOOK
 	if (smb_nf_local_in_hook && smb_nf_local_in_hook(skb))
+		return ip_local_deliver_finish(skb);
+	else 
+#endif
+#ifdef PGB_QUICK_PATH
+	if (SWRT_FASTPATH(skb))
 		return ip_local_deliver_finish(skb);
 	else 
 #endif
@@ -455,6 +462,11 @@ int ip_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type *pt, 
 
 #ifdef CONFIG_NF_SHORTCUT_HOOK
 	if (smb_nf_pre_routing_hook && smb_nf_pre_routing_hook(skb))
+		return ip_rcv_finish(skb);
+	else 
+#endif
+#ifdef PGB_QUICK_PATH
+	if (SWRT_FASTPATH(skb))
 		return ip_rcv_finish(skb);
 	else 
 #endif

@@ -7788,7 +7788,7 @@ start_services(void)
 #if defined(RTCONFIG_SOFTCENTER)
 	nvram_set_int("sc_services_start_sig", 1);
 #endif
-#if defined(RTCONFIG_SWRT_KVR)
+#if defined(RTCONFIG_SWRT_KVR) && defined(RTCONFIG_RALINK)
 	system("/usr/bin/iappd.sh restart");
 #endif
 	return 0;

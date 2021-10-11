@@ -2759,6 +2759,13 @@ _dprintf("nat_rule: stop_nat_rules 1.\n");
 	}
 #endif
 
+#if defined(RTCONFIG_SWRT_FASTPATH)
+	char fbuf[3];
+	if(f_read("/proc/lan_ip", fbuf, 2) > 0){
+		char *p = nvram_get("lan_ipaddr");
+		f_write_string("/proc/lan_ip", p, 0, 0);
+	}
+#endif
 	_dprintf("%s %d\n", __FUNCTION__, __LINE__);
 }
 
@@ -4210,7 +4217,7 @@ lan_up(char *lan_ifname)
 	start_networkmap(0);
 	update_lan_state(LAN_STATE_CONNECTED, 0);
 
-#if defined(RTCONFIG_SWRT_KVR)
+#if defined(RTCONFIG_SWRT_KVR) && defined(RTCONFIG_RALINK)
 	system("/usr/bin/iappd.sh restart");
 #endif
 
@@ -5931,7 +5938,7 @@ void restart_wireless(void)
 		doSystem("%s &", RSTHYD_SCRIPT);
 	}
 #endif
-#if defined(RTCONFIG_SWRT_KVR)
+#if defined(RTCONFIG_SWRT_KVR) && defined(RTCONFIG_RALINK)
 	system("/usr/bin/iappd.sh restart");
 #endif
 }
