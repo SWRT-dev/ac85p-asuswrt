@@ -151,10 +151,7 @@ static struct mtd_partition g_pasStatic_Partition[] = {
 #endif
         }, {
                 name:           "RootFS",
-#if defined(CONFIG_MODEL_RMAC2100)
-                size:           0x2600000,
-                offset:         0x400000,
-#elif defined(CONFIG_MODEL_R6800)
+#if defined(CONFIG_MODEL_RMAC2100) || defined(CONFIG_MODEL_R6800)
                 size:           0x2400000,
                 offset:         0x600000,
 #else
@@ -173,10 +170,7 @@ static struct mtd_partition g_pasStatic_Partition[] = {
 #endif
         }, {
                 name:           "RootFS2",
-#if defined(CONFIG_MODEL_RMAC2100)
-                size:           0x2600000,
-                offset:         0x400000,
-#elif defined(CONFIG_MODEL_R6800)
+#if defined(CONFIG_MODEL_RMAC2100) || defined(CONFIG_MODEL_R6800)
                 size:           0x2400000,
                 offset:         0x600000,
 #else
@@ -214,13 +208,7 @@ static struct mtd_partition g_pasStatic_Partition[] = {
                 size:           MTDPART_SIZ_FULL,
                 offset:         0,
 		}
-#if defined(CONFIG_MODEL_RMAC2100)
-        , {
-                name:           "RootFS-default",
-                size:           0x2600000,
-                offset:         0x400000,
-		}
-#elif defined(CONFIG_MODEL_R6800)
+#if defined(CONFIG_MODEL_RMAC2100) || defined(CONFIG_MODEL_R6800)
         , {
                 name:           "RootFS-default",
                 size:           0x2400000,

@@ -10226,6 +10226,7 @@ static void sysinit(void)
 #if defined(RTCONFIG_BLINK_LED)
 	modprobe("bled");
 #endif
+#endif
 #if defined(RTCONFIG_SWRT_I2CLED)
 #if defined(R6800)
 	modprobe("sx150x-leds");

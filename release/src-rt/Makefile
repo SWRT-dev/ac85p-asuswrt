@@ -539,6 +539,11 @@ ifeq ($(CONFIG_RALINK),y)
 	if [ "$(BUILD_NAME)" = "R6800" ]; then \
 		cp $(PLATFORMDIR)/zImage.img $(PLATFORMDIR)/kernel.img ; \
 	fi ; \
+	if [ "$(BUILD_NAME)" = "R6800" ] || [ "$(BUILD_NAME)" = "RM-AC2100" ]; then \
+		SIZE=`wc -c $(PLATFORMDIR)/zImage.img | awk '{print $$1}'`; \
+		PAD=`expr 4194304 - $${SIZE} - 64` ; \
+		dd if=/dev/zero count=1 bs=$${PAD} 2> /dev/null | tr \\000 \\377 >> $(PLATFORMDIR)/zImage.img ; \
+	fi ; \
 	cat $(PLATFORMDIR)/target.image >> $(PLATFORMDIR)/zImage.img ; \
 	#generate ASUS Image
 	@ENTRY=`LANG=en_US readelf -h $(ROOTDIR)/$(LINUXDIR)/vmlinux | grep "Entry" | awk '{print $$4}'` ; \
@@ -1691,8 +1696,6 @@ define RouterOptions
 	if [ "$(CIFS)" = "y" ]; then \
 		sed -i "/RTCONFIG_CIFS/d" $(1); \
 		echo "RTCONFIG_CIFS=y" >>$(1); \
-		sed -i "/RTCONFIG_AUTODICT/d" $(1); \
-		echo "RTCONFIG_AUTODICT=n" >>$(1); \
 	fi; \
 	if [ "$(SSH)" = "y" ]; then \
 		sed -i "/RTCONFIG_SSH/d" $(1); \

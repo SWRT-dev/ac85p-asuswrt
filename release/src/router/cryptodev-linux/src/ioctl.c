@@ -838,10 +838,10 @@ static unsigned int is_known_accelerated(struct crypto_tfm *tfm)
 	if (!strncmp(name, "qcrypto", 7))
 		return 1;
 #elif defined(MT7621)
-	if (strstr(name, "-eip93"))
+	if (strstr(name, "eip93"))
 		return 1;
 #elif defined(MT7622)
-	if (strstr(name, "-eip97"))
+	if (strstr(name, "mtk"))
 		return 1;
 #elif defined(LANTIQ)
 	if (strstr(name, "ltq-crypto"))

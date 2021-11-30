@@ -134,6 +134,8 @@ int mkdir_if_none(const char *path)
 #include <amas-utils.h>
 #endif
 
+#include <swrt.h>
+
 extern char *crypt __P((const char *, const char *)); //should be defined in unistd.h with _XOPEN_SOURCE defined
 #define sin_addr(s) (((struct sockaddr_in *)(s))->sin_addr)
 
@@ -7824,7 +7826,7 @@ start_services(void)
 #endif
 	run_custom_script("services-start", 0, NULL, NULL);
 #if defined(RTCONFIG_SOFTCENTER)
-	nvram_set_int("sc_services_start_sig", 1);
+	sc_services_start_sig = 1;
 #endif
 #if defined(RTCONFIG_SWRT_KVR) && defined(RTCONFIG_RALINK)
 	system("/usr/bin/iappd.sh restart");
@@ -7846,7 +7848,7 @@ stop_services(void)
 {
 	run_custom_script("services-stop", 0, NULL, NULL);
 #if defined(RTCONFIG_SOFTCENTER)
-	nvram_set_int("sc_services_stop_sig", 1);
+	sc_services_stop_sig = 1;
 #endif
 #if defined(RTCONFIG_ENTWARE)
 	nvram_set_int("entware_stop_sig", 1);
@@ -13258,7 +13260,9 @@ _dprintf("nat_rule: the nat rule file was not ready. wait %d seconds...\n", retr
 	setup_udp_timeout(TRUE);
 
 	run_custom_script("nat-start", 0, NULL, NULL);
-	nvram_set_int("sc_nat_sig", 1);
+#if defined(RTCONFIG_SOFTCENTER)
+	sc_nat_sig = 1;
+#endif
 	return NAT_STATE_NORMAL;
 }
 
