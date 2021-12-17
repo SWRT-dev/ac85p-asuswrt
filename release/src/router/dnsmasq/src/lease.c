@@ -1,4 +1,4 @@
-/* dnsmasq is Copyright (c) 2000-2020 Simon Kelley
+/* dnsmasq is Copyright (c) 2000-2021 Simon Kelley
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -640,6 +640,26 @@ struct dhcp_lease *lease_find_by_client(unsigned char *hwaddr, int hw_len, int h
 #endif   
       if ((!lease->clid || !clid) && 
 	  hw_len != 0 && 
+	  lease->hwaddr_len == hw_len &&
+	  lease->hwaddr_type == hw_type &&
+	  memcmp(hwaddr, lease->hwaddr, hw_len) == 0)
+	return lease;
+    }
+
+  return NULL;
+}
+
+struct dhcp_lease *lease_find_by_hwaddr(unsigned char *hwaddr, int hw_len, int hw_type)
+{
+  struct dhcp_lease *lease;
+
+  for (lease = leases; lease; lease = lease->next)
+    {
+#ifdef HAVE_DHCP6
+      if (lease->flags & (LEASE_TA | LEASE_NA))
+	continue;
+#endif
+      if (hw_len != 0 &&
 	  lease->hwaddr_len == hw_len &&
 	  lease->hwaddr_type == hw_type &&
 	  memcmp(hwaddr, lease->hwaddr, hw_len) == 0)

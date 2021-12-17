@@ -3656,7 +3656,6 @@ int timecheck_reboot(char *activeSchedule)
 	return active;
 }
 
-
 int svcStatus[12] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
 
 /* Check for time-reated service 	*/
@@ -3686,6 +3685,9 @@ void timecheck(void)
 	item = 0;
 	unit = 0;
 
+	if (nvram_match("svc_ready", "0") || nvram_match("wlready", "0"))
+		goto end_of_wl_sched;
+
 	if (nvram_match("reload_svc_radio", "1"))
 	{
 		nvram_set("reload_svc_radio", "0");
@@ -3702,7 +3704,6 @@ void timecheck(void)
 	}
 
 	// radio on/off
-	if (nvram_match("svc_ready", "1") && nvram_match("wlready", "1"))
 	foreach (word, nvram_safe_get("wl_ifnames"), next) {
 		SKIP_ABSENT_BAND_AND_INC_UNIT(unit);
 		snprintf(prefix, sizeof(prefix), "wl%d_", unit);
@@ -3749,6 +3750,7 @@ void timecheck(void)
 		unit++;
 
 	}
+end_of_wl_sched:
 
 	// guest ssid expire check
 	if ((sw_mode() != SW_MODE_REPEATER) &&
@@ -4119,6 +4121,7 @@ void fake_etlan_led(void)
 	}
 	allstatus = 1;
 #endif
+
 	if (!GetPhyStatus(0)) {
 		if (lstatus)
 #ifdef GTAC5300
@@ -5129,7 +5132,7 @@ void regular_ddns_check(void)
 #else
 	int r, wan_unit = wan_primary_ifunit(), last_unit = nvram_get_int("ddns_last_wan_unit");
 #endif
-	char prefix[sizeof("wanX_YYY")];
+	char prefix[sizeof("wanXXXXXXXXXX_")];
 	struct in_addr ip_addr;
 	struct hostent *hostinfo;
 
@@ -5170,8 +5173,13 @@ void regular_ddns_check(void)
 
 	//_dprintf("WAN IP change!\n");
 	nvram_set("ddns_update_by_wdog", "1");
-	if (wan_unit != last_unit)
+	if (wan_unit != last_unit) {
+#ifndef RTCONFIG_INADYN
 		unlink("/tmp/ddns.cache");
+#else
+		eval("rm", "-f", "/var/cache/inadyn/*.cache");
+#endif
+	}
 	logmessage("watchdog", "Hostname/IP mapping error! Restart ddns.");
 	if (last_unit != wan_unit)
 		r = notify_rc("restart_ddns");
@@ -5195,7 +5203,7 @@ void ddns_check(void)
 #endif
 
 	//_dprintf("ddns_check... %d\n", ddns_check_count);
-	if (!nvram_match("ddns_enable_x", "1"))
+	if (!nvram_get_int("ddns_enable_x"))
 		return;
 
 #if defined(RTCONFIG_DUALWAN)
@@ -5220,12 +5228,17 @@ void ddns_check(void)
 	if (!nvram_match("wans_mode", "lb") && !is_wan_connect(wan_unit))
 		return;
 
-	/* Check existence of ez-ipupdate/phddns
+	/* Check existence of ddns daemon
 	 * if and only if last WAN unit is equal to new WAN unit.
 	 */
 	if (last_unit == wan_unit) {
+#ifndef RTCONFIG_INADYN
 		if (pids("ez-ipupdate"))	//ez-ipupdate is running!
 			return;
+#else
+		if (pids("inadyn"))		//inadyn is running!
+			return;
+#endif
 		if (pids("phddns"))		//phddns is running!
 			return;
 	}
@@ -5261,8 +5274,13 @@ void ddns_check(void)
 		return;
 
 	nvram_set("ddns_update_by_wdog", "1");
-	if (wan_unit != last_unit)
+	if (wan_unit != last_unit) {
+#ifndef RTCONFIG_INADYN
 		unlink("/tmp/ddns.cache");
+#else
+		eval("rm", "-f", "/var/cache/inadyn/*.cache");
+#endif
+	}
 	logmessage("watchdog", "start ddns.");
 	if (last_unit != wan_unit)
 		r = notify_rc("restart_ddns");
@@ -7316,9 +7334,7 @@ wdp:
 		modem_flow_check(modem_unit);
 #endif
 #endif
-#ifdef RTCONFIG_FORCE_AUTO_UPGRADE
 	auto_firmware_check();
-#endif
 #ifdef RTCONFIG_BWDPI
 	auto_sig_check();		// libbwdpi.so
 	web_history_save();		// libbwdpi.so

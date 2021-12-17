@@ -42,6 +42,7 @@
 #define RALINK_REG_PIO9564SET           (RALINK_PRGIO_ADDR + 0x38)
 #define RALINK_REG_PIO9564RESET         (RALINK_PRGIO_ADDR + 0x48)
 
+
 static struct mt7621_gpio_reg_s {
 	int start;
 	int end;

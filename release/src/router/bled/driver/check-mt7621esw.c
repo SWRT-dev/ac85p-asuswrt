@@ -53,7 +53,7 @@ static inline void get_port_stats(int port, unsigned long *rx, unsigned long *tx
 {
 	mii_mgr_read(31, (REG_ESW_PORT_RGOCN_LOW_P0 + port * 0x100), rx); //32bits
 	mii_mgr_read(31, (REG_ESW_PORT_TGOCN_LOW_P0 + port * 0x100), tx);  //32bits
-	//printk("bled port=%d tx=%x, rx=%x\n",port,*tx,*rx);
+	//printk("bled tx=%x, rx=%x\n",*tx,*rx);
 }
 
 /**

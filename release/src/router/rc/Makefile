@@ -374,14 +374,14 @@ endif
 ifeq ($(or $(RTCONFIG_FRS_LIVE_UPDATE),$(RTCONFIG_FRS_FEEDBACK)),y)
 CFLAGS += -I$(TOP)/curl-7.21.7/include
 LDFLAGS += -L$(TOP)/curl-7.21.7/lib/.libs -lcurl
+endif
+ifeq ($(RTCONFIG_FRS_FEEDBACK),y)
 OBJS += dsl_fb.o
 endif
-
 ifeq ($(RTCONFIG_FRS_LIVE_UPDATE),y)
-ifneq ($(SWRT_NAME), $(filter $(SWRT_NAME), K3 K3C R7900P SBRAC3200P RTAC85P RMAC2100 R6800))
 OBJS += frs_service.o
 endif
-endif
+
 ifeq ($(RTCONFIG_DSL),y)
 OBJS += asustest.o
 endif
@@ -516,9 +516,12 @@ endif
 ifeq ($(RTCONFIG_HTTPS),y)
 ifeq ($(or $(RTCONFIG_PUSH_EMAIL),$(RTCONFIG_NOTIFICATION_CENTER)),y)
 OBJS += pwdec.o
+endif
+endif
+
+ifeq ($(RTCONFIG_FRS_LIVE_UPDATE),y)
 CFLAGS += -I$(TOP)/json-c
 LDFLAGS += -L$(TOP)/json-c/.libs -ljson-c
-endif
 endif
 
 ifeq ($(RTCONFIG_INTERNAL_GOBI),y)
@@ -619,6 +622,7 @@ endif
 
 ifeq ($(RTCONFIG_TUNNEL),y)
 OBJS += natnl_api.o
+CFLAGS += -I$(TOP)/aaews
 endif
 
 ifneq ($(RTCONFIG_RALINK)$(RTCONFIG_QCA)$(RTCONFIG_REALTEK),y)

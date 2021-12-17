@@ -1348,9 +1348,25 @@ static inline int get_primaryif_dualwan_unit(void)
 #endif // RTCONFIG_DUALWAN
 
 #ifdef CONFIG_BCMWL5
+extern int get_ifname_unit(const char* ifname, int *unit, int *subunit);
+
 static inline int guest_wlif(char *ifname)
 {
-	return strncmp(ifname, "wl", 2) == 0 && strchr(ifname, '.');
+	int unit = -1, subunit = -1;
+
+	if (!ifname || strncmp(ifname, "wl", 2)) return 0;
+
+	if (get_ifname_unit(ifname, &unit, &subunit) < 0)
+		return 0;
+
+	if (sw_mode() == SW_MODE_REPEATER && unit == nvram_get_int("wlc_band") && subunit == 1)
+		return 0;
+
+#ifdef RTCONFIG_AMAS
+	return nvram_get_int("re_mode") ? (subunit > 1) : (subunit > 0);
+#else
+	return (subunit > 0);
+#endif
 }
 #elif defined RTCONFIG_RALINK
 static inline int guest_wlif(char *ifname)
@@ -1638,11 +1654,13 @@ extern uint32_t hnd_get_phy_speed(int port, int offs, unsigned int regv, unsigne
 extern int hnd_ethswctl(ecmd_t act, unsigned int val, int len, int wr, unsigned long long regdata);
 extern uint32_t set_ex53134_ctrl(uint32_t portmask, int ctrl);
 #endif
+#ifdef RTCONFIG_BCMWL6
 extern int with_non_dfs_chspec(char *wif);
 extern chanspec_t select_band1_chspec_with_same_bw(char *wif, chanspec_t chanspec);
 extern chanspec_t select_band4_chspec_with_same_bw(char *wif, chanspec_t chanspec);
 extern chanspec_t select_chspec_with_band_bw(char *wif, int band, int bw, chanspec_t chanspec);
 extern void wl_list_5g_chans(int unit, int band, char *buf, int len);
+#endif
 extern int wl_cap(int unit, char *cap_check);
 #endif
 #ifdef RTCONFIG_AMAS

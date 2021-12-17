@@ -1243,7 +1243,8 @@ void repeater_nat_setting(){
 	fprintf(fp, "-A PREROUTING -d 10.0.0.1 -p tcp --dport 80 -j DNAT --to-destination %s:%d\n", lan_ip, lan_port);
 	fprintf(fp, "-A PREROUTING -d %s -p tcp --dport 80 -j DNAT --to-destination %s:%d\n", nvram_default_get("lan_ipaddr"), lan_ip, lan_port);
 #ifdef RTCONFIG_REDIRECT_DNAME
-	fprintf(fp, "-A PREROUTING -p udp --dport 53 -j DNAT --to-destination %s:53\n", lan_ip);
+	if (nvram_invmatch("redirect_dname", "0"))
+		fprintf(fp, "-A PREROUTING -p udp --dport 53 -j DNAT --to-destination %s:53\n", lan_ip);
 #endif
 	fprintf(fp, "-A PREROUTING -p udp --dport 53 -j DNAT --to-destination %s:18018\n", lan_ip);
 	fprintf(fp, "COMMIT\n");
@@ -2763,6 +2764,7 @@ void write_UrlFilter(char *chain, char *lan_if, char *lan_ip, char *logdrop, FIL
 
 	char *ptr, *p, *pvalue;
 	char list[256], list2[256];
+	int first;
 
 	snprintf(config_rule, sizeof(config_rule), "-d %s", lan_ip);
 #ifdef RTCONFIG_IPV6
@@ -2806,10 +2808,17 @@ void write_UrlFilter(char *chain, char *lan_if, char *lan_ip, char *logdrop, FIL
 				memset(list2, 0, sizeof(list2));
 
 				ptr = pvalue = strdup(url);
+				first = 1;
 				while (pvalue && (p = strsep(&pvalue, ".")) != NULL) {
 					if (!strlen(p)) {
 						pvalue++;
 						continue;
+					}
+
+					if (first) {
+						first = 0;
+						if (!strncasecmp(p, "www", 3))
+							continue;
 					}
 
 					snprintf(list2, sizeof(list2), "%s|%02x|%s", list, strlen(p), p);
@@ -2840,10 +2849,17 @@ void write_UrlFilter(char *chain, char *lan_if, char *lan_ip, char *logdrop, FIL
 					memset(list2, 0, sizeof(list2));
 
 					ptr = pvalue = strdup(url);
+					first = 1;
 					while (pvalue && (p = strsep(&pvalue, ".")) != NULL) {
 						if (!strlen(p)) {
 							pvalue++;
 							continue;
+						}
+
+						if (first) {
+							first = 0;
+							if (!strncasecmp(p, "www", 3))
+								continue;
 						}
 
 						snprintf(list2, sizeof(list2), "%s|%02x|%s", list, strlen(p), p);
@@ -3519,6 +3535,7 @@ TRACE_PT("writing Parental Control\n");
 		fprintf(fp_ipv6, "-A FORWARD -p ipv6-nonxt -m length --length 40 -j ACCEPT\n");
 
 		// ICMPv6 rules
+		fprintf(fp_ipv6, "-A FORWARD -p ipv6-icmp --icmpv6-type %i -m limit --limit 1/s -j %s\n", 128, logdrop);
 		for (i = 0; i < sizeof(allowed_icmpv6)/sizeof(int); ++i) {
 			fprintf(fp_ipv6, "-A FORWARD -p ipv6-icmp --icmpv6-type %i -j %s\n", allowed_icmpv6[i], logaccept);
 		}
@@ -4546,6 +4563,7 @@ TRACE_PT("writing Parental Control\n");
 		fprintf(fp_ipv6, "-A FORWARD -p ipv6-nonxt -m length --length 40 -j ACCEPT\n");
 
 		// ICMPv6 rules
+		fprintf(fp_ipv6, "-A FORWARD -p ipv6-icmp --icmpv6-type %i -m limit --limit 1/s -j %s\n", 128, logdrop);
 		for (i = 0; i < sizeof(allowed_icmpv6)/sizeof(int); ++i) {
 			fprintf(fp_ipv6, "-A FORWARD -p ipv6-icmp --icmpv6-type %i -j %s\n", allowed_icmpv6[i], logaccept);
 		}

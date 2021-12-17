@@ -958,6 +958,8 @@ int switch_exist(void)
 
 #ifdef RTCONFIG_QCA8033
 	snprintf(cmd, sizeof(cmd), "cat /proc/link_status");
+#elif defined(RTCONFIG_QCN550X) && defined(RTCONFIG_SWITCH_QCA8337N)
+	snprintf(cmd, sizeof(cmd), "ssdk_sh port linkstatus get 0");
 #else
 	snprintf(cmd, sizeof(cmd), "swconfig dev %s port 0 get link", MII_IFNAME);
 #endif
@@ -972,6 +974,8 @@ int switch_exist(void)
 	buf[rlen-1] = '\0';
 #ifdef RTCONFIG_QCA8033
 	if (strstr(buf, "link up (1000"))
+#elif defined(RTCONFIG_QCN550X) && defined(RTCONFIG_SWITCH_QCA8337N)
+	if (strstr(buf, ":ENABLE"))
 #else
 	if (strstr(buf, "link:up speed:1000"))
 #endif
@@ -2052,9 +2056,7 @@ void reinit_sfe(int unit)
 	int act = 1,i;	/* -1/0/otherwise: ignore/remove sfe/load sfe */
 	struct load_nat_accel_kmod_seq_s *p = &load_nat_accel_kmod_seq[0];
 #if defined(RTCONFIG_DUALWAN)
-	int nat_x = -1, l, t, link_wan = 1, link_wans_lan = 1;
-	int wans_cap = get_wans_dualwan() & WANSCAP_WAN;
-	int wanslan_cap = get_wans_dualwan() & WANSCAP_LAN;
+	int nat_x = -1;
 	char nat_x_str[] = "wanX_nat_xXXXXXX";
 #endif
 	int sfe_dev;
@@ -2064,12 +2066,6 @@ void reinit_sfe(int unit)
 #endif
 
 	act = nvram_get_int("qca_sfe");	
-
-	if(nvram_get_int("url_enable_x")==1 && strlen(nvram_get("url_rulelist"))!=0)
-		act = 0;
-
-	if(nvram_get_int("keyword_enable_x")==1 && strlen(nvram_get("keyword_rulelist"))!=0)
-		act = 0;
 
 	/* If QoS is enabled, disable sfe. */
 	if (nvram_get_int("qos_enable") == 1 && nvram_get_int("qos_type") != 1)
@@ -2094,25 +2090,28 @@ void reinit_sfe(int unit)
 
 	if (act > 0) {
 #if defined(RTCONFIG_DUALWAN)
-		if (unit < 0 || unit > WAN_UNIT_SECOND) {
-			if ((wans_cap && wanslan_cap) /* ||
-			    (wanslan_cap && (!nvram_match("switch_wantag", "none") && !nvram_match("switch_wantag", ""))) */
-			   )
-				act = 0;
-		} else {
+		/* Load Balance */
+		if (nvram_match("wans_mode", "lb"))
+			act = 0;
+#if !defined(RT4GAC53U) /* for Gobi */
+		/* Fail Over to 3G/4G */
+		else if (/*(unit == -1 && get_wans_dualwan() & WANSCAP_USB) ||*/
+			 (unit == prim_unit && get_dualwan_by_unit(unit) == WANS_DUALWAN_IF_USB))
+			act = 0;
+#endif
+		/* Enable NAT */
+		else {
 			snprintf(nat_x_str, sizeof(nat_x_str), "wan%d_nat_x", unit);
 			nat_x = nvram_get_int(nat_x_str);
 			if (unit == prim_unit && !nat_x)
-				act = 0;
-			else if ((wans_cap && wanslan_cap) /* ||
-				 (wanslan_cap && (!nvram_match("switch_wantag", "none") && !nvram_match("switch_wantag", ""))) */
-				)
 				act = 0;
 			else if (unit != prim_unit)
 				act = -1;
 		}
 #else
 		if (!is_nat_enabled())
+			act = 0;
+		if (dualwan_unit__usbif(prim_unit))
 			act = 0;
 #endif
 	}
@@ -2121,64 +2120,11 @@ void reinit_sfe(int unit)
 	if ((sw_mode() != SW_MODE_ROUTER) && !nvram_match("cfg_master", "1"))
 		act = 0;
 #endif
-#if !defined(RT4GAC53U) /* for Gobi */
-	if (act > 0) {
-#if defined(RTCONFIG_DUALWAN)
-		if (unit < 0 || unit > WAN_UNIT_SECOND || nvram_match("wans_mode", "lb")) {
-			if (get_wans_dualwan() & WANSCAP_USB)
-				act = 0;
-		} else {
-			if (unit == prim_unit && get_dualwan_by_unit(unit) == WANS_DUALWAN_IF_USB)
-				act = 0;
-		}
-#else
-		if (dualwan_unit__usbif(prim_unit))
-			act = 0;
-#endif
-	}
-#endif
 
 #if defined(RTCONFIG_DUALWAN)
-	if (act != 0 &&
-	    ((wans_cap && wanslan_cap) || (wanslan_cap && (!nvram_match("switch_wantag", "none") && !nvram_match("switch_wantag", ""))))
-	   )
-	{
-		/* If WANS_LAN and WAN is enabled, WANS_LAN is link-up and WAN is not link-up, hw_nat MUST be removed.
-		 * If hw_nat exists in such scenario, LAN PC can't connect to Internet through WANS_LAN correctly.
-		 *
-		 * FIXME:
-		 * If generic IPTV feature is enabled, STB port and VoIP port are recognized as WAN port(s).
-		 * In such case, we don't know whether real WAN port is link-up/down.
-		 * Thus, if WAN is link-up and primary unit is not WAN, assume WAN is link-down.
-		 */
-		for (i = WAN_UNIT_FIRST; i < WAN_UNIT_MAX; ++i) {
-			if ((t = get_dualwan_by_unit(i)) == WANS_DUALWAN_IF_USB)
-				continue;
-
-			l = wanport_status(i);
-			switch (t) {
-			case WANS_DUALWAN_IF_WAN:
-				link_wan = l && (i == prim_unit);
-				break;
-			case WANS_DUALWAN_IF_DSL:
-				link_wan = l;
-				break;
-			case WANS_DUALWAN_IF_LAN:
-				link_wans_lan = l;
-				break;
-			default:
-				_dprintf("%s: Unknown WAN type %d\n", __func__, t);
-			}
-		}
-
-		if (!link_wan && link_wans_lan)
-			act = 0;
-	}
-
-	_dprintf("%s:DUALWAN: unit %d,%d type %d iptv [%s] nat_x %d qos %d wans_mode %s link %d,%d: action %d.\n",
-		__func__, unit, prim_unit, get_dualwan_by_unit(unit), nvram_safe_get("switch_wantag"), nat_x,
-		nvram_get_int("qos_enable"), nvram_safe_get("wans_mode"),
-		link_wan, link_wans_lan, act);
+	_dprintf("%s:DUALWAN: unit %d,%d type %d nat_x %d qos %d wans_mode %s: action %d.\n",
+		__func__, unit, prim_unit, get_dualwan_by_unit(unit),
+		nat_x, nvram_get_int("qos_enable"), nvram_safe_get("wans_mode"), act);
 #else
 	_dprintf("%s:WAN: unit %d,%d type %d nat_x %d qos %d: action %d.\n",
 		__func__, unit, prim_unit, get_dualwan_by_unit(unit),
@@ -2187,7 +2133,6 @@ void reinit_sfe(int unit)
 
 	if (act < 0)
 		return;
-
 
 	for (i = 0, p = &load_nat_accel_kmod_seq[i]; i < ARRAY_SIZE(load_nat_accel_kmod_seq); ++i, ++p) {
 		if (!act) {
@@ -2207,16 +2152,9 @@ void reinit_sfe(int unit)
 			}
 #endif
 			/* load sfe */
-			if (module_loaded(p->kmod_name))
-			{
-
-#if defined(RTCONFIG_SOC_IPQ40XX)
-				if(nvram_get_int("MULTIFILTER_ENABLE")==1 &&
-				   !strcmp(p->kmod_name,"shortcut_fe_cm"))
-					modprobe_r("shortcut_fe_cm");
-				else				
-#endif
-					continue;
+			if (module_loaded(p->kmod_name)) {
+				f_write_string("/proc/net/nf_conntrack", "f", 0, 0);
+				continue;
 			}
 			
 #if defined(RTCONFIG_SOC_IPQ40XX) && defined(RTCONFIG_BWDPI)

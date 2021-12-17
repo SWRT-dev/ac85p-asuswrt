@@ -9126,6 +9126,11 @@ int init_nvram(void)
 	if (nvram_get_int("https_crt_save") == 0) {
 		nvram_set_int("https_crt_save", 1);
 	}
+
+	/* remove nvram https_crt_file */
+	if (nvram_safe_get("https_crt_file")) {
+		nvram_unset("https_crt_file");
+	}
 #ifdef RTCONFIG_LETSENCRYPT
 	add_rc_support("letsencrypt");
 #endif
@@ -9162,7 +9167,7 @@ int init_nvram(void)
 #ifdef RTCONFIG_BCMWL6
 	add_rc_support("wl6");
 #endif
-#if defined(RTCONFIG_BCMWL6) || defined(RTCONFIG_QCA)
+#if defined(RTN66U) || defined(RTAC66U) || defined(RTAC68U) || defined(DSL_AC68U) || defined(RTCONFIG_QCA)
 #ifdef RTCONFIG_OPTIMIZE_XBOX
 	add_rc_support("optimize_xbox");
 #endif
@@ -9352,6 +9357,12 @@ int init_nvram(void)
 #ifdef RTCONFIG_PORT2_DEVICE
 	add_rc_support("port2_device");
 #endif
+
+#ifdef RTCONFIG_REDIRECT_DNAME
+	if (sw_mode() == SW_MODE_REPEATER || sw_mode() == SW_MODE_AP)
+		add_rc_support("redirect_dname");
+#endif
+
 #if defined(RTCONFIG_SWRT_FULLCONE)
 	add_rc_support("swrt_fullcone");
 #endif
@@ -10153,6 +10164,10 @@ static void sysinit(void)
 		"/tmp/share", "/var/webmon", // !!TB
 		"/var/log", "/var/run", "/var/tmp", "/var/lib", "/var/lib/misc",
 		"/var/spool", "/var/spool/cron", "/var/spool/cron/crontabs",
+		"/var/cache",
+#ifdef RTCONFIG_INADYN
+		"/var/cache/inadyn",
+#endif
 		"/tmp/var/wwwext", "/tmp/var/wwwext/cgi-bin",	// !!TB - CGI support
 #ifdef BLUECAVE
 		"/tmp/etc/rc.d",
@@ -10615,6 +10630,10 @@ static void sysinit(void)
 #if defined(MAPAC2200)
 	nvram_unset("dpdt_ant");
 #endif
+
+#ifdef RTCONFIG_ASD
+	nvram_set("3rd-party", "");
+#endif
 }
 
 #if defined(RTCONFIG_TEMPROOTFS)
@@ -10825,6 +10844,10 @@ int init_main(int argc, char *argv[])
 				stop_wan();
 
 			stop_lan();
+#if defined(RTCONFIG_SOC_QCA9557) || defined(RTCONFIG_QCA953X) || defined(RTCONFIG_QCA956X) || defined(RTCONFIG_QCN550X)
+			if ((state != SIGTERM /* REBOOT */) &&
+				(state != SIGQUIT /* HALT */))
+#endif
 			stop_vlan();
 			stop_logger();
 
@@ -11319,21 +11342,7 @@ dbg("boot/continue fail= %d/%d\n", nvram_get_int("Ate_boot_fail"),nvram_get_int(
 			force_free_caches();
 #endif
 
-#if defined(K3)
-			k3_init_done();
-#elif defined(K3C)
-			k3c_init_done();
-#elif defined(SBRAC1900P)
-			ac1900p_init_done();
-#elif defined(SBRAC3200P)
-			ac3200p_init_done();
-#elif defined(R8000P) || defined(R7900P)
-			r8000p_init_done();
-#elif defined(RTAC68U) && !defined(SBRAC1900P)
-			ac68u_init_done();
-#else
 			swrt_init_done();
-#endif
 
 #ifdef RTCONFIG_AMAS
 			nvram_set("start_service_ready", "1");
