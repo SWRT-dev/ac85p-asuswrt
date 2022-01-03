@@ -94,6 +94,18 @@ static int mtd_open(const char *mtdname, mtd_info_t *mi)
 	return -1;
 }
 
+/* int _unlock_erase(const char *mtdname, int erase)
+ *
+ * mtdname: name of mtd partition want to do
+ * erase  : 0      to Unlock
+ *          others to Erase
+ *
+ * return:
+ * 	 1: timeout
+ * 	 0: success
+ * 	-1: fail
+ */
+
 static int _unlock_erase(const char *mtdname, int erase)
 {
 	int mf;
@@ -101,7 +113,9 @@ static int _unlock_erase(const char *mtdname, int erase)
 	erase_info_t ei;
 	int r;
 
-	if (!wait_action_idle(5)) return 0;
+	if (!wait_action_idle(10)){
+		return 1;	//timeout
+	}
 	set_action(ACT_ERASE_NVRAM);
 
 	r = 0;
@@ -163,7 +177,9 @@ static int _unlock_erase(const char *mtdname, int erase)
 	else printf("\nError %sing MTD\n", erase ? "eras" : "unlock");
 
 	sleep(1);
-	return r;
+	if (r)
+		return 0;	//success
+	return -1;		//erase fail
 }
 
 int mtd_unlock(const char *mtdname)
@@ -211,18 +227,17 @@ int mtd_unlock_erase_main(int argc, char *argv[])
 int asusimg2rtkimg(char *src_name)
 {
 		FILE *pSrcFile = NULL, *pDstFile = NULL;
-		int pDstFile_fd = -1;
 		unsigned char buf[4096] = {0};
-		long filesize, kernelsize, write_total_size = 0;
+		long filesize, kernelsize;
 		int first_read_kernel = 1, first_read_root = 1, last_read_kernel = 0, count;
 
 		pSrcFile = fopen(src_name, "r");
-		pDstFile = fopen(src_name, "r+"); // If using same file, it cannot need 2x firmware_size free memory.
-		pDstFile_fd = fileno(pDstFile);
-		if (pSrcFile && pDstFile && pDstFile_fd != -1) {
+		pDstFile = fopen("/tmp/linux.trx.tmp", "w");
+		if (pSrcFile && pDstFile) {
 			/* Get image size */
 			fseek(pSrcFile, 0, SEEK_END);
 			filesize = ftell(pSrcFile);
+
 			/* Skip ASUS trx header */
 			fseek(pSrcFile, 64, SEEK_SET);
 			filesize -= 64;
@@ -246,7 +261,6 @@ int asusimg2rtkimg(char *src_name)
 				}
 				if (kernelsize > 0) { // Write Kernel + Kernrl signature
 					fwrite(buf, 1, count, pDstFile);
-					write_total_size += count;
 					kernelsize -= count;
 
 					if (kernelsize > 0 && kernelsize <= sizeof(buf))
@@ -255,26 +269,29 @@ int asusimg2rtkimg(char *src_name)
 				else { // Write Rootfs
 					if (first_read_root) {
 						fwrite(buf+16, 1, count-16, pDstFile);
-						write_total_size += (count-16);
-
 						first_read_root = 0;
 					}
-					else {
+					else
 						fwrite(buf, 1, count, pDstFile);
-						write_total_size += count;
-					}
 				}
 
 				filesize -= count;
 
 			} while(filesize > 0);
 
-			/* resize new firmware file */
-			fseek(pDstFile, 0, SEEK_SET);
-			if (ftruncate(pDstFile_fd, write_total_size)) {
-				_dprintf("ftruncate file error.\n");
-				fclose(pSrcFile);
-				fclose(pDstFile);
+			fclose(pSrcFile);
+			fclose(pDstFile);
+
+			if (remove(src_name) == 0) { // Delete asus trx image
+				if (rename("/tmp/linux.trx.tmp", "/tmp/linux.trx") == 0) // rename rtk trx image
+					return 1;
+				else {
+					_dprintf("rename failed\n");
+					return 0;
+				}
+			}
+			else {
+				_dprintf("Delete linux.trx failed\n");
 				return 0;
 			}
 		}
@@ -282,10 +299,8 @@ int asusimg2rtkimg(char *src_name)
 			_dprintf("Open file failed\n");
 			return 0;
 		}
-		
-	fclose(pSrcFile);
-	fclose(pDstFile);
-	return 1;
+
+	return 0;
 }
 int copy_file2file(char * src_name,long src_offset, char *dst_name,long dst_offset,char* errorInfo)
 {
@@ -396,7 +411,7 @@ int mtd_write_main(int argc, char *argv[])
 		if(strcmp(iname,"/tmp/linux.trx")==0)
 		{
 #ifdef CONFIG_MTD_NAND
-			if(mtd_erase("/dev/mtdblock2") == 0){
+			if(mtd_erase("/dev/mtdblock2")){
 				printf("%s %d\n", __FUNCTION__,__LINE__);
 			}
 			if(copy_file2file("/tmp/linux.trx",0,"/dev/mtdblock2",0x0,msg_buf)<0)
@@ -410,7 +425,7 @@ int mtd_write_main(int argc, char *argv[])
 		//	_dprintf("%s %d\n", __FUNCTION__,__LINE__);
 #ifdef CONFIG_ASUS_DUAL_IMAGE_ENABLE
 #ifdef CONFIG_MTD_NAND
-			if(mtd_erase("/dev/mtdblock4") == 0){
+			if(mtd_erase("/dev/mtdblock4")){
 				printf("%s %d\n", __FUNCTION__,__LINE__);
 			}
 			if(copy_file2file("/tmp/linux.trx",0,"/dev/mtdblock4",0x0,msg_buf)<0)
@@ -427,7 +442,7 @@ int mtd_write_main(int argc, char *argv[])
 		{
 			//_dprintf("%s %d\n", __FUNCTION__,__LINE__);
 #ifdef CONFIG_MTD_NAND
-			if(mtd_erase("/dev/mtdblock3") == 0){
+			if(mtd_erase("/dev/mtdblock3")){
 				printf("%s %d\n", __FUNCTION__,__LINE__);
 			}
 			if(copy_file2file("/tmp/root.trx",0,"/dev/mtdblock3",0,msg_buf)<0)
@@ -441,7 +456,7 @@ int mtd_write_main(int argc, char *argv[])
 			//_dprintf("%s %d\n", __FUNCTION__,__LINE__);
 #ifdef CONFIG_ASUS_DUAL_IMAGE_ENABLE
 #ifdef CONFIG_MTD_NAND
-			if(mtd_erase("/dev/mtdblock5") == 0){
+			if(mtd_erase("/dev/mtdblock5")){
 				printf("%s %d\n", __FUNCTION__,__LINE__);
 			}
 			if(copy_file2file("/tmp/root.trx",0,"/dev/mtdblock5",0,msg_buf)<0)
@@ -1203,3 +1218,4 @@ bca_sys_upgrade(const char *path)
 }
 
 #endif
+
